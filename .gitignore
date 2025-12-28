@@ -1,0 +1,46 @@
+# Python/UV specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+*.whl
+*.tar.gz
+
+# UV cache and lock files
+uv.lock
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.tmp
+
+# Testing
+coverage/
+htmlcov/
+.pytest_cache/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Project specific - backend is part of the repo
+# backend/  # REMOVED - backend should be tracked

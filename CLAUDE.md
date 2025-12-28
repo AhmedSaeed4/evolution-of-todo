@@ -253,6 +253,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 ## Active Technologies
 - Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only) (001-cli-todo)
 - In-memory dictionary (no persistence - per spec requirement) (001-cli-todo)
+- Python 3.13+ (per Constitution VI) + Python standard library only (no new dependencies) (002-cli-ui-update)
+- In-memory dictionary (no persistence changes - per spec requirement) (002-cli-ui-update)
 
 ## Recent Changes
 - 001-cli-todo: Added Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only)

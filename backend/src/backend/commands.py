@@ -147,14 +147,16 @@ def help_handler(args, manager):
 
     Usage: help
     """
-    print("Available commands:")
-    print("  add <title>        - Add a new task")
-    print("  delete <id>        - Delete a task")
-    print("  update <id> <title> - Update task title")
-    print("  list               - List all tasks")
-    print("  complete <id>      - Toggle task completion")
-    print("  help               - Show this help")
-    print("  exit/quit          - Exit the application")
+    print("Available commands (used via menu):")
+    print("  1. Add a new task")
+    print("  2. List all tasks")
+    print("  3. Complete a task")
+    print("  4. Update a task title")
+    print("  5. Delete a task")
+    print("  6. Show help")
+    print("  7. Exit application")
+    print()
+    print("All operations are now performed through the menu interface.")
 
 
 def exit_handler(args, manager):

@@ -12,12 +12,14 @@
 
 ### 🎯 Key Features
 
-- **Sequential Branching Strategy**: `001-cli-todo`, `002-*`, `003-*` etc.
+- **Sequential Branching Strategy**: `001-cli-todo`, `002-cli-ui-update`, `003-*` etc.
+- **Menu-Driven Interface**: 7 numbered options with input validation and retry logic
 - **Complete Development Lifecycle**: Spec → Plan → Tasks → Implementation → Documentation
 - **Architecture Decision Records**: Every significant decision documented
 - **Prompt History Tracking**: Complete record of all AI interactions
 - **Python 3.13+**: Modern Python with uv package manager
 - **In-Memory Storage**: Standard library only, no external dependencies
+- **TDD Approach**: Comprehensive unit and integration tests
 
 ## 🏗️ Architecture
 
@@ -25,10 +27,14 @@
 
 ```
 main (stable, protected)
-└── 001-cli-todo (feature branch)
-    ├── specs/           # Requirements and specifications
-    ├── backend/         # Python implementation
-    ├── docs/            # Documentation
+├── 001-cli-todo (completed)
+│   ├── specs/           # CLI specifications
+│   ├── backend/         # Command-line implementation
+│   └── docs/            # Original documentation
+└── 002-cli-ui-update (current)
+    ├── specs/           # Menu interface specifications
+    ├── backend/         # Menu-driven implementation
+    ├── docs/            # Updated documentation
     ├── history/         # ADRs and PHRs
     └── .specify/        # SDD templates and scripts
 ```
@@ -61,7 +67,8 @@ evolution-of-todo/
 │   ├── api_reference.md       # API documentation
 │   └── branching-strategy.md  # Git workflow
 ├── specs/                      # Specifications
-│   └── 001-cli-todo/          # Feature 001 specs
+│   ├── 001-cli-todo/          # Feature 001 specs (completed)
+│   └── 002-cli-ui-update/     # Feature 002 specs (current)
 ├── history/                    # Development history
 │   ├── adr/                   # Architecture Decision Records
 │   └── prompts/               # Prompt History Records
@@ -79,14 +86,18 @@ This project follows the **Spec-Driven Development** methodology:
 5. **Documentation** (`docs/`) - Architecture and API docs
 6. **History** (`history/`) - Decisions and interactions
 
-### Current Stage: 001-cli-todo
+### Current Stage: 002-cli-ui-update
 
-**CLI Todo Application** with full SDD framework:
-- ✅ Command-line interface
-- ✅ Task management (add, list, complete, delete)
+**Menu-Driven CLI Todo Application** with full SDD framework:
+- ✅ Menu-driven interface (7 numbered options)
+- ✅ Task management (add, list, complete, update, delete)
+- ✅ Input validation with retry loops
+- ✅ Pause-after-operation UX
 - ✅ Spec-Driven Development tooling
 - ✅ Architecture Decision Records
 - ✅ Prompt History tracking
+
+**Previous Stage**: `001-cli-todo` - Original CLI with command-line interface
 
 ## 🚀 Getting Started
 
@@ -115,29 +126,35 @@ uv run todo --help
 ### Quick Start
 
 ```bash
-# Add a task
-uv run todo add "Learn Spec-Driven Development"
-
-# List all tasks
-uv run todo list
-
-# Complete a task
-uv run todo complete 1
-
-# Delete a task
-uv run todo delete 2
-
-# Show help
-uv run todo --help
+# Launch the menu-driven interface
+uv run python -m backend.main
 ```
+
+**Menu Options:**
+1. Add a new task
+2. List all tasks
+3. Complete a task
+4. Update a task title
+5. Delete a task
+6. Show help
+7. Exit application
+
+**Example Workflow:**
+1. Select option 1 → Enter task title → Press Enter
+2. Select option 2 → View all tasks → Press Enter
+3. Select option 3 → Enter task ID → Press Enter
+4. Select option 7 → Exit application
+
+**Note**: The new interface replaces command-line arguments with an interactive menu system.
 
 ## 📖 Documentation
 
 - **[Branching Strategy](docs/branching-strategy.md)** - Git workflow and branch management
 - **[Architecture](docs/architecture.md)** - System design and decisions
-- **[API Reference](docs/api_reference.md)** - Command interface documentation
-- **[Spec 001](specs/001-cli-todo/spec.md)** - CLI todo specification
+- **[Spec 001](specs/001-cli-todo/spec.md)** - CLI todo specification (completed)
+- **[Spec 002](specs/002-cli-ui-update/spec.md)** - Menu-driven interface specification (current)
 - **[ADRs](history/adr/)** - Architecture Decision Records
+- **[PHRs](history/prompts/)** - Prompt History Records
 
 ## 🔄 Development Workflow
 
@@ -164,7 +181,8 @@ git push -u origin 002-next-feature
 ### Current Branches
 
 - `main` - Stable base (protected, default)
-- `001-cli-todo` - CLI todo application with SDD framework
+- `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX
+- `001-cli-todo` - Original CLI todo application (previous version)
 
 ## 🧪 Testing
 
@@ -186,11 +204,13 @@ uv run pytest --cov=src/backend
 
 ## 📊 Project Metrics
 
-- **Total Files**: 69+
-- **Lines of Code**: 14,000+
-- **Test Coverage**: Comprehensive
+- **Total Files**: 75+
+- **Lines of Code**: 15,000+
+- **Test Coverage**: 22/22 unit tests passing
 - **Python Version**: 3.13+
 - **Dependencies**: Zero external (stdlib only)
+- **Features**: 7 menu operations with full CRUD
+- **Architecture**: Spec-Driven Development framework
 
 ## 🤝 Contributing
 
@@ -213,15 +233,19 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - **Issues**: https://github.com/AhmedSaeed4/evolution-of-todo/issues
 - **Discussions**: https://github.com/AhmedSaeed4/evolution-of-todo/discussions
 
-## 🎯 Future Evolution Stages
+## 🎯 Evolution Stages
 
-Potential next stages for this project:
+**Completed:**
+- `001-cli-todo` - Original CLI with command-line interface ✅
+- `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX ✅
 
-- `002-web-interface` - Web UI for todo management
+**Future Stages:**
 - `003-database-persistence` - Replace in-memory with database
 - `004-api-layer` - REST API for external integrations
-- `005-authentication` - User authentication and authorization
-- `006-real-time` - WebSocket updates and notifications
+- `005-web-interface` - Web UI for todo management
+- `006-authentication` - User authentication and authorization
+- `007-real-time` - WebSocket updates and notifications
+- `008-mcp-tools` - Model Context Protocol integration
 
 ---
 

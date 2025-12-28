@@ -205,6 +205,23 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 - `history/prompts/` — Prompt History Records
 - `history/adr/` — Architecture Decision Records
 - `.specify/` — SpecKit Plus templates and scripts
+- `docs/branching-strategy.md` — Git branching strategy documentation
+
+## Git Branching Strategy
+
+This project uses a sequential feature branching strategy:
+
+- **`main`**: Stable base branch (production-ready)
+- **Feature branches**: `001-*, 002-*, 003-*` etc.
+  - Sequential numbering represents project evolution
+  - Each branch represents a clear stage/feature
+  - Created from `main`, merged back to `main` after review
+
+**Current branches:**
+- `main` - Stable base
+- `001-cli-todo` - CLI Todo application with SDD framework
+
+See `docs/branching-strategy.md` for complete workflow documentation.
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.

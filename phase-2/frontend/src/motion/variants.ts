@@ -67,5 +67,5 @@ export const lineDraw: Variants = {
 export const hoverScale = {
   whileHover: { scale: 1.02, y: -1 },
   whileTap: { scale: 0.98 },
-  transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
+  transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
 };

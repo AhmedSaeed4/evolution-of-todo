@@ -27,6 +27,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  createdAt?: string;  // ISO 8601 timestamp for member since display
 }
 
 // Task Filters

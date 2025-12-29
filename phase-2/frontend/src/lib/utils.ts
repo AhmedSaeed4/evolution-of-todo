@@ -148,3 +148,96 @@ export function getCategoryColor(category: string): string {
 export function cn(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
+
+/**
+ * Validate profile form data
+ * @param name - User's display name
+ * @param email - User's email address
+ * @returns Validation result with errors array
+ */
+export function validateProfileForm(name: string, email: string): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  // Name validation
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    errors.push('Name is required');
+  } else if (trimmedName.length < 1) {
+    errors.push('Name must be at least 1 character');
+  } else if (trimmedName.length > 100) {
+    errors.push('Name must be less than 100 characters');
+  }
+
+  // Email validation
+  const trimmedEmail = email.trim();
+  if (!trimmedEmail) {
+    errors.push('Email is required');
+  } else if (!isValidEmail(trimmedEmail)) {
+    errors.push('Invalid email format');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Validate password change form data
+ * @param currentPassword - Current password
+ * @param newPassword - New password
+ * @param confirmPassword - Confirmation of new password
+ * @returns Validation result with errors array
+ */
+export function validatePasswordForm(
+  currentPassword: string,
+  newPassword: string,
+  confirmPassword: string
+): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  // Current password validation
+  if (!currentPassword.trim()) {
+    errors.push('Current password is required');
+  } else if (currentPassword.length < 8) {
+    errors.push('Current password must be at least 8 characters');
+  }
+
+  // New password validation
+  if (!newPassword.trim()) {
+    errors.push('New password is required');
+  } else if (newPassword.length < 8) {
+    errors.push('New password must be at least 8 characters');
+  }
+
+  // Confirm password validation
+  if (!confirmPassword.trim()) {
+    errors.push('Please confirm your new password');
+  } else if (newPassword !== confirmPassword) {
+    errors.push('New passwords do not match');
+  }
+
+  // Check if new password is different from current
+  if (currentPassword && newPassword && currentPassword === newPassword) {
+    errors.push('New password must be different from current password');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Format date to "Month DD, YYYY" format
+ * @param dateString - ISO date string
+ * @returns Formatted date string (e.g., "December 30, 2025")
+ */
+export function formatDateLong(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}

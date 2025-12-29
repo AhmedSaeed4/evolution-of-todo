@@ -8,7 +8,8 @@ import { jwtClient } from 'better-auth/client/plugins';
 const MOCK_USER = {
   id: 'bypass-user',
   email: 'bypass@example.com',
-  name: 'Bypass User'
+  name: 'Bypass User',
+  createdAt: new Date().toISOString()
 };
 
 // Auth client instance

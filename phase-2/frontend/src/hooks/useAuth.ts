@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { authClient, getSession, isAuthBypassEnabled, getCurrentUser } from '@/lib/auth';
+import { api } from '@/lib/api';
 import { User } from '@/types';
 
 interface AuthState {
@@ -14,6 +15,8 @@ export function useAuth(): AuthState & {
   signUp: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<{ success: boolean; error?: string }>;
   refetch: () => Promise<void>;
+  updateProfile: (data: { name: string }) => Promise<{ success: boolean; error?: string }>;
+  changePassword: (data: { currentPassword: string; newPassword: string }) => Promise<{ success: boolean; error?: string }>;
 } {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -36,6 +39,7 @@ export function useAuth(): AuthState & {
             id: mockUser.id,
             email: mockUser.email,
             name: mockUser.name,
+            createdAt: mockUser.createdAt,
           } : null,
           loading: false,
           error: null,
@@ -50,7 +54,7 @@ export function useAuth(): AuthState & {
 
       // Type guard to check if session has user
       const hasUser = session && typeof session === 'object' && 'user' in session &&
-                      session.user && typeof session.user === 'object';
+        session.user && typeof session.user === 'object';
 
       if (hasUser) {
         setState({
@@ -145,11 +149,81 @@ export function useAuth(): AuthState & {
     }
   };
 
+  const updateProfile = async (data: { name: string }) => {
+    if (!state.user) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    // Check for session expiration before making request
+    if (!isAuthBypassEnabled() && !state.isAuthenticated) {
+      return { success: false, error: 'Session expired. Please sign in again.' };
+    }
+
+    try {
+      const updatedUser = await api.updateProfile(state.user.id, data);
+      setState(prev => ({
+        ...prev,
+        user: updatedUser,
+      }));
+      return { success: true };
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+
+      // Handle specific error cases
+      if (errorMessage.includes('Session expired') || errorMessage.includes('User not found')) {
+        // Force sign out on session issues
+        setState({
+          user: null,
+          loading: false,
+          error: null,
+          isAuthenticated: false,
+        });
+        return { success: false, error: 'Session expired. Please sign in again.' };
+      }
+
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const changePassword = async (data: { currentPassword: string; newPassword: string }) => {
+    if (!state.user) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    // Check for session expiration before making request
+    if (!isAuthBypassEnabled() && !state.isAuthenticated) {
+      return { success: false, error: 'Session expired. Please sign in again.' };
+    }
+
+    try {
+      await api.changePassword(state.user.id, data);
+      return { success: true };
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+
+      // Handle specific error cases
+      if (errorMessage.includes('Session expired') || errorMessage.includes('User not found')) {
+        // Force sign out on session issues
+        setState({
+          user: null,
+          loading: false,
+          error: null,
+          isAuthenticated: false,
+        });
+        return { success: false, error: 'Session expired. Please sign in again.' };
+      }
+
+      return { success: false, error: errorMessage };
+    }
+  };
+
   return {
     ...state,
     signIn,
     signUp,
     signOut,
     refetch: checkAuth,
+    updateProfile,
+    changePassword,
   };
 }

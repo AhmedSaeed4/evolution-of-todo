@@ -4,12 +4,19 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/Card';
-import { fadeInUp } from '@/motion/variants';
-import { User, Mail, Calendar } from 'lucide-react';
+import { fadeInUp, staggerContainer } from '@/motion/variants';
+import { User } from 'lucide-react';
 import { isAuthBypassEnabled } from '@/lib/auth';
 
+// Import profile components
+import ProfileInfoCard from '@/components/profile/ProfileInfoCard';
+import PasswordChangeCard from '@/components/profile/PasswordChangeCard';
+import AccountInfoCard from '@/components/profile/AccountInfoCard';
+import TaskStatsCard from '@/components/profile/TaskStatsCard';
+import DangerZoneCard from '@/components/profile/DangerZoneCard';
+
 export default function ProfilePage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
     // Only redirect if bypass is disabled
@@ -27,7 +34,8 @@ export default function ProfilePage() {
   const displayUser = user || {
     id: 'bypass-user',
     email: 'bypass@example.com',
-    name: 'Bypass User'
+    name: 'Bypass User',
+    createdAt: new Date().toISOString()
   };
 
   return (
@@ -35,58 +43,83 @@ export default function ProfilePage() {
       variants={fadeInUp}
       initial="hidden"
       animate="visible"
-      className="space-y-6 max-w-2xl mx-auto"
+      className="space-y-8 max-w-6xl mx-auto px-4"
     >
-      <div className="text-center">
-        <h1 className="font-serif text-3xl md:text-4xl font-bold text-[#2A1B12] mb-2">
-          Profile
-        </h1>
-        <p className="text-[#5C4D45] font-sans">Manage your account information</p>
+      {/* Header Section */}
+      <div className="text-center space-y-3">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.6 }}
+          className="font-serif text-4xl md:text-5xl font-bold text-structure"
+        >
+          Profile Settings
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.6, delay: 0.1 }}
+          className="text-text-secondary font-sans text-lg"
+        >
+          Manage your account information, security, and preferences
+        </motion.p>
+
+        {/* User Quick Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.4, delay: 0.15 }}
+          className="inline-block mt-4"
+        >
+          <Card className="bg-surface border border-structure/10 inline-flex items-center gap-4 px-6 py-4">
+            <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-white" strokeWidth={2} />
+            </div>
+            <div className="text-left">
+              <p className="font-serif text-xl font-bold text-structure">{displayUser.name}</p>
+              <p className="text-sm text-text-secondary font-mono">{displayUser.email}</p>
+              {isAuthBypassEnabled() && (
+                <p className="text-xs text-accent font-mono mt-1">BYPASS MODE ACTIVE</p>
+              )}
+            </div>
+          </Card>
+        </motion.div>
       </div>
 
-      <Card className="space-y-6">
-        <div className="flex items-center gap-4 pb-4 border-b border-[#2A1B12]/10">
-          <div className="w-12 h-12 bg-[#FF6B4A] rounded-full flex items-center justify-center">
-            <User className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="font-serif text-xl font-bold text-[#2A1B12]">{displayUser.name}</h2>
-            <p className="text-sm text-[#5C4D45] font-mono">User ID: {displayUser.id}</p>
-            {isAuthBypassEnabled() && (
-              <p className="text-xs text-[#FF6B4A] font-mono mt-1">BYPASS MODE ACTIVE</p>
-            )}
-          </div>
+      {/* Main Content Grid */}
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
+        {/* Left Column */}
+        <div className="space-y-6">
+          <ProfileInfoCard user={displayUser} />
+          <PasswordChangeCard />
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 text-[#2A1B12]">
-            <Mail className="w-4 h-4 text-[#FF6B4A]" />
-            <span className="font-sans">{displayUser.email}</span>
-          </div>
-
-          <div className="flex items-center gap-3 text-[#5C4D45]">
-            <Calendar className="w-4 h-4 text-[#2A1B12]" />
-            <span className="font-sans text-sm">Account created</span>
-          </div>
+        {/* Right Column */}
+        <div className="space-y-6">
+          <AccountInfoCard />
+          <TaskStatsCard />
+          <DangerZoneCard />
         </div>
+      </motion.div>
 
-        <div className="bg-[#2A1B12]/5 p-4 rounded-sm">
-          <p className="font-mono text-xs text-[#2A1B12]/70">
-            {isAuthBypassEnabled()
-              ? 'Bypass Mode: Mock authentication active (no backend required)'
-              : 'Account Type: Mock Authentication (Ready for Backend Integration)'
-            }
-          </p>
-        </div>
-      </Card>
-
+      {/* Footer */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="text-center text-sm text-[#5C4D45] font-sans"
+        transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.5, delay: 0.2 }}
+        className="text-center text-sm text-text-secondary font-sans pt-4 border-t border-structure/10"
       >
-        <p>Need help? Contact support at support@todoapp.com</p>
+        <p>Need help? Contact support at <a href="mailto:support@todoapp.com" className="text-accent hover:underline">support@todoapp.com</a></p>
+        {isAuthBypassEnabled() && (
+          <p className="font-mono text-xs text-structure/50 mt-2">
+            Mock Mode: All operations use local state (no backend required)
+          </p>
+        )}
       </motion.div>
     </motion.div>
   );

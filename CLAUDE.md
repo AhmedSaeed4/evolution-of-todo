@@ -327,6 +327,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 - In-memory dictionary (no persistence - per spec requirement) (001-cli-todo)
 - Python 3.13+ (per Constitution VI) + Python standard library only (no new dependencies) (002-cli-ui-update)
 - In-memory dictionary (no persistence changes - per spec requirement) (002-cli-ui-update)
+- TypeScript 5.x, React 18+, Next.js 15+ (App Router) + Framer Motion (animations), Lucide React (icons), Tailwind CSS v4 (004-profile-editing)
+- Client-side state via React hooks (useAuth, useTasks) - no new persistence required (004-profile-editing)
 
 ## Recent Changes
 - 001-cli-todo: Added Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only)

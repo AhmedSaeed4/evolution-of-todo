@@ -11,7 +11,7 @@
 
 | Component | Status | Quick Start |
 |-----------|--------|-------------|
-| **Backend CLI** | ✅ Complete | `cd backend && uv run python -m backend.main` |
+| **Backend CLI** | ✅ Complete | `cd phase-1//backend && uv run python -m backend.main` |
 | **Frontend Web** | ✅ Phase 2 | `cd phase-2/frontend && npm run dev` |
 | **Auth Bypass** | 🎯 Key Feature | `echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local` |
 | **Documentation** | 📚 Complete | See below for phase-specific docs |
@@ -85,8 +85,13 @@ evolution-of-todo/
 │   ├── frontend/              # Next.js application
 │   │   ├── src/app/           # App Router pages
 │   │   ├── src/components/    # React components
+│   │   │   ├── profile/       # Profile management components
+│   │   │   ├── tasks/         # Task management components
+│   │   │   ├── auth/          # Authentication components
+│   │   │   └── ui/            # Reusable UI components
 │   │   ├── src/lib/           # Utilities and auth
-│   │   └── src/hooks/         # Custom hooks
+│   │   ├── src/hooks/         # Custom hooks
+│   │   └── src/motion/        # Animation variants
 │   ├── AUTH_BYPASS_IMPLEMENTATION.md  # Bypass feature docs
 │   ├── AUTH_BYPASS_ROLLBACK.md        # Rollback reference
 │   └── AUTH_BYPASS_SUMMARY.md         # Quick reference
@@ -97,7 +102,8 @@ evolution-of-todo/
 ├── specs/                      # Specifications
 │   ├── 001-cli-todo/          # Feature 001 specs (completed)
 │   ├── 002-cli-ui-update/     # Feature 002 specs (completed)
-│   └── 003-frontend-design/   # Feature 003 specs (current)
+│   ├── 003-frontend-design/   # Feature 003 specs (completed)
+│   └── 004-profile-editing/   # Feature 004 specs (current)
 ├── history/                    # Development history
 │   ├── adr/                   # Architecture Decision Records
 │   └── prompts/               # Prompt History Records
@@ -115,30 +121,38 @@ This project follows the **Spec-Driven Development** methodology:
 5. **Documentation** (`docs/`) - Architecture and API docs
 6. **History** (`history/`) - Decisions and interactions
 
-### Current Stage: 002-cli-ui-update
+### Current Stage: 004-profile-editing
 
-**Menu-Driven CLI Todo Application** with full SDD framework:
-- ✅ Menu-driven interface (7 numbered options)
-- ✅ Task management (add, list, complete, update, delete)
-- ✅ Input validation with retry loops
-- ✅ Pause-after-operation UX
-- ✅ Spec-Driven Development tooling
-- ✅ Architecture Decision Records
-- ✅ Prompt History tracking
+**Enhanced Profile Management System** with comprehensive user settings:
 
-**Previous Stage**: `001-cli-todo` - Original CLI with command-line interface
+- ✅ **Profile Information Form** - Edit name and email with validation
+- ✅ **Password Change Form** - Secure password updates with confirmation
+- ✅ **Account Information Display** - Read-only user data with icons
+- ✅ **Task Statistics Dashboard** - Visual metrics and progress tracking
+- ✅ **Danger Zone** - Account deletion with confirmation modal
+- ✅ **Modern UI Components** - Built with design system tokens
+- ✅ **Form Validation** - Real-time error handling and success feedback
+- ✅ **Bypass Mode Support** - Full functionality without backend
 
-### Next Stage: 003-frontend-design
+**Previous Stages:**
+- `001-cli-todo` - Original CLI with command-line interface ✅
+- `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX ✅
+- `003-frontend-design` - Next.js web frontend with auth bypass ✅
 
-**Modern Web Frontend** built with Next.js 16+ featuring:
+### 🎯 Key Innovation: Profile Management Architecture
 
-- ✅ **Next.js 16+ App Router** with TypeScript
-- ✅ **Modern UI/UX** with Modern Technical Editorial design
-- ✅ **Framer Motion** animations and transitions
-- ✅ **Environment-based Authentication Bypass** for testing
-- ✅ **Task Management** with full CRUD operations
-- ✅ **Responsive Design** with mobile-first approach
-- ✅ **Mock API Layer** ready for backend integration
+**New Component Architecture:**
+- **ProfileInfoCard** - Editable form with change detection and validation
+- **PasswordChangeCard** - Secure password updates with confirmation
+- **AccountInfoCard** - Read-only user data display with icons
+- **TaskStatsCard** - Visual task statistics and progress metrics
+- **DangerZoneCard** - Account deletion with confirmation modal
+
+**Design System Integration:**
+- **Typography**: Playfair (serif), DM Sans (sans), JetBrains Mono (mono)
+- **Colors**: Cream background (#F9F7F2), Accent orange (#FF6B4A)
+- **Animations**: Framer Motion with staggered entrances
+- **Components**: Built with reusable UI primitives from design system
 
 ### 🎯 Key Innovation: Authentication Bypass System
 
@@ -257,7 +271,8 @@ npm run dev
 - **[Spec 002](specs/002-cli-ui-update/spec.md)** - Menu-driven interface specification (completed)
 
 ### Frontend (Web - Phase 2)
-- **[Spec 003](specs/003-frontend-design/spec.md)** - Next.js frontend specification (current)
+- **[Spec 003](specs/003-frontend-design/spec.md)** - Next.js frontend specification (completed)
+- **[Spec 004](specs/004-profile-editing/spec.md)** - Profile management specification (current)
 - **[Auth Bypass Guide](phase-2/AUTH_BYPASS_IMPLEMENTATION.md)** - Complete bypass feature documentation
 - **[Auth Bypass Summary](phase-2/AUTH_BYPASS_SUMMARY.md)** - Quick reference guide
 - **[Auth Bypass Rollback](phase-2/AUTH_BYPASS_ROLLBACK.md)** - Complete rollback reference
@@ -291,9 +306,10 @@ git push -u origin 002-next-feature
 ### Current Branches
 
 - `main` - Stable base (protected, default)
+- `004-profile-editing` - Enhanced profile management system (current)
+- `003-frontend-design` - Next.js web frontend with auth bypass
 - `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX
 - `001-cli-todo` - Original CLI todo application (previous version)
-- `003-frontend-design` - Next.js web frontend with modern UI/UX
 
 ## 🧪 Testing
 
@@ -344,16 +360,17 @@ npm run dev
 - **Features**: 7 menu operations with full CRUD
 
 ### Frontend (Web - Phase 2)
-- **Total Files**: 50+
-- **Components**: 15+ React components
-- **Pages**: 6 main pages (Home, Login, Signup, Tasks, Profile)
+- **Total Files**: 60+
+- **Components**: 20+ React components
+- **Profile Components**: 5 specialized cards (Info, Password, Account, Stats, Danger)
+- **Pages**: 6 main pages (Home, Login, Signup, Tasks, Profile, Test)
 - **TypeScript**: 100% coverage
 - **Dependencies**: Modern Next.js ecosystem
-- **Features**: Full task management + auth bypass system
+- **Features**: Full task management + auth bypass + profile management
 
 ### Overall
 - **Architecture**: Spec-Driven Development framework
-- **Branches**: 3 feature branches (001, 002, 003)
+- **Branches**: 4 feature branches (001, 002, 003, 004)
 - **Documentation**: Complete ADR + PHR tracking
 
 ## 🤝 Contributing
@@ -383,18 +400,19 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - `001-cli-todo` - Original CLI with command-line interface ✅
 - `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX ✅
 - `003-frontend-design` - Next.js web frontend with auth bypass ✅
+- `004-profile-editing` - Enhanced profile management system ✅
 
 **Current Focus:**
-- **Phase 2**: Web frontend with modern UI/UX and authentication bypass system
-- **Key Innovation**: Environment-based auth toggle for instant testing
+- **Phase 2**: Complete profile management with modern UI/UX
+- **Key Innovation**: Component-based architecture with design system integration
 
 **Future Stages:**
-- `004-backend-integration` - Connect frontend to FastAPI backend
-- `005-database-persistence` - Replace in-memory with database
-- `006-real-time` - WebSocket updates and notifications
-- `007-mobile-app` - React Native mobile application
-- `008-advanced-auth` - OAuth, JWT, and role-based access
-- `009-mcp-integration` - Model Context Protocol for AI agents
+- `005-backend-integration` - Connect frontend to FastAPI backend
+- `006-database-persistence` - Replace in-memory with database
+- `007-real-time` - WebSocket updates and notifications
+- `008-mobile-app` - React Native mobile application
+- `009-advanced-auth` - OAuth, JWT, and role-based access
+- `010-mcp-integration` - Model Context Protocol for AI agents
 
 ---
 

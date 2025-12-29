@@ -6,7 +6,8 @@ let mockUsers: User[] = [
   {
     id: 'user-1',
     email: 'demo@example.com',
-    name: 'Demo User'
+    name: 'Demo User',
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -30,7 +31,7 @@ export const api = {
         if (!filters?.search) return true;
         const search = filters.search.toLowerCase();
         return task.title.toLowerCase().includes(search) ||
-               (task.description?.toLowerCase().includes(search) || false);
+          (task.description?.toLowerCase().includes(search) || false);
       })
       .sort((a, b) => {
         if (!filters?.sortBy) return 0;
@@ -122,5 +123,83 @@ export const api = {
     task.updatedAt = new Date().toISOString();
 
     return task;
+  },
+
+  // UPDATE PROFILE
+  async updateProfile(userId: string, data: { name: string }): Promise<User> {
+    // Simulate network delay for realistic UX
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Simulate occasional network failure (5% chance)
+    if (Math.random() < 0.05) {
+      throw new Error('Network error: Please check your connection and try again');
+    }
+
+    // TODO: Replace with fetch() to FastAPI endpoint
+    // TODO: PUT /api/{user_id}/profile
+    const userIndex = mockUsers.findIndex(u => u.id === userId);
+
+    if (userIndex === -1) {
+      throw new Error('User not found or session expired');
+    }
+
+    const updatedUser = {
+      ...mockUsers[userIndex],
+      name: data.name,
+      // Preserve email and createdAt
+      email: mockUsers[userIndex].email,
+      createdAt: mockUsers[userIndex].createdAt
+    };
+
+    mockUsers[userIndex] = updatedUser;
+    return updatedUser;
+  },
+
+  // CHANGE PASSWORD
+  async changePassword(userId: string, data: { currentPassword: string; newPassword: string }): Promise<void> {
+    // Simulate network delay for realistic UX
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    // Simulate occasional network failure (5% chance)
+    if (Math.random() < 0.05) {
+      throw new Error('Network error: Please check your connection and try again');
+    }
+
+    // TODO: Replace with fetch() to FastAPI endpoint
+    // TODO: POST /api/{user_id}/change-password
+    const user = mockUsers.find(u => u.id === userId);
+
+    if (!user) {
+      throw new Error('User not found or session expired');
+    }
+
+    // Mock password validation (always succeeds in mock mode)
+    // In real implementation: verify currentPassword matches stored hash
+    if (data.currentPassword === data.newPassword) {
+      throw new Error('New password must be different from current password');
+    }
+
+    if (data.newPassword.length < 8) {
+      throw new Error('New password must be at least 8 characters');
+    }
+
+    // Mock success - no actual password change in mock mode
+    return Promise.resolve();
+  },
+
+  // GET TASK STATISTICS
+  async getTaskStats(userId: string): Promise<{ total: number; pending: number; completed: number }> {
+    // Simulate minimal network delay for stats
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // TODO: Replace with fetch() to FastAPI endpoint
+    // TODO: GET /api/{user_id}/stats
+    const userTasks = mockTasks.filter(t => t.userId === userId);
+
+    return {
+      total: userTasks.length,
+      pending: userTasks.filter(t => t.status === 'pending').length,
+      completed: userTasks.filter(t => t.status === 'completed').length
+    };
   }
 };

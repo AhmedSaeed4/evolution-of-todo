@@ -250,6 +250,78 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 
 **Documentation**: See `.claude/skills/backend/concepts/` for detailed UV workflow and structure guides.
 
+---
+
+### Next.js Skill
+**Location**: `.claude/skills/nextjs/`
+
+**Purpose**: Provides expertise in building modern web applications with Next.js, focusing on the App Router architecture, Server Components, and TypeScript.
+
+**When to use**:
+- Creating new Next.js web applications
+- Working with App Router (`app/` directory) and file conventions
+- Implementing Server Components vs Client Components
+- Data fetching with Async Server Components and Server Actions
+- Tailwind CSS integration and styling
+
+**Key workflows**:
+- **New project**: Uses strict flags (`src/` dir, no alias, etc.)
+- **Components**: Default to Server Component unless interactivity is needed
+- **Data mutations**: Use Server Actions for form submissions
+
+**Guidelines**: Always use TypeScript. Always assume App Router unless Pages Router is explicitly requested.
+
+**Documentation**: See `.claude/skills/nextjs/concepts/` for CLI commands and file structure guides.
+
+---
+
+### UI Animation Skill (Framer Motion)
+**Location**: `.claude/skills/ui-animation/`
+
+**Purpose**: Defines the motion design language for projects using **Framer Motion** with a "Modern Technical Editorial" aesthetic.
+
+**When to use**:
+- Adding smooth animations and transitions to UI
+- Implementing entrance animations (FadeUp, LineDraw, Stagger)
+- Creating hover states and interactive element animations
+
+**Core principles**:
+- **No abrupt appearances**: Use `FadeInUp` for content, `LineDraw` for dividers
+- **Physics over duration**: Use smooth eased transitions (`duration: 0.4, ease: [0.22, 1, 0.36, 1]`)
+- **Subtlety over action**: Hover scales rarely exceed `1.02`
+- **Stagger everything**: Lists and grids must cascade
+
+**Key workflows**:
+- **Install**: `npm install framer-motion`
+- **Import**: `import { motion } from 'framer-motion'`
+- **Custom components**: Use `motion()` wrapper for library components (e.g., `const MotionLink = motion(Link)`)
+
+**Documentation**: See `MOTION_TOKENS.md` and `ANIMATION_PATTERNS.md` for constants and code patterns.
+
+---
+
+### UI Design Skill (Modern Technical Editorial)
+**Location**: `.claude/skills/ui-design/`
+
+**Purpose**: Defines the user's preferred **Modern Technical Editorial** aesthetic—blending editorial warmth (serifs, cream backgrounds) with technical precision (lines, wireframes, mono fonts).
+
+**When to use**:
+- Designing new UI components or pages
+- Establishing consistent visual language
+- Creating layouts with the editorial + technical aesthetic
+
+**Core design rules**:
+- **Background**: Always `#F9F7F2` (Cream). Never pure white.
+- **Typography Triad**:
+  - **Serif**: Headings (`Playfair`, `Young Serif`)
+  - **Sans**: Body (`DM Sans`)
+  - **Mono**: Labels/Nav/Data (`JetBrains Mono`)
+- **Technical Lines**: Use subtle 1px borders (`#2A1B12/10`)
+- **Accent**: Vibrant Orange (`#FF6B4A`) for key interactions
+- **Layout**: Open, spacious, with occasional "Massive" typography
+
+**Documentation**: See `TOKENS.md`, `LAYOUT_PATTERNS.md`, and `COMPONENT_PATTERNS.md` for detailed patterns.
+
 ## Active Technologies
 - Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only) (001-cli-todo)
 - In-memory dictionary (no persistence - per spec requirement) (001-cli-todo)

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
@@ -12,18 +12,46 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
+  const redirectRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Clear any pending redirects
+    if (redirectRef.current) {
+      clearTimeout(redirectRef.current);
+      redirectRef.current = null;
+    }
+
     // If bypass is enabled, never redirect
     if (isAuthBypassEnabled()) {
       return;
     }
 
+    // Only redirect if we're done loading AND not authenticated
     if (!loading && !isAuthenticated) {
-      router.push('/login');
+      if (process.env.NODE_ENV === 'development') {
+        const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+        console.log(`[${timestamp}] ProtectedRoute - scheduling redirect to login`);
+      }
+
+      // Use a small delay to catch any last-second state updates
+      redirectRef.current = setTimeout(() => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('ProtectedRoute - executing redirect');
+        }
+        router.push('/login');
+      }, 100);
     }
   }, [isAuthenticated, loading, router]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (redirectRef.current) {
+        clearTimeout(redirectRef.current);
+      }
+    };
+  }, []);
 
   // If bypass is enabled, skip loading state and render immediately
   if (isAuthBypassEnabled()) {

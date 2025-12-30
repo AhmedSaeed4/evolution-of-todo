@@ -33,8 +33,17 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signIn(formData.email, formData.password);
-      router.push('/tasks');
+      const result = await signIn(formData.email, formData.password);
+
+      if (result.success) {
+        // Small delay to ensure auth state propagates before redirect
+        // This prevents race conditions where ProtectedRoute might not see the updated state
+        await new Promise(resolve => setTimeout(resolve, 150));
+
+        router.push('/tasks');
+      } else {
+        setError(result.error || 'Invalid email or password');
+      }
     } catch (err) {
       setError('Invalid email or password');
     } finally {

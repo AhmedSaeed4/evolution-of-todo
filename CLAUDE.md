@@ -322,6 +322,50 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 
 **Documentation**: See `TOKENS.md`, `LAYOUT_PATTERNS.md`, and `COMPONENT_PATTERNS.md` for detailed patterns.
 
+---
+
+### Better Auth Skill
+**Location**: `.claude/skills/better-auth/`
+
+**Purpose**: Provides comprehensive knowledge for implementing secure authentication and authorization using **Better Auth**, a framework-agnostic TypeScript library.
+
+**When to use**:
+- Setting up authentication with Next.js, Remix, Astro, or Express
+- Configuring OAuth providers (Google, GitHub, etc.)
+- Managing user sessions and access control
+- Adding plugins (organization, twoFactor, passkey, etc.)
+
+**Capabilities**:
+- **Setup & Configuration**: Initializing `betterAuth()` with adapters (Prisma, Drizzle, etc.)
+- **Framework Integration**: Best practices for Next.js App Router, API routes, and Express
+- **Client Side**: Using `createAuthClient` and framework-specific hooks (`useSession`)
+- **Plugins**: Organization, two-factor auth, passkeys, username plugin
+
+**Documentation**: See `concepts/IMPLEMENTATION_SUMMARY.md`, `concepts/NEXTJS_PATTERNS.md`, and `references/api_reference.md` for detailed patterns.
+
+---
+
+### Neon DB Skill
+**Location**: `.claude/skills/neon-db/`
+
+**Purpose**: Provides expertise in **Neon PostgreSQL** - a serverless PostgreSQL database with TypeScript/Node.js and Python integration patterns.
+
+**When to use**:
+- Connecting to Neon PostgreSQL from Node.js or Python
+- Setting up connection pooling with SSL
+- Designing schemas with proper indexes and triggers
+- Integrating with Better Auth or FastAPI backends
+
+**Capabilities**:
+- **TypeScript/Node.js**: pg Pool with SSL, Better Auth adapter integration
+- **Python/FastAPI**: psycopg2 with context managers, async patterns
+- **Schema Design**: JSONB metadata, indexes, triggers, foreign keys
+- **Multi-tenant**: User isolation patterns with userId filtering
+
+**Key configuration**: SSL is **required** for all Neon connections.
+
+**Documentation**: See `concepts/TYPESCRIPT_PATTERNS.md`, `concepts/PYTHON_PATTERNS.md`, and `concepts/SCHEMA_DESIGN.md` for detailed patterns.
+
 ## Active Technologies
 - Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only) (001-cli-todo)
 - In-memory dictionary (no persistence - per spec requirement) (001-cli-todo)
@@ -329,6 +373,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 - In-memory dictionary (no persistence changes - per spec requirement) (002-cli-ui-update)
 - TypeScript 5.x, React 18+, Next.js 15+ (App Router) + Framer Motion (animations), Lucide React (icons), Tailwind CSS v4 (004-profile-editing)
 - Client-side state via React hooks (useAuth, useTasks) - no new persistence required (004-profile-editing)
+- TypeScript 5.x, Next.js 16.1.1 (App Router), React 19.2.3 + better-auth v1.4.9 (already installed), pg (new - PostgreSQL driver) (005-user-auth)
+- Neon PostgreSQL (shared with FastAPI backend) (005-user-auth)
 
 ## Recent Changes
 - 001-cli-todo: Added Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only)

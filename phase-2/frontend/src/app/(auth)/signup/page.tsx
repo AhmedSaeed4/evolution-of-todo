@@ -34,8 +34,25 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      await signUp(formData.name, formData.email, formData.password);
-      router.push('/tasks');
+      const result = await signUp(formData.name, formData.email, formData.password);
+
+      if (result.success) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Signup successful, waiting for auth state to settle...');
+        }
+
+        // Small delay to ensure auth state propagates before redirect
+        // This prevents race conditions where ProtectedRoute might not see the updated state
+        await new Promise(resolve => setTimeout(resolve, 150));
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Redirecting to tasks after auth state settled');
+        }
+
+        router.push('/tasks');
+      } else {
+        setError(result.error || 'Failed to create account. Please try again.');
+      }
     } catch (err) {
       setError('Failed to create account. Please try again.');
     } finally {

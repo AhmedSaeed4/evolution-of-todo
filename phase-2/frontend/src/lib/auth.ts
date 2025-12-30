@@ -1,5 +1,5 @@
 // Better Auth configuration for Next.js 16+ App Router
-// This file sets up the authentication client with JWT support
+// This file sets up the authentication client
 
 import { createAuthClient } from 'better-auth/react';
 import { jwtClient } from 'better-auth/client/plugins';
@@ -12,7 +12,8 @@ const MOCK_USER = {
   createdAt: new Date().toISOString()
 };
 
-// Auth client instance
+// Auth client instance with JWT plugin for FastAPI integration
+// JWT tokens will be sent to FastAPI backend for authentication
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000',
   plugins: [jwtClient()]

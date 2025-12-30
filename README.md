@@ -11,14 +11,47 @@
 
 | Component | Status | Quick Start |
 |-----------|--------|-------------|
-| **Backend CLI** | ✅ Complete | `cd phase-1//backend && uv run python -m backend.main` |
+| **Backend CLI** | ✅ Complete | `cd backend && uv run python -m backend.main` |
 | **Frontend Web** | ✅ Phase 2 | `cd phase-2/frontend && npm run dev` |
-| **Auth Bypass** | 🎯 Key Feature | `echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local` |
+| **Authentication** | ✅ Production-Ready | See `specs/005-user-auth/quickstart.md` |
+| **Auth Bypass** | 🎯 Testing Mode | `echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local` |
 | **Documentation** | 📚 Complete | See below for phase-specific docs |
 
 ## 🚀 Project Overview
 
 **Evolution of Todo** is a comprehensive demonstration of Spec-Driven Development methodology, building a CLI todo application through clearly defined evolutionary stages. Each stage represents a distinct feature branch, creating a complete development history from concept to production-ready system.
+
+### 🎯 Authentication System (005-user-auth) ✅
+
+**Production-Ready Authentication with Better Auth:**
+
+```bash
+# Quick setup for real authentication
+cd phase-2/frontend
+npm install  # Includes pg dependency
+# Configure .env.local with DATABASE_URL and BETTER_AUTH_SECRET
+npm run dev
+
+# Test the API endpoints
+curl -X POST http://localhost:3000/api/auth/sign-up/email \
+  -H "Content-Type: application/json" \
+  -d '{"name":"User","email":"user@example.com","password":"password123"}'
+```
+
+**What's Working:**
+- ✅ **User Registration** - Email/password signup with validation
+- ✅ **User Login** - Secure authentication with JWT tokens
+- ✅ **Session Management** - Persistent sessions via cookies
+- ✅ **Password Security** - bcrypt hashing, constant-time comparison
+- ✅ **JWT Integration** - Ready for FastAPI backend validation
+- ✅ **Neon PostgreSQL** - Database persistence with SSL
+- ✅ **Complete API** - 3 endpoints tested and documented
+
+**Backend Integration Ready:**
+- JWT tokens (HS256) with user_id, email, name, exp
+- Shared secret for Next.js ↔ FastAPI authentication
+- User isolation via user_id for multi-tenancy
+- See `specs/005-user-auth/contracts/auth-api.md` for details
 
 ### 🎯 Key Features
 
@@ -84,12 +117,17 @@ evolution-of-todo/
 ├── phase-2/                    # Next.js Web Frontend
 │   ├── frontend/              # Next.js application
 │   │   ├── src/app/           # App Router pages
+│   │   │   ├── api/           # API routes
+│   │   │   │   └── auth/      # Authentication endpoints
+│   │   │   │       └── [...all]/route.ts  # Better Auth handler
 │   │   ├── src/components/    # React components
 │   │   │   ├── profile/       # Profile management components
 │   │   │   ├── tasks/         # Task management components
 │   │   │   ├── auth/          # Authentication components
 │   │   │   └── ui/            # Reusable UI components
 │   │   ├── src/lib/           # Utilities and auth
+│   │   │   ├── auth.ts        # Client auth config
+│   │   │   └── auth-server.ts # Better Auth server config
 │   │   ├── src/hooks/         # Custom hooks
 │   │   └── src/motion/        # Animation variants
 │   ├── AUTH_BYPASS_IMPLEMENTATION.md  # Bypass feature docs
@@ -103,7 +141,15 @@ evolution-of-todo/
 │   ├── 001-cli-todo/          # Feature 001 specs (completed)
 │   ├── 002-cli-ui-update/     # Feature 002 specs (completed)
 │   ├── 003-frontend-design/   # Feature 003 specs (completed)
-│   └── 004-profile-editing/   # Feature 004 specs (current)
+│   ├── 004-profile-editing/   # Feature 004 specs (completed)
+│   └── 005-user-auth/         # Feature 005 specs (current)
+│       ├── spec.md            # Requirements
+│       ├── plan.md            # Architecture
+│       ├── tasks.md           # Implementation tasks
+│       ├── quickstart.md      # Setup guide
+│       ├── data-model.md      # Database schema
+│       ├── contracts/         # API contracts
+│       └── checklists/        # Quality checks
 ├── history/                    # Development history
 │   ├── adr/                   # Architecture Decision Records
 │   └── prompts/               # Prompt History Records
@@ -121,38 +167,45 @@ This project follows the **Spec-Driven Development** methodology:
 5. **Documentation** (`docs/`) - Architecture and API docs
 6. **History** (`history/`) - Decisions and interactions
 
-### Current Stage: 004-profile-editing
+### Current Stage: 005-user-auth
 
-**Enhanced Profile Management System** with comprehensive user settings:
+**Production-Ready Authentication System** with Better Auth integration:
 
-- ✅ **Profile Information Form** - Edit name and email with validation
-- ✅ **Password Change Form** - Secure password updates with confirmation
-- ✅ **Account Information Display** - Read-only user data with icons
-- ✅ **Task Statistics Dashboard** - Visual metrics and progress tracking
-- ✅ **Danger Zone** - Account deletion with confirmation modal
-- ✅ **Modern UI Components** - Built with design system tokens
-- ✅ **Form Validation** - Real-time error handling and success feedback
-- ✅ **Bypass Mode Support** - Full functionality without backend
+- ✅ **User Registration** - Email/password signup with full validation
+- ✅ **User Login** - Secure authentication with JWT tokens
+- ✅ **Session Management** - Persistent sessions with cookie-based auth
+- ✅ **Password Security** - bcrypt hashing with constant-time comparison
+- ✅ **JWT Integration** - Ready for FastAPI backend validation
+- ✅ **Neon PostgreSQL** - Database persistence with SSL connections
+- ✅ **API Endpoints** - Complete RESTful authentication endpoints
+- ✅ **Comprehensive Documentation** - Quickstart, API contracts, data models
 
 **Previous Stages:**
 - `001-cli-todo` - Original CLI with command-line interface ✅
 - `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX ✅
 - `003-frontend-design` - Next.js web frontend with auth bypass ✅
+- `004-profile-editing` - Enhanced profile management system ✅
 
-### 🎯 Key Innovation: Profile Management Architecture
+### 🎯 Key Innovation: Production-Ready Authentication
 
-**New Component Architecture:**
-- **ProfileInfoCard** - Editable form with change detection and validation
-- **PasswordChangeCard** - Secure password updates with confirmation
-- **AccountInfoCard** - Read-only user data display with icons
-- **TaskStatsCard** - Visual task statistics and progress metrics
-- **DangerZoneCard** - Account deletion with confirmation modal
+**Better Auth Integration:**
+- **Server Configuration** - `auth-server.ts` with PostgreSQL adapter
+- **API Route Handler** - Single file handles all auth endpoints
+- **JWT Plugin** - Token generation for FastAPI backend integration
+- **Database Schema** - User, Session, Account tables with proper indexes
+- **Security Features** - bcrypt hashing, constant-time comparison, SSL connections
 
-**Design System Integration:**
-- **Typography**: Playfair (serif), DM Sans (sans), JetBrains Mono (mono)
-- **Colors**: Cream background (#F9F7F2), Accent orange (#FF6B4A)
-- **Animations**: Framer Motion with staggered entrances
-- **Components**: Built with reusable UI primitives from design system
+**Working API Endpoints:**
+- **Registration**: `POST /api/auth/sign-up/email` - Validates, creates user, returns JWT
+- **Login**: `POST /api/auth/sign-in/email` - Verifies credentials, issues session
+- **Session**: `GET /api/auth/get-session` - Validates cookies, returns user data
+- **Security**: Generic error messages prevent user enumeration
+
+**Backend Integration Ready:**
+- **JWT Format**: HS256 signed tokens with user_id, email, name, exp
+- **Shared Secret**: `BETTER_AUTH_SECRET` for both Next.js and FastAPI
+- **Database**: Neon PostgreSQL with SSL, shared with backend
+- **User Isolation**: All queries scoped to user_id for multi-tenancy
 
 ### 🎯 Key Innovation: Authentication Bypass System
 
@@ -241,11 +294,17 @@ uv run python -m backend.main
 # Navigate to phase-2 frontend
 cd phase-2/frontend
 
-# Install dependencies
+# Install dependencies (includes pg for database)
 npm install
 
-# Set up environment for bypass mode (optional, for testing)
-echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local
+# Set up authentication environment
+# Generate secure secret: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+cat > .env.local << EOF
+NEXT_PUBLIC_AUTH_BYPASS=false
+DATABASE_URL=postgresql://user:pass@host:5432/dbname?sslmode=require
+BETTER_AUTH_SECRET=your-generated-64-char-secret
+NEXT_PUBLIC_AUTH_URL=http://localhost:3000
+EOF
 
 # Run development server
 npm run dev
@@ -253,14 +312,15 @@ npm run dev
 
 **Quick Start (Web):**
 - Visit `http://localhost:3000`
-- **With bypass**: Goes directly to tasks (no login)
-- **Without bypass**: Shows login/signup pages
+- **With bypass** (`NEXT_PUBLIC_AUTH_BYPASS=true`): Direct access to tasks
+- **Without bypass**: Login/signup pages with real authentication
 
-**Authentication Bypass Feature:**
-- Set `NEXT_PUBLIC_AUTH_BYPASS=true` in `.env.local`
-- Instant access to all features for testing
-- Mock user system with visual indicators
-- See `phase-2/AUTH_BYPASS_IMPLEMENTATION.md` for details
+**Authentication System Features:**
+- **Real Authentication**: Better Auth with Neon PostgreSQL
+- **JWT Tokens**: Ready for FastAPI backend integration
+- **Complete API**: Registration, login, session validation endpoints
+- **Security**: bcrypt hashing, SSL connections, proper validation
+- **See**: `specs/005-user-auth/quickstart.md` for complete setup guide
 
 ## 📖 Documentation
 
@@ -272,7 +332,11 @@ npm run dev
 
 ### Frontend (Web - Phase 2)
 - **[Spec 003](specs/003-frontend-design/spec.md)** - Next.js frontend specification (completed)
-- **[Spec 004](specs/004-profile-editing/spec.md)** - Profile management specification (current)
+- **[Spec 004](specs/004-profile-editing/spec.md)** - Profile management specification (completed)
+- **[Spec 005](specs/005-user-auth/spec.md)** - Authentication system specification (current)
+- **[Auth Quickstart](specs/005-user-auth/quickstart.md)** - Complete setup guide
+- **[API Contracts](specs/005-user-auth/contracts/auth-api.md)** - RESTful endpoints documentation
+- **[Data Model](specs/005-user-auth/data-model.md)** - Database schema and relationships
 - **[Auth Bypass Guide](phase-2/AUTH_BYPASS_IMPLEMENTATION.md)** - Complete bypass feature documentation
 - **[Auth Bypass Summary](phase-2/AUTH_BYPASS_SUMMARY.md)** - Quick reference guide
 - **[Auth Bypass Rollback](phase-2/AUTH_BYPASS_ROLLBACK.md)** - Complete rollback reference
@@ -333,10 +397,35 @@ uv run pytest --cov=src/backend
 
 ### Frontend (Web) Testing
 
+**Authentication Testing (Real Backend):**
 ```bash
 cd phase-2/frontend
 
-# Run development server with bypass enabled
+# Set up real authentication
+echo "NEXT_PUBLIC_AUTH_BYPASS=false" > .env.local
+# Add DATABASE_URL and BETTER_AUTH_SECRET to .env.local
+
+# Start server
+npm run dev
+
+# Test registration
+curl -X POST http://localhost:3000/api/auth/sign-up/email \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test","email":"test@example.com","password":"testpassword123"}'
+
+# Test login
+curl -X POST http://localhost:3000/api/auth/sign-in/email \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"testpassword123"}'
+
+# Test session validation
+curl http://localhost:3000/api/auth/get-session \
+  -b "better-auth.session_token=YOUR_TOKEN"
+```
+
+**Bypass Mode Testing:**
+```bash
+# Enable bypass for UI testing
 echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local
 npm run dev
 
@@ -360,13 +449,15 @@ npm run dev
 - **Features**: 7 menu operations with full CRUD
 
 ### Frontend (Web - Phase 2)
-- **Total Files**: 60+
-- **Components**: 20+ React components
+- **Total Files**: 70+
+- **Components**: 25+ React components
+- **Auth Components**: Login, Signup forms with validation
 - **Profile Components**: 5 specialized cards (Info, Password, Account, Stats, Danger)
 - **Pages**: 6 main pages (Home, Login, Signup, Tasks, Profile, Test)
+- **API Routes**: 1 auth route handler (`[...all]/route.ts`)
 - **TypeScript**: 100% coverage
-- **Dependencies**: Modern Next.js ecosystem
-- **Features**: Full task management + auth bypass + profile management
+- **Dependencies**: Better Auth v1.4.9, pg v8.16.3, Next.js 16.1.1
+- **Features**: Full task management + real authentication + profile management
 
 ### Overall
 - **Architecture**: Spec-Driven Development framework
@@ -401,18 +492,27 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX ✅
 - `003-frontend-design` - Next.js web frontend with auth bypass ✅
 - `004-profile-editing` - Enhanced profile management system ✅
+- `005-user-auth` - Production-ready authentication with Better Auth ✅
 
 **Current Focus:**
-- **Phase 2**: Complete profile management with modern UI/UX
-- **Key Innovation**: Component-based architecture with design system integration
+- **Phase 2**: Complete authentication system ready for backend integration
+- **Key Innovation**: Better Auth + Neon PostgreSQL + JWT tokens for FastAPI
+
+**Backend Integration Ready:**
+- ✅ JWT tokens generated with HS256
+- ✅ Shared secret configured for both systems
+- ✅ Database tables created in Neon PostgreSQL
+- ✅ User isolation via user_id for multi-tenancy
+- ✅ API endpoints fully functional and tested
 
 **Future Stages:**
-- `005-backend-integration` - Connect frontend to FastAPI backend
-- `006-database-persistence` - Replace in-memory with database
-- `007-real-time` - WebSocket updates and notifications
-- `008-mobile-app` - React Native mobile application
-- `009-advanced-auth` - OAuth, JWT, and role-based access
-- `010-mcp-integration` - Model Context Protocol for AI agents
+- `006-fastapi-jwt-validation` - Backend JWT verification implementation
+- `007-task-api-integration` - Connect task CRUD to authenticated users
+- `008-websocket-realtime` - Real-time updates and notifications
+- `009-mobile-app` - React Native mobile application
+- `010-oauth-providers` - Google, GitHub authentication
+- `011-2fa-security` - Two-factor authentication
+- `012-mcp-integration` - Model Context Protocol for AI agents
 
 ---
 

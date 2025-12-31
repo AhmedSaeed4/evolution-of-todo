@@ -3,7 +3,7 @@ const { betterAuth } = require('better-auth');
 const { jwt } = require('better-auth/plugins/jwt');
 const { Pool } = require('pg');
 
-const connectionString = 'postgresql://neondb_owner:npg_uknyA9soWpe6@ep-raspy-truth-adwqwssi-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+const connectionString = process.env.DATABASE_URL;
 
 const pool = new Pool({
   connectionString: connectionString,
@@ -13,6 +13,11 @@ const pool = new Pool({
 
 async function testAuth() {
   console.log('🧪 Testing Better Auth Configuration...\n');
+
+  if (!process.env.DATABASE_URL || !process.env.BETTER_AUTH_SECRET) {
+    console.error('❌ Missing environment variables. Make sure DATABASE_URL and BETTER_AUTH_SECRET are set.');
+    process.exit(1);
+  }
 
   try {
     // Test 1: Database connection
@@ -29,7 +34,7 @@ async function testAuth() {
     console.log('\n2. Creating Better Auth instance...');
     const auth = betterAuth({
       database: pool,
-      secret: '8cbab842b2de9c2e5342f273489dcdd74f9c8be3b4eb567cdb2731c30fe195ec',
+      secret: process.env.BETTER_AUTH_SECRET,
       emailAndPassword: {
         enabled: true,
         minPasswordLength: 8,

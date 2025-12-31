@@ -12,6 +12,7 @@
 | Component | Status | Quick Start |
 |-----------|--------|-------------|
 | **Backend CLI** | ✅ Complete | `cd backend && uv run python -m backend.main` |
+| **Backend API** | ✅ Complete | `cd phase-2/backend && uv run uvicorn src.backend.main:app --reload` |
 | **Frontend Web** | ✅ Phase 2 | `cd phase-2/frontend && npm run dev` |
 | **Authentication** | ✅ Production-Ready | See `specs/005-user-auth/quickstart.md` |
 | **Auth Bypass** | 🎯 Testing Mode | `echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local` |
@@ -20,6 +21,40 @@
 ## 🚀 Project Overview
 
 **Evolution of Todo** is a comprehensive demonstration of Spec-Driven Development methodology, building a CLI todo application through clearly defined evolutionary stages. Each stage represents a distinct feature branch, creating a complete development history from concept to production-ready system.
+
+### 🎯 FastAPI Backend (006-backend-implement) ✅
+
+**Production-Ready RESTful API with JWT Authentication:**
+
+```bash
+# Quick setup for backend API
+cd phase-2/backend
+uv sync  # Install dependencies
+# Configure .env with DATABASE_URL and BETTER_AUTH_SECRET
+uv run uvicorn src.backend.main:app --reload --host 0.0.0.0 --port 8000
+
+# Test the API endpoints
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     http://localhost:8000/api/user_123/tasks
+```
+
+**What's Working:**
+- ✅ **7 RESTful Endpoints** - Full CRUD + stats for tasks
+- ✅ **JWT Validation** - EdDSA/ES256/RS256 via Better Auth JWKS
+- ✅ **Multi-Tenancy** - User isolation via user_id scoping
+- ✅ **SQLModel ORM** - Type-safe database operations
+- ✅ **Pydantic Validation** - Request/response validation
+- ✅ **CORS Support** - Frontend integration ready
+- ✅ **Async/Await** - High-performance async patterns
+
+**API Endpoints:**
+- `GET /api/{user_id}/tasks` - List tasks with filters
+- `POST /api/{user_id}/tasks` - Create task (201)
+- `GET /api/{user_id}/tasks/{task_id}` - Get single task
+- `PUT /api/{user_id}/tasks/{task_id}` - Update task
+- `DELETE /api/{user_id}/tasks/{task_id}` - Delete task (204)
+- `PATCH /api/{user_id}/tasks/{task_id}/complete` - Toggle completion
+- `GET /api/{user_id}/stats` - Task statistics
 
 ### 🎯 Authentication System (005-user-auth) ✅
 
@@ -48,7 +83,7 @@ curl -X POST http://localhost:3000/api/auth/sign-up/email \
 - ✅ **Complete API** - 3 endpoints tested and documented
 
 **Backend Integration Ready:**
-- JWT tokens (HS256) with user_id, email, name, exp
+- JWT tokens (HS256/EdDSA) with user_id, email, name, exp
 - Shared secret for Next.js ↔ FastAPI authentication
 - User isolation via user_id for multi-tenancy
 - See `specs/005-user-auth/contracts/auth-api.md` for details
@@ -74,30 +109,51 @@ main (stable, protected)
 │   ├── specs/           # CLI specifications
 │   ├── backend/         # Command-line implementation
 │   └── docs/            # Original documentation
-└── 002-cli-ui-update (current)
-    ├── specs/           # Menu interface specifications
-    ├── backend/         # Menu-driven implementation
-    ├── docs/            # Updated documentation
-    ├── history/         # ADRs and PHRs
-    └── .specify/        # SDD templates and scripts
+├── 002-cli-ui-update (completed)
+│   ├── specs/           # Menu interface specifications
+│   ├── backend/         # Menu-driven implementation
+│   └── docs/            # Updated documentation
+├── 003-frontend-design (completed)
+│   ├── specs/           # Next.js frontend specs
+│   └── phase-2/         # Web application
+├── 004-profile-editing (completed)
+│   ├── specs/           # Profile management specs
+│   └── phase-2/         # Enhanced profile features
+├── 005-user-auth (completed)
+│   ├── specs/           # Authentication specs
+│   └── phase-2/         # Better Auth integration
+└── 006-backend-implement (current)
+    ├── specs/           # FastAPI backend specs
+    ├── phase-2/backend/ # RESTful API implementation
+    └── phase-2/frontend/# Frontend API client updates
 ```
 
 ### Technology Stack
 
-**Backend (CLI):**
+**Backend CLI (Original):**
 - **Language**: Python 3.13+
 - **Package Manager**: uv (fast, modern Python tooling)
 - **Storage**: In-memory dictionary (per spec requirement)
 - **Architecture**: Layered CLI application
 - **Testing**: Unit + Integration tests
 
+**Backend API (FastAPI):**
+- **Framework**: FastAPI 0.128.0 (async/await)
+- **ORM**: SQLModel 0.0.31 (Pydantic + SQLAlchemy)
+- **Database**: Neon PostgreSQL (serverless, SSL)
+- **Authentication**: JWT validation via Better Auth JWKS
+- **Security**: Pydantic validation, CORS, multi-tenancy
+- **Performance**: Asyncpg for connection pooling
+- **API Style**: RESTful with OpenAPI documentation
+
 **Frontend (Web):**
-- **Framework**: Next.js 16+ with App Router
-- **Language**: TypeScript
+- **Framework**: Next.js 16.1.1 with App Router
+- **Language**: TypeScript 5.x
 - **Styling**: Tailwind CSS with Modern Technical Editorial design
 - **Animations**: Framer Motion
 - **State Management**: React Hooks + Server Components
-- **Authentication**: Better Auth (with bypass mode for testing)
+- **Authentication**: Better Auth v1.4.9 (with bypass mode)
+- **API Client**: Fetch with JWT token management
 
 ## 📁 Project Structure
 
@@ -114,7 +170,7 @@ evolution-of-todo/
 │   ├── src/backend/           # Application code
 │   ├── tests/                 # Test suite
 │   └── pyproject.toml         # Python config
-├── phase-2/                    # Next.js Web Frontend
+├── phase-2/                    # Next.js Web Frontend + FastAPI Backend
 │   ├── frontend/              # Next.js application
 │   │   ├── src/app/           # App Router pages
 │   │   │   ├── api/           # API routes
@@ -127,9 +183,28 @@ evolution-of-todo/
 │   │   │   └── ui/            # Reusable UI components
 │   │   ├── src/lib/           # Utilities and auth
 │   │   │   ├── auth.ts        # Client auth config
+│   │   │   ├── api.ts         # API client (backend integration)
 │   │   │   └── auth-server.ts # Better Auth server config
 │   │   ├── src/hooks/         # Custom hooks
 │   │   └── src/motion/        # Animation variants
+│   ├── backend/               # FastAPI RESTful API
+│   │   ├── src/backend/       # Python application
+│   │   │   ├── main.py        # FastAPI entry point
+│   │   │   ├── config.py      # Environment config
+│   │   │   ├── database.py    # Neon PostgreSQL connection
+│   │   │   ├── models/        # SQLModel entities
+│   │   │   │   └── task.py    # Task model
+│   │   │   ├── schemas/       # Pydantic schemas
+│   │   │   │   └── task.py    # Request/response schemas
+│   │   │   ├── routers/       # API endpoints
+│   │   │   │   └── tasks.py   # Task CRUD routes
+│   │   │   ├── services/      # Business logic
+│   │   │   │   └── task_service.py
+│   │   │   └── auth/          # JWT validation
+│   │   │       └── jwt.py     # Better Auth JWKS integration
+│   │   ├── tests/             # API tests
+│   │   ├── pyproject.toml     # Python dependencies
+│   │   └── .env.example       # Environment template
 │   ├── AUTH_BYPASS_IMPLEMENTATION.md  # Bypass feature docs
 │   ├── AUTH_BYPASS_ROLLBACK.md        # Rollback reference
 │   └── AUTH_BYPASS_SUMMARY.md         # Quick reference
@@ -142,13 +217,14 @@ evolution-of-todo/
 │   ├── 002-cli-ui-update/     # Feature 002 specs (completed)
 │   ├── 003-frontend-design/   # Feature 003 specs (completed)
 │   ├── 004-profile-editing/   # Feature 004 specs (completed)
-│   └── 005-user-auth/         # Feature 005 specs (current)
+│   ├── 005-user-auth/         # Feature 005 specs (completed)
+│   └── 006-backend-implement/ # Feature 006 specs (current)
 │       ├── spec.md            # Requirements
 │       ├── plan.md            # Architecture
 │       ├── tasks.md           # Implementation tasks
 │       ├── quickstart.md      # Setup guide
 │       ├── data-model.md      # Database schema
-│       ├── contracts/         # API contracts
+│       ├── contracts/         # API contracts (OpenAPI)
 │       └── checklists/        # Quality checks
 ├── history/                    # Development history
 │   ├── adr/                   # Architecture Decision Records
@@ -167,45 +243,58 @@ This project follows the **Spec-Driven Development** methodology:
 5. **Documentation** (`docs/`) - Architecture and API docs
 6. **History** (`history/`) - Decisions and interactions
 
-### Current Stage: 005-user-auth
+### Current Stage: 006-backend-implement
 
-**Production-Ready Authentication System** with Better Auth integration:
+**Production-Ready FastAPI Backend** with JWT authentication:
 
-- ✅ **User Registration** - Email/password signup with full validation
-- ✅ **User Login** - Secure authentication with JWT tokens
-- ✅ **Session Management** - Persistent sessions with cookie-based auth
-- ✅ **Password Security** - bcrypt hashing with constant-time comparison
-- ✅ **JWT Integration** - Ready for FastAPI backend validation
-- ✅ **Neon PostgreSQL** - Database persistence with SSL connections
-- ✅ **API Endpoints** - Complete RESTful authentication endpoints
-- ✅ **Comprehensive Documentation** - Quickstart, API contracts, data models
+- ✅ **7 RESTful Endpoints** - Full task CRUD + statistics
+- ✅ **JWT Validation** - EdDSA/ES256/RS256 via Better Auth JWKS
+- ✅ **Multi-Tenancy** - User isolation via user_id scoping
+- ✅ **SQLModel ORM** - Type-safe database operations
+- ✅ **Pydantic Validation** - Request/response validation
+- ✅ **CORS Support** - Frontend integration ready
+- ✅ **Async/Await** - High-performance async patterns
+- ✅ **OpenAPI Docs** - Auto-generated API documentation
 
 **Previous Stages:**
 - `001-cli-todo` - Original CLI with command-line interface ✅
 - `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX ✅
 - `003-frontend-design` - Next.js web frontend with auth bypass ✅
 - `004-profile-editing` - Enhanced profile management system ✅
+- `005-user-auth` - Production-ready authentication with Better Auth ✅
 
-### 🎯 Key Innovation: Production-Ready Authentication
+### 🎯 Key Innovation: Full-Stack Architecture
 
-**Better Auth Integration:**
+**FastAPI Backend Integration:**
+- **RESTful API** - 7 endpoints for complete task management
+- **JWT Validation** - EdDSA/ES256/RS256 via Better Auth JWKS endpoint
+- **SQLModel ORM** - Type-safe database operations with Neon PostgreSQL
+- **Multi-Tenancy** - User isolation via user_id in all queries
+- **CORS Support** - Seamless frontend integration
+- **OpenAPI Docs** - Auto-generated at `/docs` endpoint
+
+**Better Auth (Frontend):**
 - **Server Configuration** - `auth-server.ts` with PostgreSQL adapter
 - **API Route Handler** - Single file handles all auth endpoints
-- **JWT Plugin** - Token generation for FastAPI backend integration
+- **JWT Plugin** - Token generation for backend validation
 - **Database Schema** - User, Session, Account tables with proper indexes
 - **Security Features** - bcrypt hashing, constant-time comparison, SSL connections
 
-**Working API Endpoints:**
-- **Registration**: `POST /api/auth/sign-up/email` - Validates, creates user, returns JWT
-- **Login**: `POST /api/auth/sign-in/email` - Verifies credentials, issues session
-- **Session**: `GET /api/auth/get-session` - Validates cookies, returns user data
-- **Security**: Generic error messages prevent user enumeration
+**Working Authentication Flow:**
+1. User signs up/logs in via Better Auth → JWT token issued
+2. Frontend stores token in session
+3. API calls include `Authorization: Bearer <token>`
+4. Backend validates token via JWKS, extracts user_id
+5. Backend scopes all queries to user_id for data isolation
 
-**Backend Integration Ready:**
-- **JWT Format**: HS256 signed tokens with user_id, email, name, exp
-- **Shared Secret**: `BETTER_AUTH_SECRET` for both Next.js and FastAPI
-- **Database**: Neon PostgreSQL with SSL, shared with backend
-- **User Isolation**: All queries scoped to user_id for multi-tenancy
+**Backend API Endpoints:**
+- `GET /api/{user_id}/tasks` - List with filters (status, priority, category, search)
+- `POST /api/{user_id}/tasks` - Create task (201 Created)
+- `GET /api/{user_id}/tasks/{task_id}` - Get single task
+- `PUT /api/{user_id}/tasks/{task_id}` - Update task
+- `DELETE /api/{user_id}/tasks/{task_id}` - Delete task (204 No Content)
+- `PATCH /api/{user_id}/tasks/{task_id}/complete` - Toggle completion
+- `GET /api/{user_id}/stats` - Task statistics (total, pending, completed)
 
 ### 🎯 Key Innovation: Authentication Bypass System
 
@@ -248,7 +337,12 @@ cd phase-2/frontend && npm run dev
 
 ### Prerequisites
 
-**Backend (CLI):**
+**Backend API (FastAPI):**
+- Python 3.13+
+- uv package manager
+- Neon PostgreSQL database
+
+**Backend CLI (Original):**
 - Python 3.13+
 - uv package manager
 
@@ -256,17 +350,51 @@ cd phase-2/frontend && npm run dev
 - Node.js 18+
 - npm or yarn
 
-### Backend Setup (CLI)
+### Backend API Setup (FastAPI - Phase 2)
 
 ```bash
 # Clone the repository
 git clone https://github.com/AhmedSaeed4/evolution-of-todo.git
 cd evolution-of-todo
 
-# Navigate to backend
-cd backend
+# Navigate to backend directory
+cd phase-2/backend
 
 # Install dependencies with uv
+uv sync
+
+# Create environment file
+cat > .env << EOF
+DATABASE_URL="postgresql://user:password@host:port/database?sslmode=require"
+BETTER_AUTH_SECRET="your-generated-secret-key"
+CORS_ORIGINS="http://localhost:3000,http://localhost:3001"
+API_HOST="0.0.0.0"
+API_PORT="8000"
+DEBUG="true"
+EOF
+
+# Run the development server
+uv run uvicorn src.backend.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Quick Start (Backend API):**
+```bash
+# Server runs at http://localhost:8000
+# API docs at http://localhost:8000/docs
+# Health check at http://localhost:8000/health
+
+# Test with curl (requires JWT token)
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     http://localhost:8000/api/user_123/tasks
+```
+
+### Backend CLI Setup (Original)
+
+```bash
+# Navigate to CLI backend
+cd backend
+
+# Install dependencies
 uv sync
 
 # Run the application
@@ -324,7 +452,16 @@ npm run dev
 
 ## 📖 Documentation
 
-### Backend (CLI)
+### Backend API (FastAPI - Phase 2)
+- **[Spec 006](specs/006-backend-implement/spec.md)** - FastAPI backend specification (current)
+- **[Backend Quickstart](specs/006-backend-implement/quickstart.md)** - Complete setup guide
+- **[API Contracts](specs/006-backend-implement/contracts/openapi.yaml)** - OpenAPI specification
+- **[Data Model](specs/006-backend-implement/data-model.md)** - Database schema and relationships
+- **[API Reference](docs/api_reference.md)** - Complete endpoint documentation
+- **Auto-Generated Docs**: `http://localhost:8000/docs` (Swagger UI)
+- **Auto-Generated Docs**: `http://localhost:8000/redoc` (ReDoc)
+
+### Backend CLI (Original)
 - **[Branching Strategy](docs/branching-strategy.md)** - Git workflow and branch management
 - **[Architecture](docs/architecture.md)** - System design and decisions
 - **[Spec 001](specs/001-cli-todo/spec.md)** - CLI todo specification (completed)
@@ -333,7 +470,7 @@ npm run dev
 ### Frontend (Web - Phase 2)
 - **[Spec 003](specs/003-frontend-design/spec.md)** - Next.js frontend specification (completed)
 - **[Spec 004](specs/004-profile-editing/spec.md)** - Profile management specification (completed)
-- **[Spec 005](specs/005-user-auth/spec.md)** - Authentication system specification (current)
+- **[Spec 005](specs/005-user-auth/spec.md)** - Authentication system specification (completed)
 - **[Auth Quickstart](specs/005-user-auth/quickstart.md)** - Complete setup guide
 - **[API Contracts](specs/005-user-auth/contracts/auth-api.md)** - RESTful endpoints documentation
 - **[Data Model](specs/005-user-auth/data-model.md)** - Database schema and relationships
@@ -376,6 +513,40 @@ git push -u origin 002-next-feature
 - `001-cli-todo` - Original CLI todo application (previous version)
 
 ## 🧪 Testing
+
+### Backend API (FastAPI) Testing
+
+```bash
+cd phase-2/backend
+
+# Run all tests
+uv run pytest
+
+# Run API tests
+uv run pytest tests/test_tasks.py -v
+
+# Run with coverage
+uv run pytest --cov=src/backend
+
+# Manual API testing (requires running server)
+# Get JWT token from frontend, then:
+
+# Test health check
+curl http://localhost:8000/health
+
+# Test list tasks
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     http://localhost:8000/api/user_123/tasks
+
+# Test create task
+curl -X POST -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"title":"Test Task","priority":"high","category":"work"}' \
+     http://localhost:8000/api/user_123/tasks
+
+# View auto-generated docs
+open http://localhost:8000/docs
+```
 
 ### Backend (CLI) Testing
 
@@ -440,7 +611,16 @@ npm run dev
 
 ## 📊 Project Metrics
 
-### Backend (CLI)
+### Backend API (FastAPI - Phase 2)
+- **Total Files**: 15+ Python files
+- **Endpoints**: 7 RESTful API endpoints
+- **Models**: SQLModel with 1 main entity (Task)
+- **Schemas**: Pydantic request/response validation
+- **Python Version**: 3.13+
+- **Dependencies**: FastAPI, SQLModel, asyncpg, python-jose
+- **Features**: Full CRUD + JWT auth + multi-tenancy + filtering
+
+### Backend CLI (Original)
 - **Total Files**: 75+
 - **Lines of Code**: 15,000+
 - **Test Coverage**: 22/22 unit tests passing
@@ -461,8 +641,10 @@ npm run dev
 
 ### Overall
 - **Architecture**: Spec-Driven Development framework
-- **Branches**: 4 feature branches (001, 002, 003, 004)
+- **Branches**: 6 feature branches (001-006)
 - **Documentation**: Complete ADR + PHR tracking
+- **Database**: Neon PostgreSQL (shared between auth and API)
+- **Authentication**: Better Auth + JWT validation via JWKS
 
 ## 🤝 Contributing
 
@@ -493,26 +675,36 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - `003-frontend-design` - Next.js web frontend with auth bypass ✅
 - `004-profile-editing` - Enhanced profile management system ✅
 - `005-user-auth` - Production-ready authentication with Better Auth ✅
+- `006-backend-implement` - FastAPI RESTful backend with JWT validation ✅
 
 **Current Focus:**
-- **Phase 2**: Complete authentication system ready for backend integration
-- **Key Innovation**: Better Auth + Neon PostgreSQL + JWT tokens for FastAPI
+- **Phase 2**: Full-stack architecture with frontend + backend integration
+- **Key Innovation**: Complete authentication flow from Better Auth → JWT → FastAPI validation
 
-**Backend Integration Ready:**
-- ✅ JWT tokens generated with HS256
-- ✅ Shared secret configured for both systems
-- ✅ Database tables created in Neon PostgreSQL
-- ✅ User isolation via user_id for multi-tenancy
-- ✅ API endpoints fully functional and tested
+**What's Working:**
+- ✅ **7 RESTful Endpoints** - Full task CRUD + statistics
+- ✅ **JWT Validation** - EdDSA/ES256/RS256 via Better Auth JWKS
+- ✅ **Multi-Tenancy** - User isolation via user_id scoping
+- ✅ **SQLModel ORM** - Type-safe database operations
+- ✅ **Pydantic Validation** - Request/response validation
+- ✅ **CORS Support** - Frontend integration ready
+- ✅ **OpenAPI Docs** - Auto-generated API documentation
+
+**Integration Complete:**
+- ✅ Better Auth issues JWT tokens
+- ✅ Frontend stores tokens in session
+- ✅ Backend validates via JWKS endpoint
+- ✅ All queries scoped to user_id
+- ✅ Shared Neon PostgreSQL database
 
 **Future Stages:**
-- `006-fastapi-jwt-validation` - Backend JWT verification implementation
-- `007-task-api-integration` - Connect task CRUD to authenticated users
+- `007-frontend-backend-integration` - Connect Next.js to FastAPI endpoints
 - `008-websocket-realtime` - Real-time updates and notifications
 - `009-mobile-app` - React Native mobile application
 - `010-oauth-providers` - Google, GitHub authentication
 - `011-2fa-security` - Two-factor authentication
 - `012-mcp-integration` - Model Context Protocol for AI agents
+- `013-docker-deployment` - Containerized production deployment
 
 ---
 

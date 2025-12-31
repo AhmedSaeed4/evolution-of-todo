@@ -113,3 +113,17 @@ coverage/
 *.tmp
 *.temp
 *.cache
+
+# Backend specific (phase-2/backend)
+phase-2/backend/.env
+phase-2/backend/.venv/
+phase-2/backend/uv.lock
+phase-2/backend/__pycache__/
+phase-2/backend/src/backend/__pycache__/
+phase-2/backend/tests/__pycache__/
+phase-2/backend/build/
+phase-2/backend/dist/
+phase-2/backend/*.egg-info/
+phase-2/backend/.pytest_cache/
+phase-2/backend/coverage/
+phase-2/backend/htmlcov/

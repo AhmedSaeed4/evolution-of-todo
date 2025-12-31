@@ -77,3 +77,36 @@ export async function isAuthenticated(): Promise<boolean> {
   const session = await getSession();
   return !!session;
 }
+
+// Helper to get JWT token for API requests
+export async function getAuthToken(): Promise<string | null> {
+  if (isAuthBypassEnabled()) {
+    // In bypass mode, we generate a JWT-like token for the backend
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({
+      sub: MOCK_USER.id,
+      email: MOCK_USER.email,
+      name: MOCK_USER.name,
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      iat: Math.floor(Date.now() / 1000)
+    }));
+    return `${header}.${payload}.bypass-signature`;
+  }
+
+  try {
+    // Use the JWT plugin's token() method to get a signed JWT
+    // jwtClient adds token() method directly to authClient
+    const tokenResult = await (authClient as any).token();
+
+    if (tokenResult?.data?.token) {
+      return tokenResult.data.token;
+    }
+    if (tokenResult?.token) {
+      return tokenResult.token;
+    }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
+}

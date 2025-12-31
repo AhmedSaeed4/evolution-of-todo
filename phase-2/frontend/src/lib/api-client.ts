@@ -1,43 +1,63 @@
-// Generic API client wrapper for future backend integration
-// Currently used for structure, will be activated when backend is ready
+// Generic API client wrapper for backend integration
+// Handles JWT token injection, error handling, and request/response logging
 
 export async function apiClient<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  token?: string
 ): Promise<T> {
-  // TODO: Implement JWT token injection from Better Auth session
-  // TODO: Replace mock API calls with this client
-
-  // For now, this is a placeholder for the future implementation
-  // When backend is ready, this will handle:
-  // - JWT token injection
-  // - Request/response logging
-  // - Error handling
-  // - Retry logic
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...options.headers as Record<string, string>
   };
 
-  // Future implementation:
-  // const session = await getSession();
-  // const token = session?.token;
-  // if (token) {
-  //   headers['Authorization'] = `Bearer ${token}`;
-  // }
+  // Inject JWT token if provided
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
-  // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
-  //   ...options,
-  //   headers
-  // });
+  const url = `${backendUrl}${endpoint}`;
 
-  // if (!response.ok) {
-  //   const error = await response.json().catch(() => ({ message: 'Unknown error' }));
-  //   throw new Error(error.message || `HTTP ${response.status}`);
-  // }
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
 
-  // return response.json() as Promise<T>;
+    // Handle different response statuses
+    if (response.status === 204) {
+      return undefined as unknown as T;
+    }
 
-  throw new Error('API client not yet implemented - using mock services in api.ts');
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { message: `HTTP ${response.status}` };
+      }
+
+      // Map HTTP status to meaningful errors
+      if (response.status === 401) {
+        throw new Error('Authentication required. Please log in again.');
+      } else if (response.status === 403) {
+        throw new Error('Access denied. You do not have permission to access this resource.');
+      } else if (response.status === 404) {
+        throw new Error('Resource not found.');
+      } else if (response.status === 422) {
+        throw new Error(`Validation error: ${errorData.detail || 'Invalid input data'}`);
+      } else {
+        throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+      }
+    }
+
+    return response.json() as Promise<T>;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Network error: Please check your connection and try again');
+  }
 }

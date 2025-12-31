@@ -375,6 +375,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 - Client-side state via React hooks (useAuth, useTasks) - no new persistence required (004-profile-editing)
 - TypeScript 5.x, Next.js 16.1.1 (App Router), React 19.2.3 + better-auth v1.4.9 (already installed), pg (new - PostgreSQL driver) (005-user-auth)
 - Neon PostgreSQL (shared with FastAPI backend) (005-user-auth)
+- Python 3.13+ + FastAPI, SQLModel, uvicorn, python-jose, asyncpg (006-backend-implement)
+- Neon Serverless PostgreSQL (shared with frontend Better Auth) (006-backend-implement)
 
 ## Recent Changes
 - 001-cli-todo: Added Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only)

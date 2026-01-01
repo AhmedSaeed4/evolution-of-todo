@@ -7,11 +7,9 @@ This project follows a sequential feature branching strategy where `main` serves
 
 ### Main Branch (`main`)
 - **Purpose**: Stable base branch containing production-ready code
-- **Default Branch**: ✅ Set as primary branch for the repository
-- **Protection**: ✅ Protected (requires PR review, 1 approval required)
+- **Protection**: Should be protected (no direct commits)
 - **Content**: Only merged feature branches that have been reviewed and tested
 - **State**: Always deployable
-- **Direct Commits**: ❌ Not allowed (must go through PR process)
 
 ### Feature Branches (`001-*, 002-*, etc.`)
 - **Naming**: Sequential three-digit numbers with descriptive names
@@ -57,10 +55,8 @@ git push origin main
 
 | Branch | Status | Description |
 |--------|--------|-------------|
-| `main` | ✅ **Default** | Base branch for all features (protected) |
+| `main` | ✅ Stable | Base branch for all features |
 | `001-cli-todo` | ✅ Feature | CLI Todo application with Spec-Driven Development framework |
-
-**Repository Default**: `main` is set as the primary/default branch
 
 ## Feature Evolution Examples
 

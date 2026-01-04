@@ -44,3 +44,86 @@ htmlcov/
 
 # Project specific - backend is part of the repo
 # backend/  # REMOVED - backend should be tracked
+
+# Next.js/Node.js (for frontend implementation)
+node_modules/
+.next/
+dist/
+build/
+out/
+*.tsbuildinfo
+.next-export/
+
+# Frontend environment files
+frontend/.env
+frontend/.env.local
+frontend/.env.local.example
+frontend/.env.development
+frontend/.env.production
+
+# Phase-2 frontend environment files
+phase-2/frontend/.env.local.example
+
+# Frontend build artifacts
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+
+# Dependency locks (keep package.json, ignore lock files if using pnpm/yarn)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing (frontend)
+frontend/coverage/
+frontend/.nyc_output/
+
+# Vercel (if deployed)
+.vercel/
+
+# Turborepo
+.turbo/
+
+# ESLint
+.eslintcache/
+
+# Prettier
+.prettier-cache/
+
+# Playwright
+playwright-report/
+test-results/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Storybook
+storybook-static/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Temp files
+*.tmp
+*.temp
+*.cache
+
+# Backend specific (phase-2/backend)
+phase-2/backend/.env
+phase-2/backend/.venv/
+phase-2/backend/uv.lock
+phase-2/backend/__pycache__/
+phase-2/backend/src/backend/__pycache__/
+phase-2/backend/tests/__pycache__/
+phase-2/backend/build/
+phase-2/backend/dist/
+phase-2/backend/*.egg-info/
+phase-2/backend/.pytest_cache/
+phase-2/backend/coverage/
+phase-2/backend/htmlcov/

@@ -1,0 +1,489 @@
+openapi: 3.0.3
+info:
+  title: FastAPI Todo Backend API
+  description: RESTful API for managing user tasks with JWT authentication
+  version: 1.0.0
+  contact:
+    name: Backend API
+    email: api@example.com
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Task:
+      type: object
+      required:
+        - id
+        - title
+        - priority
+        - category
+        - status
+        - completed
+        - createdAt
+        - updatedAt
+        - userId
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        title:
+          type: string
+          maxLength: 255
+          example: "Buy groceries"
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+          example: "Milk, eggs, bread"
+        priority:
+          type: string
+          enum: [low, medium, high]
+          example: "high"
+        category:
+          type: string
+          enum: [work, personal, home, other]
+          example: "personal"
+        status:
+          type: string
+          enum: [pending, completed]
+          example: "pending"
+        completed:
+          type: boolean
+          example: false
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-12-31T23:59:59Z"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-12-31T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-12-31T10:00:00Z"
+        userId:
+          type: string
+          example: "user_123"
+
+    TaskCreate:
+      type: object
+      required:
+        - title
+        - priority
+        - category
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Complete project"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Finish all remaining tasks"
+        priority:
+          type: string
+          enum: [low, medium, high]
+          example: "high"
+        category:
+          type: string
+          enum: [work, personal, home, other]
+          example: "work"
+        dueDate:
+          type: string
+          format: date-time
+          example: "2025-12-31T23:59:59Z"
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Updated title"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Updated description"
+        priority:
+          type: string
+          enum: [low, medium, high]
+          example: "medium"
+        category:
+          type: string
+          enum: [work, personal, home, other]
+          example: "personal"
+        dueDate:
+          type: string
+          format: date-time
+          example: "2026-01-15T12:00:00Z"
+
+    Stats:
+      type: object
+      required:
+        - total
+        - pending
+        - completed
+      properties:
+        total:
+          type: integer
+          minimum: 0
+          example: 10
+        pending:
+          type: integer
+          minimum: 0
+          example: 7
+        completed:
+          type: integer
+          minimum: 0
+          example: 3
+
+    Error:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          example: "Authentication required"
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Invalid or missing JWT token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            detail: "Invalid JWT token"
+
+    Forbidden:
+      description: Forbidden - User ID mismatch
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            detail: "Access denied to this user's resources"
+
+    NotFound:
+      description: Not Found - Task does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            detail: "Task not found"
+
+    Validation:
+      description: Validation Error - Invalid input
+      content:
+        application/json:
+          example:
+            detail: "Title is required"
+
+paths:
+  /api/{user_id}/tasks:
+    get:
+      summary: List user tasks
+      description: Get all tasks for the authenticated user with optional filtering
+      operationId: listTasks
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User ID (must match authenticated user)
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, completed]
+          description: Filter by status
+        - in: query
+          name: priority
+          schema:
+            type: string
+            enum: [low, medium, high]
+          description: Filter by priority
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [work, personal, home, other]
+          description: Filter by category
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search in title and description
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+            enum: [dueDate, priority, title, createdAt]
+          description: Sort field
+          default: createdAt
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [asc, desc]
+          description: Sort order
+          default: desc
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          description: Internal Server Error
+
+    post:
+      summary: Create task
+      description: Create a new task for the authenticated user
+      operationId: createTask
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User ID (must match authenticated user)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                detail: "Invalid request body"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/Validation'
+        '500':
+          description: Internal Server Error
+
+  /api/{user_id}/tasks/{task_id}:
+    get:
+      summary: Get task by ID
+      description: Get a single task by ID
+      operationId: getTask
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User ID (must match authenticated user)
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Task found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+
+    put:
+      summary: Update task
+      description: Update an existing task
+      operationId: updateTask
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User ID (must match authenticated user)
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/Validation'
+        '500':
+          description: Internal Server Error
+
+    delete:
+      summary: Delete task
+      description: Delete a task
+      operationId: deleteTask
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User ID (must match authenticated user)
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Task deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+
+  /api/{user_id}/tasks/{task_id}/complete:
+    patch:
+      summary: Toggle task completion
+      description: Toggle task completion status (pending ↔ completed)
+      operationId: toggleComplete
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User ID (must match authenticated user)
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Task completion toggled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+
+  /api/{user_id}/stats:
+    get:
+      summary: Get task statistics
+      description: Get task statistics for the authenticated user
+      operationId: getStats
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User ID (must match authenticated user)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Task statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          description: Internal Server Error

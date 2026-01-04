@@ -13,9 +13,10 @@ interface TaskFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
   mode?: 'create' | 'edit';
+  isLoading?: boolean;
 }
 
-export function TaskForm({ task, onSubmit, onCancel, mode = 'create' }: TaskFormProps) {
+export function TaskForm({ task, onSubmit, onCancel, mode = 'create', isLoading }: TaskFormProps) {
   const [formData, setFormData] = useState({
     title: task?.title || '',
     description: task?.description || '',
@@ -129,10 +130,20 @@ export function TaskForm({ task, onSubmit, onCancel, mode = 'create' }: TaskForm
       />
 
       <div className="flex gap-3 pt-2">
-        <Button type="submit" variant="primary" className="flex-1">
+        <Button
+          type="submit"
+          variant="primary"
+          className="flex-1"
+          isLoading={isLoading}
+        >
           {mode === 'create' ? 'Create Task' : 'Update Task'}
         </Button>
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCancel}
+          disabled={isLoading}
+        >
           Cancel
         </Button>
       </div>

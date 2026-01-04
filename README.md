@@ -1,11 +1,21 @@
 # Evolution of Todo
 
-> A Spec-Driven Development (SDD) project demonstrating the evolution from CLI to modern web application through systematic development phases.
+> A Spec-Driven Development (SDD) project demonstrating the complete evolution from CLI to cloud-native deployment through 5 systematic phases.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.13+](https://img.shields.io/badge/Python-3.13%2B-blue.svg)](https://www.python.org/downloads/)
 [![Next.js 16+](https://img.shields.io/badge/Next.js-16%2B-black.svg)](https://nextjs.org/)
 [![Spec-Driven Development](https://img.shields.io/badge/SDD-Framework-purple.svg)](https://github.com/AhmedSaeed4/evolution-of-todo)
+
+## 🗺️ 5-Phase Evolution Roadmap
+
+| Phase | Description | Technology Stack | Status |
+|-------|-------------|------------------|--------|
+| **Phase I** | In-Memory Python Console App | Python, Claude Code, Spec-Kit Plus | ✅ **COMPLETE** |
+| **Phase II** | Full-Stack Web Application | Next.js 16+, FastAPI, SQLModel, Neon PostgreSQL, Better Auth | ✅ **COMPLETE** |
+| **Phase III** | AI-Powered Todo Chatbot | OpenAI ChatKit, Agents SDK, Official MCP SDK | 🎯 **NEXT** |
+| **Phase IV** | Local Kubernetes Deployment | Docker, Minikube, Helm, kubectl-ai, kagent | ⏳ **PLANNED** |
+| **Phase V** | Advanced Cloud Deployment | [To be specified] | 📋 **FUTURE** |
 
 ## 🚀 Quick Access
 
@@ -676,6 +686,7 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - `004-profile-editing` - Enhanced profile management system ✅
 - `005-user-auth` - Production-ready authentication with Better Auth ✅
 - `006-backend-implement` - FastAPI RESTful backend with JWT validation ✅
+- `007-frontend-ux-polish` - Toast notifications, date labels, animations ✅
 
 **Current Focus:**
 - **Phase 2**: Full-stack architecture with frontend + backend integration
@@ -697,14 +708,21 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - ✅ All queries scoped to user_id
 - ✅ Shared Neon PostgreSQL database
 
+**UX Polish Features (007-frontend-ux-polish):**
+- ✅ **Sonner Toast Notifications** - 7 scenarios (CRUD + Auth events)
+- ✅ **Enhanced Date Labels** - Due/Created/Updated with icons and mono typography
+- ✅ **Task Completion Animations** - Scale 0.98/1, opacity 0.6/1, editorial easing
+- ✅ **Modern Technical Editorial Design** - Cream backgrounds, sharp corners, mono labels
+- ✅ **Mobile Hamburger Menu** - Framer Motion animated navigation
+
 **Future Stages:**
-- `007-frontend-backend-integration` - Connect Next.js to FastAPI endpoints
-- `008-websocket-realtime` - Real-time updates and notifications
-- `009-mobile-app` - React Native mobile application
-- `010-oauth-providers` - Google, GitHub authentication
-- `011-2fa-security` - Two-factor authentication
-- `012-mcp-integration` - Model Context Protocol for AI agents
-- `013-docker-deployment` - Containerized production deployment
+- `008-frontend-backend-integration` - Connect Next.js to FastAPI endpoints
+- `009-websocket-realtime` - Real-time updates and notifications
+- `010-mobile-app` - React Native mobile application
+- `011-oauth-providers` - Google, GitHub authentication
+- `012-2fa-security` - Two-factor authentication
+- `013-mcp-integration` - Model Context Protocol for AI agents
+- `014-docker-deployment` - Containerized production deployment
 
 ---
 

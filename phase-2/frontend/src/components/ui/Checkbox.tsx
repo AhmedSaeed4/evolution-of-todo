@@ -9,20 +9,26 @@ interface CheckboxProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label?: string;
+  disabled?: boolean;
 }
 
-export function Checkbox({ checked, onChange, label }: CheckboxProps) {
+export function Checkbox({ checked, onChange, label, disabled = false }: CheckboxProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className={cn("flex items-center gap-3", disabled && "opacity-50 cursor-not-allowed")}>
       <motion.button
         type="button"
+        disabled={disabled}
         className={cn(
           'w-5 h-5 border-2 rounded-sm flex items-center justify-center transition-colors',
-          checked ? 'bg-accent border-accent' : 'bg-transparent border-structure/20 hover:border-structure'
+          checked
+            ? 'bg-accent border-accent'
+            : 'bg-transparent border-structure/20',
+          !disabled && !checked && 'hover:border-structure',
+          disabled && 'cursor-not-allowed'
         )}
-        onClick={() => onChange(!checked)}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        onClick={() => !disabled && onChange(!checked)}
+        whileHover={!disabled ? { scale: 1.02 } : undefined}
+        whileTap={!disabled ? { scale: 0.98 } : undefined}
         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       >
         {checked && (

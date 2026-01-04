@@ -3,6 +3,7 @@ import { api } from '@/lib/api';
 import { Task, TaskFilters, CreateTaskDTO, UpdateTaskDTO } from '@/types';
 import { useAuth } from './useAuth';
 import { isAuthBypassEnabled } from '@/lib/auth';
+import { toast } from 'sonner';
 
 interface TaskState {
   tasks: Task[];
@@ -53,7 +54,10 @@ export function useTasks(): TaskState & {
   }, [effectiveUserId, fetchTasks]);
 
   const createTask = async (data: CreateTaskDTO): Promise<{ success: boolean; task?: Task; error?: string }> => {
-    if (!effectiveUserId) return { success: false, error: 'Not authenticated' };
+    if (!effectiveUserId) {
+      toast.error('Not authenticated');
+      return { success: false, error: 'Not authenticated' };
+    }
 
     try {
       const newTask = await api.create(effectiveUserId, data);
@@ -61,14 +65,20 @@ export function useTasks(): TaskState & {
         ...prev,
         tasks: [...prev.tasks, newTask]
       }));
+      toast.success('Task created');
       return { success: true, task: newTask };
     } catch (error) {
-      return { success: false, error: (error as Error).message };
+      const errorMessage = (error as Error).message;
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
     }
   };
 
   const updateTask = async (taskId: string, data: UpdateTaskDTO): Promise<{ success: boolean; task?: Task; error?: string }> => {
-    if (!effectiveUserId) return { success: false, error: 'Not authenticated' };
+    if (!effectiveUserId) {
+      toast.error('Not authenticated');
+      return { success: false, error: 'Not authenticated' };
+    }
 
     try {
       const updatedTask = await api.update(effectiveUserId, taskId, data);
@@ -76,14 +86,20 @@ export function useTasks(): TaskState & {
         ...prev,
         tasks: prev.tasks.map(t => t.id === taskId ? updatedTask : t)
       }));
+      toast.success('Task updated');
       return { success: true, task: updatedTask };
     } catch (error) {
-      return { success: false, error: (error as Error).message };
+      const errorMessage = (error as Error).message;
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
     }
   };
 
   const deleteTask = async (taskId: string): Promise<{ success: boolean; error?: string }> => {
-    if (!effectiveUserId) return { success: false, error: 'Not authenticated' };
+    if (!effectiveUserId) {
+      toast.error('Not authenticated');
+      return { success: false, error: 'Not authenticated' };
+    }
 
     try {
       await api.delete(effectiveUserId, taskId);
@@ -91,14 +107,20 @@ export function useTasks(): TaskState & {
         ...prev,
         tasks: prev.tasks.filter(t => t.id !== taskId)
       }));
+      toast.success('Task deleted');
       return { success: true };
     } catch (error) {
-      return { success: false, error: (error as Error).message };
+      const errorMessage = (error as Error).message;
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
     }
   };
 
   const toggleTask = async (taskId: string): Promise<{ success: boolean; task?: Task; error?: string }> => {
-    if (!effectiveUserId) return { success: false, error: 'Not authenticated' };
+    if (!effectiveUserId) {
+      toast.error('Not authenticated');
+      return { success: false, error: 'Not authenticated' };
+    }
 
     try {
       const updatedTask = await api.toggleComplete(effectiveUserId, taskId);
@@ -106,9 +128,16 @@ export function useTasks(): TaskState & {
         ...prev,
         tasks: prev.tasks.map(t => t.id === taskId ? updatedTask : t)
       }));
+      if (updatedTask.completed) {
+        toast.success('Task completed');
+      } else {
+        toast.success('Task reopened');
+      }
       return { success: true, task: updatedTask };
     } catch (error) {
-      return { success: false, error: (error as Error).message };
+      const errorMessage = (error as Error).message;
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
     }
   };
 

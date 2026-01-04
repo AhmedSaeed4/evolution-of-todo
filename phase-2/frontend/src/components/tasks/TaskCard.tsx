@@ -1,26 +1,42 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Task } from '@/types';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Badge } from '@/components/ui/Badge';
 import { fadeInUp } from '@/motion/variants';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Pencil, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
   task: Task;
-  onToggle: (id: string) => void;
+  onToggle: (id: string) => Promise<void> | void;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   index?: number;
 }
 
 export function TaskCard({ task, onToggle, onEdit, onDelete, index = 0 }: TaskCardProps) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const priorityColors = {
     high: 'border-l-4 border-priority-high',
     medium: 'border-l-4 border-priority-medium',
     low: 'border-l-4 border-priority-low',
+  };
+
+  const handleToggle = async () => {
+    if (isUpdating) return;
+
+    setIsUpdating(true);
+    try {
+      await onToggle(task.id);
+    } catch (error) {
+      console.error('Failed to toggle task:', error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const formatDate = (dateString?: string) => {
@@ -38,15 +54,34 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, index = 0 }: TaskCa
       className={cn(
         'bg-background border border-structure/10 p-4 rounded-sm',
         'hover:shadow-md transition-shadow duration-300',
-        priorityColors[task.priority],
-        task.completed && 'opacity-60'
+        priorityColors[task.priority]
       )}
     >
-      <div className="flex items-start gap-3">
-        <Checkbox
-          checked={task.completed}
-          onChange={() => onToggle(task.id)}
-        />
+      <motion.div
+        layout
+        animate={{
+          scale: task.completed ? 0.98 : 1,
+          opacity: task.completed ? 0.6 : 1
+        }}
+        transition={{
+          duration: 0.2,
+          ease: [0.22, 1, 0.36, 1]
+        }}
+        className="flex items-start gap-3"
+      >
+        <div className="relative flex items-center justify-center">
+          {isUpdating ? (
+            <div className="w-5 h-5 flex items-center justify-center">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-accent" />
+            </div>
+          ) : (
+            <Checkbox
+              checked={task.completed}
+              onChange={handleToggle}
+              disabled={isUpdating}
+            />
+          )}
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
@@ -69,18 +104,28 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, index = 0 }: TaskCa
                 <Badge variant={task.category}>{task.category}</Badge>
               </div>
 
-              <div className="flex items-center gap-3 text-[10px] font-mono opacity-60">
+              <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono">
                 {task.dueDate && (
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
+                    <Calendar className="w-3 h-3" strokeWidth={1.5} />
+                    <span className="uppercase tracking-widest opacity-60">Due:</span>
                     <span>{formatDate(task.dueDate)}</span>
                   </div>
                 )}
 
                 <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
+                  <Clock className="w-3 h-3" strokeWidth={1.5} />
+                  <span className="uppercase tracking-widest opacity-60">Created:</span>
                   <span>{formatDate(task.createdAt)}</span>
                 </div>
+
+                {task.updatedAt !== task.createdAt && (
+                  <div className="flex items-center gap-1 text-accent">
+                    <Pencil className="w-3 h-3" strokeWidth={1.5} />
+                    <span className="uppercase tracking-widest opacity-80">Updated:</span>
+                    <span>{formatDate(task.updatedAt)}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -106,7 +151,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, index = 0 }: TaskCa
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

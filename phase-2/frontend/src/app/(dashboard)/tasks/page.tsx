@@ -22,7 +22,9 @@ export default function TasksPage() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   // Redirect if not authenticated (only when bypass is disabled)
   useEffect(() => {
@@ -37,8 +39,13 @@ export default function TasksPage() {
   }
 
   const handleCreate = async (data: CreateTaskDTO) => {
-    await createTask(data);
-    setIsCreateModalOpen(false);
+    try {
+      setIsCreating(true);
+      await createTask(data);
+      setIsCreateModalOpen(false);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleUpdate = async (data: Task) => {
@@ -46,9 +53,14 @@ export default function TasksPage() {
     setEditingTask(null);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      await deleteTask(id);
+  const handleDelete = (id: string) => {
+    setTaskToDelete(id);
+  };
+
+  const confirmDelete = async () => {
+    if (taskToDelete) {
+      await deleteTask(taskToDelete);
+      setTaskToDelete(null);
     }
   };
 
@@ -141,6 +153,7 @@ export default function TasksPage() {
           onSubmit={handleCreate}
           onCancel={() => setIsCreateModalOpen(false)}
           mode="create"
+          isLoading={isCreating}
         />
       </Modal>
 
@@ -158,6 +171,34 @@ export default function TasksPage() {
             mode="edit"
           />
         )}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={!!taskToDelete}
+        onClose={() => setTaskToDelete(null)}
+        title="Confirm Deletion"
+      >
+        <div className="space-y-6">
+          <p className="font-sans text-sm text-[#5C4D45]">
+            Are you sure you want to delete this task? This action cannot be undone.
+          </p>
+          <div className="flex items-center justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setTaskToDelete(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={confirmDelete}
+              className="bg-[#FF6B4A] hover:bg-[#FF6B4A]/90"
+            >
+              Delete Task
+            </Button>
+          </div>
+        </div>
       </Modal>
     </motion.div>
   );

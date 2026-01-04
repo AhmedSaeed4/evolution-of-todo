@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "sonner";
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -38,6 +39,20 @@ export default function RootLayout({
       >
         <AuthProvider>
           {children}
+          <Toaster
+            position="bottom-right"
+            duration={4000}
+            richColors={true}
+            toastOptions={{
+              className: 'font-mono text-sm',
+              style: {
+                background: '#F9F7F2',
+                color: '#2A1B12',
+                border: '1px solid #E5E0D6',
+                borderRadius: '0px',
+              },
+            }}
+          />
         </AuthProvider>
       </body>
     </html>

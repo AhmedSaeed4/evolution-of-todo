@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { authClient, getSession, isAuthBypassEnabled, getCurrentUser } from '@/lib/auth';
 import { User } from '@/types';
+import { toast } from 'sonner';
 
 interface AuthState {
     user: User | null;
@@ -114,10 +115,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // Call checkAuth to update state
             await checkAuth();
+            toast.success('Welcome back!');
 
             return { success: true };
         } catch (error) {
-            return { success: false, error: (error as Error).message };
+            const errorMessage = (error as Error).message;
+            toast.error(errorMessage);
+            return { success: false, error: errorMessage };
         }
     }, [checkAuth]);
 
@@ -149,6 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 error: null,
                 isAuthenticated: false,
             });
+            toast.info('Logged out');
             return { success: true };
         }
 
@@ -160,9 +165,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 error: null,
                 isAuthenticated: false,
             });
+            toast.info('Logged out');
             return { success: true };
         } catch (error) {
-            return { success: false, error: (error as Error).message };
+            const errorMessage = (error as Error).message;
+            toast.error(errorMessage);
+            return { success: false, error: errorMessage };
         }
     }, []);
 
@@ -236,6 +244,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 throw new Error(result.error.message || 'Failed to change password');
             }
 
+            toast.success('Password changed successfully');
             return { success: true };
         } catch (error) {
             const errorMessage = (error as Error).message;
@@ -249,14 +258,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     error: null,
                     isAuthenticated: false,
                 });
+                toast.error('Session expired. Please sign in again.');
                 return { success: false, error: 'Session expired. Please sign in again.' };
             }
 
             // Handle incorrect current password
             if (errorMessage.includes('incorrect') || errorMessage.includes('Invalid')) {
+                toast.error('Current password is incorrect');
                 return { success: false, error: 'Current password is incorrect' };
             }
 
+            toast.error(errorMessage);
             return { success: false, error: errorMessage };
         }
     }, [state.user, state.isAuthenticated]);

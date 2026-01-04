@@ -13,8 +13,9 @@ This is the **Phase 2** frontend application built with Next.js 16+, featuring:
 - **Profile Management System** with comprehensive user settings
 - **Task Management** with full CRUD operations
 - **JWT Integration** ready for FastAPI backend
+- **UX Polish** with Sonner toasts, enhanced date labels, and smooth animations
 
-## 🎯 Current Feature: Authentication System (005-user-auth) ✅
+## 🎯 UX Polish & Enhancements (007-frontend-ux-polish) ✅
 
 ### ✅ Authentication System Features
 
@@ -65,6 +66,39 @@ This is the **Phase 2** frontend application built with Next.js 16+, featuring:
    - Helper functions for session management
    - Bypass mode support for testing
    - Ready for frontend UI integration
+
+### ✅ UX Polish Features (007-frontend-ux-polish)
+
+**Sonner Toast Notifications:**
+- **7 Toast Scenarios** - Complete coverage of all user actions
+  - Login → "Welcome back!" (bottom-right, 4s)
+  - Create task → "Task created"
+  - Update task → "Task updated"
+  - Delete task → "Task deleted"
+  - Toggle task → "Task completed" / "Task reopened"
+  - Logout → "Logged out"
+  - Password change → "Password changed successfully"
+- **Error Handling** - All errors display with toast.error()
+- **Modern Styling** - Cream background (#F9F7F2), sharp corners, mono font
+
+**Enhanced Date Labels:**
+- **Clear Labels** - "Due:", "Created:", "Updated:" with uppercase mono typography
+- **Lucide Icons** - Calendar, Clock, Pencil with strokeWidth={1.5}
+- **Conditional Rendering** - "Updated:" only shows when task was modified
+- **Accent Styling** - Updated dates use orange accent color (#FF6B4A)
+- **Proper Spacing** - Flex-wrap layout with gap-3 spacing
+
+**Task Completion Animations:**
+- **Scale Effect** - 0.98x when completed, 1x when pending
+- **Opacity Fade** - 0.6 when completed, 1 when pending
+- **Editorial Ease** - [0.22, 1, 0.36, 1] curve for smooth transitions
+- **Layout Prop** - Smooth reordering when state changes
+- **Performance** - GPU-accelerated transform/opacity only (60fps)
+
+**Mobile Navigation:**
+- **Hamburger Menu** - Framer Motion animated for mobile devices
+- **Smooth Transitions** - Staggered entrance animations
+- **Responsive Design** - Works seamlessly across all screen sizes
 
 ### 🎨 Design System Integration
 
@@ -286,6 +320,41 @@ npm run dev
 
 ## 🧪 Testing
 
+### UX Polish Testing (007-frontend-ux-polish)
+
+```bash
+# Enable bypass mode for quick testing
+echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local
+npm run dev
+
+# Test all UX polish features:
+# ✅ Toast Notifications:
+#    - Login → "Welcome back!" (bottom-right, 4s)
+#    - Create task → "Task created"
+#    - Update task → "Task updated"
+#    - Delete task → "Task deleted"
+#    - Toggle task → "Task completed" / "Task reopened"
+#    - Logout → "Logged out"
+#    - Password change → "Password changed successfully"
+
+# ✅ Date Labels:
+#    - Create new task → Shows "Created:" only
+#    - Edit existing task → Shows "Created:" + "Updated:"
+#    - Task with due date → Shows all three labels
+#    - Visual check: Mono font, uppercase labels, proper icons
+
+# ✅ Animations:
+#    - Click checkbox → Smooth scale to 0.98
+#    - Complete task → Opacity fade to 0.6
+#    - Reopen task → Return to full opacity/scale
+#    - Performance: Chrome DevTools → 60fps, no dropped frames
+
+# ✅ Mobile Navigation:
+#    - Resize window to mobile width
+#    - Check hamburger menu appears
+#    - Verify smooth Framer Motion animations
+```
+
 ### Real Authentication Testing
 
 ```bash
@@ -359,6 +428,7 @@ npm run type-check   # TypeScript type checking
 ## 🔗 Related Documentation
 
 - **Main Project**: [../../README.md](../../README.md)
+- **Spec 007**: [../../specs/007-frontend-ux-polish/spec.md](../../specs/007-frontend-ux-polish/spec.md) - UX polish specification
 - **Spec 005**: [../../specs/005-user-auth/spec.md](../../specs/005-user-auth/spec.md) - Authentication specification
 - **Auth Quickstart**: [../../specs/005-user-auth/quickstart.md](../../specs/005-user-auth/quickstart.md) - Complete setup guide
 - **API Contracts**: [../../specs/005-user-auth/contracts/auth-api.md](../../specs/005-user-auth/contracts/auth-api.md) - RESTful endpoints
@@ -366,6 +436,7 @@ npm run type-check   # TypeScript type checking
 - **Spec 004**: [../../specs/004-profile-editing/spec.md](../../specs/004-profile-editing/spec.md) - Profile management
 - **Auth Bypass**: [../../phase-2/AUTH_BYPASS_IMPLEMENTATION.md](../../phase-2/AUTH_BYPASS_IMPLEMENTATION.md) - Bypass feature docs
 - **Design System**: [../../../.claude/skills/ui-design/TOKENS.md](../../../.claude/skills/ui-design/TOKENS.md) - Design tokens
+- **Sonner Docs**: [npmjs.com/package/sonner](https://npmjs.com/package/sonner) - Toast notification library
 
 ## 🎯 Key Features
 
@@ -388,17 +459,24 @@ npm run type-check   # TypeScript type checking
 
 ### Task Management
 - ✅ Create tasks with title and description
-- ✅ Complete/uncomplete tasks
+- ✅ Complete/uncomplete tasks with animations
 - ✅ Edit task details
 - ✅ Delete tasks
 - ✅ Filter and search tasks
+- ✅ Enhanced date labels (Due/Created/Updated)
+- ✅ Visual completion feedback
 
-### UI/UX
+### UI/UX & Polish
 - ✅ Modern Technical Editorial design
-- ✅ Smooth animations and transitions
+- ✅ Sonner toast notifications (7 scenarios)
+- ✅ Smooth animations and transitions (editorial easing)
+- ✅ Task completion scale/opacity effects
+- ✅ Enhanced date display with icons and labels
+- ✅ Mobile hamburger menu with Framer Motion
 - ✅ Responsive mobile-first layout
 - ✅ Accessibility features
 - ✅ Loading states and error handling
+- ✅ 60fps performance optimization
 
 ## 📦 Dependencies
 
@@ -415,6 +493,7 @@ npm run type-check   # TypeScript type checking
 **UI & Animations:**
 - Framer Motion v12.23.26 (animations)
 - Lucide React v0.562.0 (icons)
+- Sonner v2.0.7 (toast notifications)
 - Tailwind CSS v4 (styling)
 
 **Development:**

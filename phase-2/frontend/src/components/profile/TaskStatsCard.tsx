@@ -1,10 +1,10 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useTasks } from '@/hooks/useTasks';
+import { api } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/Card';
 import { fadeInUp, staggerContainer, scaleIn } from '@/motion/variants';
+import { isAuthBypassEnabled } from '@/lib/auth';
 
 interface Stat {
   label: string;
@@ -13,25 +13,37 @@ interface Stat {
 }
 
 export default function TaskStatsCard() {
-  const { tasks } = useTasks();
+  const { user } = useAuth();
   const [stats, setStats] = useState<Stat[]>([
     { label: 'Total', value: 0, color: 'text-structure' },
     { label: 'Pending', value: 0, color: 'text-priority-medium' },
     { label: 'Completed', value: 0, color: 'text-priority-low' },
   ]);
+  const [loading, setLoading] = useState(true);
 
-  // Calculate stats whenever tasks change
+  // Calculate stats using efficient API endpoint
   useEffect(() => {
-    const total = tasks.length;
-    const pending = tasks.filter(t => !t.completed).length;
-    const completed = tasks.filter(t => t.completed).length;
+    const effectiveUserId = isAuthBypassEnabled() ? 'bypass-user' : user?.id;
 
-    setStats([
-      { label: 'Total', value: total, color: 'text-structure' },
-      { label: 'Pending', value: pending, color: 'text-priority-medium' },
-      { label: 'Completed', value: completed, color: 'text-priority-low' },
-    ]);
-  }, [tasks]);
+    if (effectiveUserId) {
+      const fetchStats = async () => {
+        try {
+          const data = await api.getTaskStats(effectiveUserId);
+          setStats([
+            { label: 'Total', value: data.total, color: 'text-structure' },
+            { label: 'Pending', value: data.pending, color: 'text-priority-medium' },
+            { label: 'Completed', value: data.completed, color: 'text-priority-low' },
+          ]);
+        } catch (error) {
+          console.error('Failed to fetch stats:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchStats();
+    }
+  }, [user]);
 
   return (
     <motion.div
@@ -85,7 +97,7 @@ export default function TaskStatsCard() {
           </motion.div>
 
           {/* Empty State */}
-          {tasks.length === 0 && (
+          {!loading && stats[0].value === 0 && (
             <div className="bg-structure/5 p-4 rounded-sm text-center">
               <p className="font-mono text-sm text-structure/60">
                 No tasks yet. Create some tasks to see statistics!

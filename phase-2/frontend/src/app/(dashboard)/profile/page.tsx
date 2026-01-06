@@ -3,9 +3,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-import { Card } from '@/components/ui/Card';
 import { fadeInUp, staggerContainer } from '@/motion/variants';
-import { User } from 'lucide-react';
 import { isAuthBypassEnabled } from '@/lib/auth';
 
 // Import profile components
@@ -64,26 +62,6 @@ export default function ProfilePage() {
           Manage your account information, security, and preferences
         </motion.p>
 
-        {/* User Quick Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.4, delay: 0.15 }}
-          className="inline-block mt-4"
-        >
-          <Card className="bg-surface border border-structure/10 inline-flex items-center gap-4 px-6 py-4">
-            <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
-              <User className="w-6 h-6 text-white" strokeWidth={2} />
-            </div>
-            <div className="text-left">
-              <p className="font-serif text-xl font-bold text-structure">{displayUser.name}</p>
-              <p className="text-sm text-text-secondary font-mono">{displayUser.email}</p>
-              {isAuthBypassEnabled() && (
-                <p className="text-xs text-accent font-mono mt-1">BYPASS MODE ACTIVE</p>
-              )}
-            </div>
-          </Card>
-        </motion.div>
       </div>
 
       {/* Main Content Grid */}

@@ -3,7 +3,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Todo App',
+  title: 'Dashboard | TaskStack',
   description: 'Manage your tasks',
 };
 

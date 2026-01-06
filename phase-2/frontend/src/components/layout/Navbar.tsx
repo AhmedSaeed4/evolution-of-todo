@@ -57,7 +57,7 @@ export function Navbar() {
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               className="font-serif text-2xl font-bold text-structure"
             >
-              Todo.
+              TaskStack
             </motion.div>
             <ListTodo className="w-5 h-5 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
           </Link>

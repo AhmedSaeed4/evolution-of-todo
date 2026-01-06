@@ -1,37 +1,57 @@
 'use client';
 
-import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-interface CardProps extends HTMLMotionProps<'div'> {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
+  variant?: 'feature' | 'tech' | 'interactive';
   hoverable?: boolean;
+  borderStyle?: 'none' | 'technical' | 'accent';
 }
 
 export function Card({
   children,
-  hoverable = false,
+  variant = 'interactive',
+  hoverable = true,
+  borderStyle = 'technical',
   className,
   ...props
 }: CardProps) {
-  const baseClasses = 'bg-background border border-structure/10 p-6';
+  // Border styles
+  const borderClasses = {
+    none: 'border-0',
+    technical: 'border border-structure/10',
+    accent: 'border border-accent'
+  }[borderStyle];
 
+  // Base classes
+  const baseClasses = `bg-background ${borderClasses} p-6`;
+
+  // Variant-specific styling
+  const variantClasses = {
+    feature: 'text-center',
+    tech: 'flex flex-col items-center text-center',
+    interactive: ''
+  }[variant];
+
+  // Combined classes
+  const combinedClasses = cn(baseClasses, variantClasses, className);
+
+  // Hoverable component (static, no animations)
   if (hoverable) {
     return (
-      <motion.div
-        className={cn(baseClasses, 'cursor-pointer', className)}
-        whileHover={{ scale: 1.02, y: -1 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] } as any}
+      <div
+        className={cn(combinedClasses, 'cursor-pointer')}
         {...props}
       >
         {children}
-      </motion.div>
+      </div>
     );
   }
 
+  // Non-hoverable static div
   return (
-    <div className={cn(baseClasses, className)}>
+    <div className={combinedClasses} {...props}>
       {children}
     </div>
   );

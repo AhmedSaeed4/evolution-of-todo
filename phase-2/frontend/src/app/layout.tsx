@@ -23,8 +23,8 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Todo App",
-  description: "Modern task management with beautiful design and smooth animations",
+  title: "TaskStack - Productivity Meets Intelligence",
+  description: "A modern task management platform designed for clarity, focus, and productivity.",
 };
 
 export default function RootLayout({

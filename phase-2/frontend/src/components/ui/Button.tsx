@@ -1,14 +1,15 @@
 'use client';
 
 import { motion, HTMLMotionProps } from 'framer-motion';
-import { hoverScale } from '@/motion/variants';
 import { cn } from '@/lib/utils';
 
 interface ButtonProps extends HTMLMotionProps<'button'> {
-  variant?: 'primary' | 'secondary' | 'technical';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'technical';
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
   isLoading?: boolean;
+  href?: string;
+  fullWidth?: boolean;
 }
 
 export function Button({
@@ -17,6 +18,7 @@ export function Button({
   children,
   className,
   isLoading,
+  fullWidth = false,
   ...props
 }: ButtonProps) {
   const baseClasses = 'font-mono text-xs uppercase tracking-widest transition-colors flex items-center justify-center';
@@ -24,6 +26,7 @@ export function Button({
   const variantClasses = {
     primary: 'bg-accent text-white hover:bg-accent-hover',
     secondary: 'bg-transparent border border-structure text-structure hover:bg-structure hover:text-background',
+    ghost: 'hover:bg-surface',
     technical: 'bg-transparent border border-structure/20 text-structure hover:border-structure hover:bg-structure hover:text-background'
   };
 
@@ -33,18 +36,21 @@ export function Button({
     lg: 'px-8 py-4 text-sm'
   };
 
+  const widthClass = fullWidth ? 'w-full' : '';
+
   return (
     <motion.button
       className={cn(
         baseClasses,
         variantClasses[variant],
         sizeClasses[size],
+        widthClass,
         'disabled:opacity-50 disabled:cursor-not-allowed',
         className
       )}
-      whileHover={!isLoading && !props.disabled ? hoverScale.whileHover : undefined}
-      whileTap={!isLoading && !props.disabled ? hoverScale.whileTap : undefined}
-      transition={hoverScale.transition as any}
+      whileHover={!isLoading && !props.disabled ? { scale: 1.02, y: -1 } : undefined}
+      whileTap={!isLoading && !props.disabled ? { scale: 0.98 } : undefined}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       disabled={isLoading || props.disabled}
       {...props}
     >

@@ -1,0 +1,511 @@
+openapi: 3.0.3
+info:
+  title: MCP Agent Integration API
+  description: Dual-agent system with MCP tools for task management via natural language
+  version: 1.0.0
+  contact:
+    name: Evolution of Todo Team
+    email: dev@evolutionoftodo.com
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.evolutionoftodo.com
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/chat:
+    post:
+      summary: Send message to agent system
+      description: Send a natural language message to the dual-agent system. Routes to appropriate agent based on content.
+      operationId: sendMessage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+            examples:
+              general:
+                summary: General question
+                value:
+                  message: "Hello, how are you?"
+              urdu:
+                summary: Urdu content
+                value:
+                  message: "کیا آپ میری مدد کر سکتے ہیں؟"
+              task:
+                summary: Task management
+                value:
+                  message: "Create a task called 'Buy groceries' with high priority"
+      responses:
+        '200':
+          description: Successful response from agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+              examples:
+                orchestrator:
+                  summary: Orchestrator response
+                  value:
+                    response: "Hello! I'm here to help you manage your tasks."
+                    agent: "orchestrator"
+                    timestamp: "2026-01-13T10:00:00Z"
+                urdu:
+                  summary: Urdu specialist response
+                  value:
+                    response: "ہاں، میں آپ کی مدد کر سکتا ہوں۔ آپ کے پاس کون سے کام ہیں؟"
+                    agent: "urdu"
+                    timestamp: "2026-01-13T10:00:01Z"
+                task_created:
+                  summary: Task creation confirmation
+                  value:
+                    response: "Task 'Buy groceries' created successfully with high priority."
+                    agent: "orchestrator"
+                    timestamp: "2026-01-13T10:00:02Z"
+        '400':
+          description: Bad request (empty message, invalid format)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (missing or invalid JWT token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/{user_id}/tasks:
+    get:
+      summary: List user tasks with filters
+      description: Get all tasks for authenticated user with optional filtering
+      operationId: listTasks
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User ID (must match JWT token)
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, completed]
+          required: false
+        - in: query
+          name: priority
+          schema:
+            type: string
+            enum: [low, medium, high]
+          required: false
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [work, personal, home, other]
+          required: false
+        - in: query
+          name: search
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+            enum: [dueDate, priority, title, createdAt]
+            default: createdAt
+          required: false
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          required: false
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Access denied (user_id mismatch)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create task
+      description: Create a new task for authenticated user
+      operationId: createTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: User ID (must match JWT token)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/{user_id}/tasks/{task_id}:
+    get:
+      summary: Get single task
+      description: Get details of a specific task
+      operationId: getTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Access denied
+        '404':
+          description: Task not found
+
+    put:
+      summary: Update task
+      description: Update existing task
+      operationId: updateTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Access denied
+        '404':
+          description: Task not found
+
+    delete:
+      summary: Delete task
+      description: Delete a task
+      operationId: deleteTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Task deleted successfully (no content)
+        '401':
+          description: Unauthorized
+        '403':
+          description: Access denied
+        '404':
+          description: Task not found
+
+  /api/{user_id}/tasks/{task_id}/complete:
+    patch:
+      summary: Toggle task completion
+      description: Toggle task completion status
+      operationId: toggleComplete
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Access denied
+        '404':
+          description: Task not found
+
+  /api/{user_id}/stats:
+    get:
+      summary: Get task statistics
+      description: Get statistics for user's tasks
+      operationId: getStats
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Task statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Access denied
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ChatRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: Natural language message to send to agent system
+          example: "Create a task called 'Buy groceries' with high priority"
+
+    ChatResponse:
+      type: object
+      required: [response, agent, timestamp]
+      properties:
+        response:
+          type: string
+          description: Agent's response message
+        agent:
+          type: string
+          enum: [orchestrator, urdu]
+          description: Which agent generated the response
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+
+    Task:
+      type: object
+      required: [id, title, priority, category, status, completed, createdAt, updatedAt, userId]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+        priority:
+          type: string
+          enum: [low, medium, high]
+        category:
+          type: string
+          enum: [work, personal, home, other]
+        status:
+          type: string
+          enum: [pending, completed]
+        completed:
+          type: boolean
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        userId:
+          type: string
+
+    TaskCreate:
+      type: object
+      required: [title, priority, category]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        priority:
+          type: string
+          enum: [low, medium, high]
+        category:
+          type: string
+          enum: [work, personal, home, other]
+        dueDate:
+          type: string
+          format: date-time
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        priority:
+          type: string
+          enum: [low, medium, high]
+        category:
+          type: string
+          enum: [work, personal, home, other]
+        dueDate:
+          type: string
+          format: date-time
+
+    StatsResponse:
+      type: object
+      required: [total, pending, completed]
+      properties:
+        total:
+          type: integer
+          minimum: 0
+        pending:
+          type: integer
+          minimum: 0
+        completed:
+          type: integer
+          minimum: 0
+
+    ErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          type: string
+          description: Human-readable error message

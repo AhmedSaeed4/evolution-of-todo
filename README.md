@@ -13,7 +13,7 @@
 |-------|-------------|------------------|--------|
 | **Phase I** | In-Memory Python Console App | Python, Claude Code, Spec-Kit Plus | ✅ **COMPLETE** |
 | **Phase II** | Full-Stack Web Application | Next.js 16+, FastAPI, SQLModel, Neon PostgreSQL, Better Auth | ✅ **COMPLETE** |
-| **Phase III** | AI-Powered Todo Chatbot | OpenAI ChatKit, Agents SDK, Official MCP SDK | 🎯 **NEXT** |
+| **Phase III** | AI-Powered Todo Chatbot | OpenAI Agents SDK, MCP, Xiaomi mimo-v2-flash | 🚧 **IN PROGRESS** |
 | **Phase IV** | Local Kubernetes Deployment | Docker, Minikube, Helm, kubectl-ai, kagent | ⏳ **PLANNED** |
 | **Phase V** | Advanced Cloud Deployment | [To be specified] | 📋 **FUTURE** |
 
@@ -165,6 +165,28 @@ main (stable, protected)
 - **Authentication**: Better Auth v1.4.9 (with bypass mode)
 - **API Client**: Fetch with JWT token management
 
+**AI Chatbot (Phase 3):**
+- **Model**: Xiaomi mimo-v2-flash via OpenAI Agents SDK
+- **Architecture**: Dual-agent system (Orchestrator + Urdu Specialist)
+- **MCP Integration**: 7 task management tools with user isolation
+- **Language Support**: English + Urdu bilingual responses
+- **Context Handling**: Enhanced input with user context preservation
+- **Tool Calling**: Automatic tool selection and execution
+
+## 🛠️ Development Skills
+
+**Available Claude Skills in `.claude/skills/`:**
+
+- **Backend** - Python development with uv package manager
+- **Next.js** - React/TypeScript web applications with App Router
+- **UI Animation** - Framer Motion animations and transitions
+- **UI Design** - Modern Technical Editorial aesthetic design system
+- **Better Auth** - Authentication and authorization implementation
+- **Neon DB** - PostgreSQL database integration and management
+- **MCP Integration** - Model Context Protocol tools and servers
+- **OpenAI Agents SDK** - AI agents with Xiaomi mimo-v2-flash model
+- **ChatKit** - Conversational AI interfaces and chat applications
+
 ## 📁 Project Structure
 
 ```
@@ -218,6 +240,16 @@ evolution-of-todo/
 │   ├── AUTH_BYPASS_IMPLEMENTATION.md  # Bypass feature docs
 │   ├── AUTH_BYPASS_ROLLBACK.md        # Rollback reference
 │   └── AUTH_BYPASS_SUMMARY.md         # Quick reference
+├── phase-3/                    # AI Chatbot + MCP Integration
+│   ├── backend/               # AI agent backend
+│   │   ├── src/backend/       # Python application
+│   │   │   ├── agents.py      # Dual-agent system (Orchestrator + Urdu)
+│   │   │   ├── main.py        # FastAPI with chat endpoint
+│   │   │   ├── task_serves_mcp_tools.py  # MCP server with 7 tools
+│   │   │   └── schemas/       # Pydantic schemas
+│   │   │       └── task.py    # Task schemas (camelCase)
+│   │   └── pyproject.toml     # Python dependencies
+│   └── frontend/              # Chat interface (future)
 ├── docs/                       # Documentation
 │   ├── architecture.md        # System architecture
 │   ├── api_reference.md       # API documentation
@@ -228,17 +260,17 @@ evolution-of-todo/
 │   ├── 003-frontend-design/   # Feature 003 specs (completed)
 │   ├── 004-profile-editing/   # Feature 004 specs (completed)
 │   ├── 005-user-auth/         # Feature 005 specs (completed)
-│   └── 006-backend-implement/ # Feature 006 specs (current)
+│   ├── 006-backend-implement/ # Feature 006 specs (completed)
+│   └── 009-agents-mcp/        # Feature 009 specs (current)
 │       ├── spec.md            # Requirements
 │       ├── plan.md            # Architecture
 │       ├── tasks.md           # Implementation tasks
-│       ├── quickstart.md      # Setup guide
-│       ├── data-model.md      # Database schema
-│       ├── contracts/         # API contracts (OpenAPI)
 │       └── checklists/        # Quality checks
 ├── history/                    # Development history
 │   ├── adr/                   # Architecture Decision Records
 │   └── prompts/               # Prompt History Records
+│       ├── 009-agents-mcp/    # Phase 3 development history
+│       └── general/           # General prompts
 └── README.md                   # This file
 ```
 

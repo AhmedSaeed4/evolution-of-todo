@@ -25,7 +25,7 @@ pool.on('error', (err) => {
 
 // Test connection on startup
 pool.on('connect', () => {
-  console.log('✅ Database connected successfully');
+  if (process.env.NODE_ENV === 'development') console.log('✅ Database connected successfully');
 });
 
 // JWT plugin enabled for FastAPI backend integration

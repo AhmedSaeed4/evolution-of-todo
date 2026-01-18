@@ -76,7 +76,7 @@ export function Navbar() {
               className={`font-mono text-xs uppercase tracking-widest transition-colors ${pathname === '/chatbot' ? 'text-accent' : 'text-structure hover:text-accent'
                 }`}
             >
-              Chatbot
+              Agent
             </Link>
             <Link
               href="/profile"
@@ -156,7 +156,7 @@ export function Navbar() {
                         }`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      Chatbot
+                      Agent
                     </Link>
                     <Link
                       href="/profile"

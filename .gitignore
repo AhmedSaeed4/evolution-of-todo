@@ -147,3 +147,12 @@ phase-3/backend/*.egg-info/
 phase-3/backend/.pytest_cache/
 phase-3/backend/coverage/
 phase-3/backend/htmlcov/
+
+# Phase-3 server scripts and logs (development/testing only)
+phase-3/logs/
+phase-3/*.pid
+phase-3/*.log
+phase-3/script.md
+phase-3/start.server.sh
+phase-3/stop.server.sh
+phase-3/status.server.sh

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
+import Script from 'next/script';
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "sonner";
@@ -37,6 +38,12 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${dmSans.variable} ${jetBrainsMono.variable} antialiased`}
       >
+        {/* ChatKit CDN Script - REQUIRED for ChatKit to work */}
+        {/* Note: Next.js 16+ doesn't allow event handlers on Script component */}
+        <Script
+          src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"
+          strategy="afterInteractive"
+        />
         <AuthProvider>
           {children}
           <Toaster

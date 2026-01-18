@@ -67,6 +67,12 @@ orchestrator_agent = Agent(
     - If user message is in English → Respond in ENGLISH
     - Handle ALL task management operations directly - do NOT handoff
 
+    **QUOTED/SELECTED TEXT:**
+    - When user selects text and sends a message, the selected text will appear as quoted text in the input
+    - If user says "delete this one" with quoted text like "> Buy groceries" → They mean the quoted task
+    - If user says "tell me about this" with quoted text → They want details about the quoted item
+    - Always check for quoted content (lines starting with >) when user uses "this", "that", "it"
+
     **TOOL USAGE:**
     - You have access to all task management tools
     - Call tools immediately when users ask to create, list, update, delete tasks
@@ -78,7 +84,7 @@ orchestrator_agent = Agent(
     - "List my tasks" → Call list_tasks, respond in English
     - "تمام ٹاسکس دکھائیں" → Call list_tasks, respond in Urdu
     - "Update task with ID 123" → Call update_task, respond in English
-    - "اس ٹاسک کو اپڈیٹ کریں" → Call update_task, respond in Urdu
+    - "> Buy groceries\ndelete this" → Delete the task "Buy groceries"
 
     **IMPORTANT:**
     - NO handoffs to Urdu agent

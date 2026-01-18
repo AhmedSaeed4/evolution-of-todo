@@ -46,7 +46,7 @@ export default function HomePage() {
     subtext: "A modern task management platform designed for clarity, focus, and productivity.",
     ctaPrimary: "GET STARTED",
     ctaSecondary: "SOURCE CODE",
-    ctaTertiary: "TRY CHATBOT"
+    ctaTertiary: "TRY AGENT"
   };
 
   // Features data
@@ -108,7 +108,7 @@ export default function HomePage() {
     brandName: "TaskStack",
     navigation: [
       { label: "Features", href: "#features" },
-      { label: "Chatbot", href: "/chatbot" },
+      { label: "Agent", href: "/chatbot" },
       { label: "LinkedIn", href: "https://www.linkedin.com/in/ahmed-saeed-0278a12b5/" },
       { label: "Docs", href: "https://github.com/AhmedSaeed4/evolution-of-todo.git" },
       { label: "About", href: "#hero" }
@@ -126,7 +126,7 @@ export default function HomePage() {
     brandName: "TaskStack",
     navigationLinks: [
       { label: "Tasks", href: "/tasks" },
-      { label: "Chatbot", href: "/chatbot" }
+      { label: "Agent", href: "/chatbot" }
     ],
     authActions: {
       signIn: "Sign In",

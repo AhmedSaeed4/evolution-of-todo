@@ -7,12 +7,15 @@
 This is the **Phase 3** frontend application built with Next.js 16+, featuring:
 
 **Phase 3 AI Chatbot Features:**
-- **AI Chatbot Interface**: Integration with OpenAI ChatKit for conversational task management
+- **OpenAI ChatKit Integration**: Production-ready chat interface via CDN
 - **Dual-Agent System**: Support for Orchestrator + Urdu Specialist agents
 - **Real-time Streaming**: Live agent responses with streaming support
 - **Bilingual UI**: English/Urdu language toggle and display
 - **Tool Visualization**: Visual indicators for MCP tool execution
-- **Conversation History**: Persistent chat sessions and context
+- **Conversation History**: Persistent chat sessions with PostgreSQL backend
+- **Modern Technical Editorial Design**: Cream backgrounds, orange accents
+- **Full Height Layout**: Responsive chat interface that fills screen space
+- **Session Management**: JWT bridging between Better Auth and OpenAI
 
 **Phase 2 Features (Inherited):**
 
@@ -29,14 +32,14 @@ This is the **Phase 3** frontend application built with Next.js 16+, featuring:
 
 ## 🤖 Phase 3: AI Chatbot Integration
 
-### 🎯 Planned Features
+### ✅ Completed Features
 
 **ChatKit Integration:**
-- **OpenAI ChatKit** React components for modern chat interface
-- **Real-time streaming** responses from AI agents
-- **Conversation history** with persistent memory
-- **Tool integration** for MCP task operations
-- **Visual feedback** for tool execution and agent thinking
+- **OpenAI ChatKit** React component via CDN (script loading)
+- **Real-time streaming** responses from AI agents (SSE)
+- **Conversation history** with PostgreSQL persistence
+- **Tool integration** for MCP task operations (visual feedback)
+- **Modern Technical Editorial Design** (cream backgrounds, orange accents)
 
 **Bilingual Support:**
 - **Language toggle** between English and Urdu
@@ -50,21 +53,22 @@ This is the **Phase 3** frontend application built with Next.js 16+, featuring:
 - **Tool execution** visual indicators
 - **Error handling** with graceful fallbacks
 - **Mobile-responsive** design
+- **Full height layout** that fills screen space
 
-### 🏗️ Architecture (Future)
+### 🏗️ Architecture (Implemented)
 
 ```
 User → ChatKit Interface → Streaming API → AI Agents → MCP Tools → Backend
                     ↓
             Language Selection & Context
                     ↓
-         Conversation History & Memory
+         Conversation History & Memory (PostgreSQL)
 ```
 
 ### 📅 Timeline
 
-**Current Status**: Backend implementation complete ✅
-**Next Steps**: ChatKit frontend integration (Branch: 010-chatkit-integration)
+**Current Status**: Complete ✅ (56/56 tasks)
+**Branch**: `010-chatkit-integration` (merged)
 
 ---
 
@@ -185,9 +189,13 @@ src/
 │   │   ├── tasks/page.tsx
 │   │   └── profile/page.tsx
 │   ├── api/              # API routes
-│   │   └── auth/         # Authentication endpoints
-│   │       └── [...all]/ # Better Auth handler
-│   │           └── route.ts
+│   │   ├── auth/         # Authentication endpoints
+│   │   │   └── [...all]/ # Better Auth handler
+│   │   │       └── route.ts
+│   │   └── chatkit/      # ChatKit session endpoints
+│   │       └── route.ts  # Session creation & refresh
+│   ├── chatbot/          # ChatKit page
+│   │   └── page.tsx      # OpenAI ChatKit component
 │   ├── page.tsx          # Landing page
 │   └── layout.tsx        # Root layout
 ├── components/
@@ -240,9 +248,9 @@ src/
 
 ```bash
 # Navigate to frontend directory
-cd phase-2/frontend
+cd phase-3/frontend
 
-# Install dependencies (includes pg for database)
+# Install dependencies (includes ChatKit)
 npm install
 
 # Set up authentication environment
@@ -252,6 +260,7 @@ NEXT_PUBLIC_AUTH_BYPASS=false
 DATABASE_URL=postgresql://user:pass@host:5432/dbname?sslmode=require
 BETTER_AUTH_SECRET=your-generated-64-char-secret
 NEXT_PUBLIC_AUTH_URL=http://localhost:3000
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
 EOF
 
 # Run development server
@@ -357,6 +366,35 @@ npm run dev
 - **Environment only**: No code changes required
 - **Production safe**: Cannot be enabled accidentally
 
+## 🤖 ChatKit Setup
+
+### Environment Configuration
+```bash
+# Required for ChatKit session management
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000  # Backend API URL
+```
+
+### ChatKit Integration
+The ChatKit integration uses:
+- **OpenAI ChatKit React component** via CDN script loading
+- **Backend session endpoints** for authentication
+- **LocalStorage** for thread persistence
+- **Modern Technical Editorial** design system
+
+### Accessing ChatKit
+1. **Start backend**: `cd phase-3/backend && uv run uvicorn src.backend.main:app --reload`
+2. **Start frontend**: `cd phase-3/frontend && npm run dev`
+3. **Visit**: `http://localhost:3000/chatbot`
+4. **ChatKit loads automatically** with task-related prompts
+
+### Features
+- **Full-height chat interface** that fills screen space
+- **Cream background** (#F9F7F2) matching design system
+- **Orange accents** (#FF6B4A) for interactive elements
+- **Loading states** with centered spinner animations
+- **Error handling** with retry functionality
+- **Navbar integration** matching dashboard pages
+
 ## 📊 Pages & Routes
 
 ### Public Routes
@@ -367,6 +405,7 @@ npm run dev
 ### Protected Routes (with bypass support)
 - `/tasks` - Task management dashboard
 - `/profile` - Profile settings page
+- `/chatbot` - AI ChatKit interface ✨ NEW
 
 ### Development Routes
 - `/test` - Component testing playground
@@ -458,6 +497,42 @@ npm run dev
 # ✅ Test all profile components
 ```
 
+### ChatKit Integration Testing
+
+```bash
+# Ensure backend is running
+cd phase-3/backend && uv run uvicorn src.backend.main:app --reload
+
+# Start frontend
+cd phase-3/frontend && npm run dev
+
+# Test checklist:
+# ✅ Visit http://localhost:3000/chatbot
+# ✅ ChatKit component loads with cream background
+# ✅ Loading states appear centered on screen
+# ✅ Error states show retry functionality
+# ✅ Navbar shows "Agent" link (not "Chatbot")
+# ✅ Full-height layout fills screen space
+# ✅ Session creation works via backend API
+# ✅ Tool execution visual feedback displays
+# ✅ Mobile responsive layout works
+```
+
+### ChatKit Component States Testing
+```bash
+# Test loading state (no OpenAI key)
+echo "OPENAI_API_KEY=invalid" > phase-3/backend/.env
+# Visit /chatbot → Should show centered loading spinner
+
+# Test error state (missing backend)
+echo "NEXT_PUBLIC_BACKEND_URL=http://localhost:9999" > phase-3/frontend/.env.local
+# Visit /chatbot → Should show error with retry button
+
+# Test success state (valid configuration)
+echo "NEXT_PUBLIC_BACKEND_URL=http://localhost:8000" > phase-3/frontend/.env.local
+# Visit /chatbot → Should load ChatKit interface
+```
+
 ### Component Testing
 
 ```bash
@@ -481,6 +556,7 @@ npm run type-check   # TypeScript type checking
 ## 🔗 Related Documentation
 
 - **Main Project**: [../../README.md](../../README.md)
+- **Spec 010**: [../../specs/010-chatkit-integration/spec.md](../../specs/010-chatkit-integration/spec.md) - ChatKit integration specification
 - **Spec 007**: [../../specs/007-frontend-ux-polish/spec.md](../../specs/007-frontend-ux-polish/spec.md) - UX polish specification
 - **Spec 005**: [../../specs/005-user-auth/spec.md](../../specs/005-user-auth/spec.md) - Authentication specification
 - **Auth Quickstart**: [../../specs/005-user-auth/quickstart.md](../../specs/005-user-auth/quickstart.md) - Complete setup guide
@@ -489,6 +565,8 @@ npm run type-check   # TypeScript type checking
 - **Spec 004**: [../../specs/004-profile-editing/spec.md](../../specs/004-profile-editing/spec.md) - Profile management
 - **Auth Bypass**: [../../phase-2/AUTH_BYPASS_IMPLEMENTATION.md](../../phase-2/AUTH_BYPASS_IMPLEMENTATION.md) - Bypass feature docs
 - **Design System**: [../../../.claude/skills/ui-design/TOKENS.md](../../../.claude/skills/ui-design/TOKENS.md) - Design tokens
+- **ChatKit Skill**: [../../../.claude/skills/chatkit/SKILL.md](../../../.claude/skills/chatkit/SKILL.md) - ChatKit integration patterns
+- **ChatKit History**: [../../history/prompts/010-chatkit-integration/](../../history/prompts/010-chatkit-integration/) - Implementation history
 - **Sonner Docs**: [npmjs.com/package/sonner](https://npmjs.com/package/sonner) - Toast notification library
 
 ## 🎯 Key Features
@@ -531,6 +609,20 @@ npm run type-check   # TypeScript type checking
 - ✅ Loading states and error handling
 - ✅ 60fps performance optimization
 
+### AI ChatKit Integration ✅
+- ✅ OpenAI ChatKit React component via CDN
+- ✅ Full-height chat interface (fills screen space)
+- ✅ Cream background (#F9F7F2) matching design system
+- ✅ Orange accent (#FF6B4A) for interactive elements
+- ✅ Loading states with centered spinner animations
+- ✅ Error handling with retry functionality
+- ✅ Session creation via backend API
+- ✅ Thread persistence (localStorage + PostgreSQL)
+- ✅ Navbar integration with "Agent" link
+- ✅ Mobile responsive layout
+- ✅ Tool execution visual feedback
+- ✅ Streaming responses (SSE support)
+
 ## 📦 Dependencies
 
 **Core:**
@@ -548,6 +640,10 @@ npm run type-check   # TypeScript type checking
 - Lucide React v0.562.0 (icons)
 - Sonner v2.0.7 (toast notifications)
 - Tailwind CSS v4 (styling)
+
+**AI ChatKit:**
+- @openai/chatkit-react (OpenAI ChatKit React component)
+- ChatKit CDN script loading (Web Components)
 
 **Development:**
 - ESLint v9 (linting)

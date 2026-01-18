@@ -420,38 +420,35 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 
 ---
 
-### ChatKit Skill
+### ChatKit Skill (Universal Integration)
 **Location**: `.claude/skills/chatkit/`
 
-**Purpose**: Provides comprehensive knowledge for working with **OpenAI ChatKit** - a framework for building conversational AI interfaces. It covers backend server implementation, store patterns, frontend React integration, and debugging.
+**Purpose**: Framework-agnostic patterns for **ChatKit + OpenAI Agents SDK integration** across any backend/frontend framework and authentication system.
 
 **When to use**:
-- Creating ChatKit backends with FastAPI and streaming responses
-- Implementing store patterns (memory for dev, PostgreSQL for production)
-- Integrating ChatKit with React/Next.js frontend applications
-- Setting up authentication with token-based sessions and httpOnly cookies
-- Adding context injection for personalized AI responses
-- Implementing tool integration (client tools, composer tools, custom actions)
-- Debugging ChatKit errors and issues
+- **ChatKit integration** with OpenAI Agents SDK (any framework)
+- **Custom ChatKitServer** implementation patterns (FastAPI, Express, Django, etc.)
+- **Frontend integration** patterns (Next.js, React, Vue, Svelte, etc.)
+- **User context injection** for personalized AI responses
+- **Tool integration** with ChatKit conversations (MCP, function calling, etc.)
+- **Data persistence** for chat threads and messages (any database)
+- **Authentication patterns** for ChatKit sessions (any auth provider)
 
 **Key capabilities**:
-- **Backend Setup**: FastAPI server with ChatKitServer, streaming responses, RAG integration
-- **Context Injection**: User/page context for personalized AI responses
-- **Store Implementation**: Memory (dev) and PostgreSQL (production) stores with user isolation
-- **Frontend Integration**: React components with `@openai/chatkit-react`, custom fetch interceptors
-- **Enhanced Script Loading**: Web Components detection with `whenDefined()` for Next.js 16+
-- **Tool Integration**: Client-side tools, composer tools, custom actions with OpenAI Agents SDK
-- **Authentication**: Token-based sessions, httpOnly cookie proxy patterns
-- **Advanced UX**: Text selection "Ask" feature, enhanced loading states
-- **Debugging**: Comprehensive error database and diagnostics
+- **Universal Patterns**: Framework-agnostic implementations for any tech stack
+- **OpenAI Agents SDK**: Integration with Xiaomi "mimo-v2-flash" model
+- **MCP Tools**: Dynamic MCP server creation per request with proper lifecycle management
+- **User Isolation**: JWT-based user filtering in all database operations
+- **Streaming Responses**: SSE format with proper headers for ChatKit compatibility
+- **Enhanced Loading**: Web Components detection with `customElements.whenDefined()`
+- **Single Endpoint Architecture**: Single `/api/chatkit` route handles all operations
 
 **Core patterns**:
-- **Backend**: Subclass `ChatKitServer` with `respond()` method, use `stream_agent_response`
-- **Store**: Implement 14 required methods with user isolation via context
-- **Frontend**: Use CDN script in body (Next.js 16+), `useChatKit` hook, localStorage for threads
-- **Auth**: Session endpoints (`/api/chatkit/session`, `/api/chatkit/refresh`), `getClientSecret()` function
-- **Context**: Extract page/user metadata for personalized responses
-- **Tools**: `onClientTool` for browser APIs, composer tools for UI interactions
+- **Frontend**: CDN script loading in body, `whenDefined()` detection, single proxy endpoint
+- **Backend**: `ChatKitServer` subclass with `respond()` method, dynamic MCP server creation
+- **Store**: PostgreSQL-backed with user isolation via `user_id` filtering
+- **Agents**: OpenAI Agents SDK with Xiaomi model, MCP tool integration
+- **Auth**: JWT token extraction, user context injection, httpOnly cookie patterns
 
 **Documentation**: See `SKILL.md` for complete reference, `concepts/` directory for detailed patterns, and `references/` for API documentation.
 

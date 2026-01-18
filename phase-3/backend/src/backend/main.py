@@ -43,6 +43,10 @@ app.add_middleware(
 # Include routers
 app.include_router(tasks_router)
 
+# Import and include ChatKit router
+from .api import chatkit
+app.include_router(chatkit.router)
+
 # Health check endpoint
 @app.get("/")
 async def root():
@@ -168,6 +172,15 @@ async def startup_event():
     logger.info("Starting FastAPI Todo Backend")
     logger.info(f"CORS origins: {origins}")
     logger.info(f"API running on {settings.api_host}:{settings.api_port}")
+
+    # Validate ChatKit configuration
+    try:
+        from .config import validate_chatkit_config
+        validate_chatkit_config()
+        logger.info("✅ ChatKit configuration validated")
+    except Exception as e:
+        logger.warning(f"❌ ChatKit validation failed: {e}. ChatKit endpoints may not work correctly.")
+        # Don't block startup, but log clearly
 
 
 @app.on_event("shutdown")

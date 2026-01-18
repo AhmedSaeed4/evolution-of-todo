@@ -13,7 +13,7 @@
 |-------|-------------|------------------|--------|
 | **Phase I** | In-Memory Python Console App | Python, Claude Code, Spec-Kit Plus | ✅ **COMPLETE** |
 | **Phase II** | Full-Stack Web Application | Next.js 16+, FastAPI, SQLModel, Neon PostgreSQL, Better Auth | ✅ **COMPLETE** |
-| **Phase III** | AI-Powered Todo Chatbot | OpenAI ChatKit, Agents SDK, Official MCP SDK | 🎯 **NEXT** |
+| **Phase III** | AI-Powered Todo Chatbot | OpenAI Agents SDK, MCP, Xiaomi mimo-v2-flash | ✅ **COMPLETE** |
 | **Phase IV** | Local Kubernetes Deployment | Docker, Minikube, Helm, kubectl-ai, kagent | ⏳ **PLANNED** |
 | **Phase V** | Advanced Cloud Deployment | [To be specified] | 📋 **FUTURE** |
 
@@ -98,6 +98,76 @@ curl -X POST http://localhost:3000/api/auth/sign-up/email \
 - User isolation via user_id for multi-tenancy
 - See `specs/005-user-auth/contracts/auth-api.md` for details
 
+### 🎯 ChatKit Integration (010-chatkit-integration) ✅
+
+**Complete AI-Powered Chatbot with OpenAI ChatKit:**
+
+```bash
+# Quick setup for ChatKit integration
+cd phase-3/backend
+uv sync  # Install OpenAI dependencies
+# Configure .env with OPENAI_API_KEY and existing DATABASE_URL
+uv run uvicorn src.backend.main:app --reload --host 0.0.0.0 --port 8001
+
+# Start frontend chat interface
+cd phase-3/frontend
+npm install @openai/chatkit-react
+npm run dev
+# Visit http://localhost:3000/chatbot
+```
+
+**What's Working:**
+- ✅ **OpenAI ChatKit UI** - Production-ready chat interface via CDN
+- ✅ **56/56 Tasks Complete** - Full implementation with all user stories
+- ✅ **Persistent Chat History** - PostgreSQL-backed sessions and messages
+- ✅ **User Isolation** - Zero-trust multi-tenancy via JWT validation
+- ✅ **MCP Tool Integration** - 7 task management tools with visualization
+- ✅ **Dual-Agent System** - Orchestrator + Urdu Specialist via OpenAI Agents SDK
+- ✅ **Multi-language Support** - Urdu text rendering and cultural context
+- ✅ **Performance Optimization** - Connection pooling, caching, error handling
+- ✅ **Complete Documentation** - API docs, deployment checklist, ADRs
+
+**Architecture:**
+- **Frontend**: OpenAI ChatKit React component with custom theme
+- **Backend**: Custom ChatKitServer with OpenAI Agents SDK integration
+- **Database**: Neon PostgreSQL with chat_sessions and chat_messages tables
+- **Authentication**: JWT bridging between Better Auth and OpenAI
+- **Tools**: MCP server with 7 task management tools (create, read, update, delete, list, search, stats)
+
+**ChatKit Features:**
+- **Modern Technical Editorial Design**: Cream backgrounds, orange accents (#FF6B4A)
+- **Streaming Responses**: Real-time agent responses via SSE
+- **Tool Visualization**: MCP tool calls displayed in chat interface
+- **Thread Persistence**: localStorage + PostgreSQL for session continuity
+- **Error Handling**: Comprehensive validation with clear error messages
+- **Mobile Responsive**: Full mobile support with proper layout
+
+**Quick Start:**
+```bash
+# 1. Set OpenAI API key (required for ChatKit session management)
+echo "OPENAI_API_KEY=sk-..." > phase-3/backend/.env
+
+# 2. Run backend with ChatKit endpoints
+cd phase-3/backend && uv run uvicorn src.backend.main:app --reload
+
+# 3. Run frontend with ChatKit integration
+cd phase-3/frontend && npm run dev
+
+# 4. Visit http://localhost:3000/chatbot
+#    - ChatKit loads automatically
+#    - Task-related prompts available
+#    - MCP tools accessible via natural language
+```
+
+**User Stories Completed:**
+- **US1**: Seamless Chat Experience (15 tasks) - ✅ Complete
+- **US4**: Persistent Chat History (7 tasks) - ✅ Complete
+- **US2**: Task Management via Conversation (4 tasks) - ✅ Complete
+- **US3**: Multi-language Support (3 tasks) - ✅ Complete
+- **Polish Phase**: Performance & Security (7 tasks) - ✅ Complete
+
+**Documentation**: See `specs/010-chatkit-integration/quickstart.md` for complete setup guide
+
 ### 🎯 Key Features
 
 - **Sequential Branching Strategy**: `001-cli-todo`, `002-cli-ui-update`, `003-*` etc.
@@ -165,6 +235,32 @@ main (stable, protected)
 - **Authentication**: Better Auth v1.4.9 (with bypass mode)
 - **API Client**: Fetch with JWT token management
 
+**AI Chatbot (Phase 3):**
+- **Model**: Xiaomi mimo-v2-flash via OpenAI Agents SDK
+- **UI Framework**: OpenAI ChatKit with custom theme integration
+- **Architecture**: Dual-agent system (Orchestrator + Urdu Specialist)
+- **MCP Integration**: 7 task management tools with ChatKit visualization
+- **Language Support**: English + Urdu bilingual responses with RTL support
+- **Context Handling**: Enhanced input with user context preservation
+- **Tool Calling**: Automatic tool selection and execution with visual feedback
+- **Persistence**: PostgreSQL-backed chat sessions and message history
+- **Authentication**: JWT bridging between Better Auth and OpenAI ChatKit
+- **Performance**: Connection pooling, caching, comprehensive error handling
+
+## 🛠️ Development Skills
+
+**Available Claude Skills in `.claude/skills/`:**
+
+- **Backend** - Python development with uv package manager
+- **Next.js** - React/TypeScript web applications with App Router
+- **UI Animation** - Framer Motion animations and transitions
+- **UI Design** - Modern Technical Editorial aesthetic design system
+- **Better Auth** - Authentication and authorization implementation
+- **Neon DB** - PostgreSQL database integration and management
+- **MCP Integration** - Model Context Protocol tools and servers
+- **OpenAI Agents SDK** - AI agents with Xiaomi mimo-v2-flash model
+- **ChatKit** - Conversational AI interfaces and chat applications
+
 ## 📁 Project Structure
 
 ```
@@ -218,6 +314,28 @@ evolution-of-todo/
 │   ├── AUTH_BYPASS_IMPLEMENTATION.md  # Bypass feature docs
 │   ├── AUTH_BYPASS_ROLLBACK.md        # Rollback reference
 │   └── AUTH_BYPASS_SUMMARY.md         # Quick reference
+├── phase-3/                    # AI Chatbot + MCP Integration ✅
+│   ├── backend/               # AI agent backend
+│   │   ├── src/backend/       # Python application
+│   │   │   ├── agents.py      # Dual-agent system (Orchestrator + Urdu)
+│   │   │   ├── main.py        # FastAPI with chat endpoint
+│   │   │   ├── api/           # ChatKit API endpoints
+│   │   │   │   └── chatkit.py # ChatKitServer + session endpoints
+│   │   │   ├── store/         # ChatKit Store implementation
+│   │   │   │   └── chatkit_store.py # 14 methods with user isolation
+│   │   │   ├── models/        # Database models
+│   │   │   │   └── chat.py    # ChatSession & ChatMessage models
+│   │   │   └── schemas/       # Pydantic schemas
+│   │   │       └── task.py    # Task schemas (camelCase)
+│   │   ├── migrations/        # Database migrations
+│   │   │   ├── chat_sessions_create.sql
+│   │   │   └── chat_messages_create.sql
+│   │   └── pyproject.toml     # Python dependencies
+│   └── frontend/              # ChatKit integration
+│       ├── src/app/chatbot/   # ChatKit page
+│       │   └── page.tsx       # OpenAI ChatKit component
+│       └── src/app/api/chatkit/ # Session endpoints
+│           └── route.ts       # Consolidated session/refresh handler
 ├── docs/                       # Documentation
 │   ├── architecture.md        # System architecture
 │   ├── api_reference.md       # API documentation
@@ -228,17 +346,21 @@ evolution-of-todo/
 │   ├── 003-frontend-design/   # Feature 003 specs (completed)
 │   ├── 004-profile-editing/   # Feature 004 specs (completed)
 │   ├── 005-user-auth/         # Feature 005 specs (completed)
-│   └── 006-backend-implement/ # Feature 006 specs (current)
+│   ├── 006-backend-implement/ # Feature 006 specs (completed)
+│   ├── 009-agents-mcp/        # Feature 009 specs (completed)
+│   └── 010-chatkit-integration/ # Feature 010 specs (completed)
 │       ├── spec.md            # Requirements
 │       ├── plan.md            # Architecture
-│       ├── tasks.md           # Implementation tasks
+│       ├── tasks.md           # 56/56 tasks completed
 │       ├── quickstart.md      # Setup guide
 │       ├── data-model.md      # Database schema
-│       ├── contracts/         # API contracts (OpenAPI)
-│       └── checklists/        # Quality checks
+│       └── contracts/         # API contracts
 ├── history/                    # Development history
 │   ├── adr/                   # Architecture Decision Records
 │   └── prompts/               # Prompt History Records
+│       ├── 009-agents-mcp/    # Phase 3 AI agents history
+│       ├── 010-chatkit-integration/ # ChatKit implementation history
+│       └── general/           # General prompts
 └── README.md                   # This file
 ```
 
@@ -253,18 +375,18 @@ This project follows the **Spec-Driven Development** methodology:
 5. **Documentation** (`docs/`) - Architecture and API docs
 6. **History** (`history/`) - Decisions and interactions
 
-### Current Stage: 006-backend-implement
+### Current Stage: 010-chatkit-integration
 
-**Production-Ready FastAPI Backend** with JWT authentication:
+**Complete AI-Powered Chatbot with OpenAI ChatKit**:
 
-- ✅ **7 RESTful Endpoints** - Full task CRUD + statistics
-- ✅ **JWT Validation** - EdDSA/ES256/RS256 via Better Auth JWKS
-- ✅ **Multi-Tenancy** - User isolation via user_id scoping
-- ✅ **SQLModel ORM** - Type-safe database operations
-- ✅ **Pydantic Validation** - Request/response validation
-- ✅ **CORS Support** - Frontend integration ready
-- ✅ **Async/Await** - High-performance async patterns
-- ✅ **OpenAPI Docs** - Auto-generated API documentation
+- ✅ **56/56 Tasks Complete** - Full implementation across all phases
+- ✅ **OpenAI ChatKit UI** - Production-ready chat interface
+- ✅ **Persistent History** - PostgreSQL-backed chat sessions
+- ✅ **User Isolation** - Zero-trust multi-tenancy via JWT
+- ✅ **MCP Tool Integration** - 7 task tools with visualization
+- ✅ **Dual-Agent System** - Orchestrator + Urdu Specialist
+- ✅ **Multi-language Support** - Urdu text and cultural context
+- ✅ **Performance Optimization** - Connection pooling, caching, error handling
 
 **Previous Stages:**
 - `001-cli-todo` - Original CLI with command-line interface ✅
@@ -272,6 +394,10 @@ This project follows the **Spec-Driven Development** methodology:
 - `003-frontend-design` - Next.js web frontend with auth bypass ✅
 - `004-profile-editing` - Enhanced profile management system ✅
 - `005-user-auth` - Production-ready authentication with Better Auth ✅
+- `006-backend-implement` - FastAPI RESTful backend with JWT validation ✅
+- `007-frontend-ux-polish` - Toast notifications, date labels, animations ✅
+- `008-frontend-backend-integration` - Connected Next.js to FastAPI ✅
+- `009-agents-mcp` - AI agents with MCP task management tools ✅
 
 ### 🎯 Key Innovation: Full-Stack Architecture
 
@@ -687,10 +813,13 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - `005-user-auth` - Production-ready authentication with Better Auth ✅
 - `006-backend-implement` - FastAPI RESTful backend with JWT validation ✅
 - `007-frontend-ux-polish` - Toast notifications, date labels, animations ✅
+- `008-frontend-backend-integration` - Connected Next.js to FastAPI ✅
+- `009-agents-mcp` - AI agents with MCP task management tools ✅
+- `010-chatkit-integration` - Complete ChatKit integration with 56/56 tasks ✅
 
 **Current Focus:**
-- **Phase 2**: Full-stack architecture with frontend + backend integration
-- **Key Innovation**: Complete authentication flow from Better Auth → JWT → FastAPI validation
+- **Phase 3 Complete**: AI-powered chatbot with OpenAI ChatKit
+- **Key Innovation**: Full ChatKit integration with persistent history, user isolation, and MCP tool visualization
 
 **What's Working:**
 - ✅ **7 RESTful Endpoints** - Full task CRUD + statistics

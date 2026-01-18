@@ -366,6 +366,92 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 
 **Documentation**: See `concepts/TYPESCRIPT_PATTERNS.md`, `concepts/PYTHON_PATTERNS.md`, and `concepts/SCHEMA_DESIGN.md` for detailed patterns.
 
+---
+
+### MCP Integration Skill
+**Location**: `.claude/skills/mcp-integration/`
+
+**Purpose**: Provides expertise in building **MCP (Model Context Protocol) tools** for OpenAI Agents SDK, enabling AI agents to access external resources, databases, and APIs through standardized tool interfaces.
+
+**When to use**:
+- Creating MCP servers with FastMCP
+- Integrating with OpenAI Agents SDK dynamically
+- Handling JWT authentication for user isolation
+- Building user-scoped tools for databases/APIs
+- Managing server lifecycle (connect/cleanup)
+
+**Key workflows**:
+- **Create MCP servers**: Use FastMCP to build tool interfaces
+- **User isolation**: Always get user_id from JWT token
+- **Dynamic servers**: Create per-request, never static
+- **Error handling**: Return structured responses with proper cleanup
+
+**Prohibited**: Never hardcode user IDs, never share database sessions, never expose tools without user isolation.
+
+**Documentation**: See `TOKENS.md`, `INTEGRATION_PATTERNS.md`, and `CODE_TEMPLATES.md` for detailed patterns.
+
+---
+
+### OpenAI Agents SDK Skill
+**Location**: `.claude/skills/openai-agents-sdk/`
+
+**Purpose**: Complete reference for **OpenAI Agents SDK** (Python) with Xiaomi "mimo-v2-flash" model, covering core basics, advanced workflows, realtime/voice, and integration/deployment.
+
+**When to use**:
+- Creating agents with Xiaomi mimo-v2-flash model
+- Building function tools and multi-agent handoffs
+- Implementing input/output guardrails for safety
+- Setting up structured outputs with Pydantic
+- Deploying with AsyncOpenAI and Xiaomi endpoints
+
+**Key capabilities**:
+- **Part A**: Basic agents, function tools, simple Runner usage
+- **Part B**: Multi-agent handoffs, guardrails, structured outputs
+- **Part C**: Realtime runner for voice/audio interactions
+- **Part D**: Xiaomi integration, error handling, production deployment
+
+**Core patterns**:
+- **Model**: Always use "mimo-v2-flash" for Xiaomi
+- **Client**: AsyncOpenAI with Xiaomi endpoint: `https://api.xiaomimimo.com/v1/`
+- **Tools**: `@function_tool` decorator for tool creation
+- **Safety**: `input_guardrail` and `output_guardrail` for validation
+
+**Documentation**: See `SKILL.md` for complete reference with all four parts.
+
+---
+
+### ChatKit Skill (Universal Integration)
+**Location**: `.claude/skills/chatkit/`
+
+**Purpose**: Framework-agnostic patterns for **ChatKit + OpenAI Agents SDK integration** across any backend/frontend framework and authentication system.
+
+**When to use**:
+- **ChatKit integration** with OpenAI Agents SDK (any framework)
+- **Custom ChatKitServer** implementation patterns (FastAPI, Express, Django, etc.)
+- **Frontend integration** patterns (Next.js, React, Vue, Svelte, etc.)
+- **User context injection** for personalized AI responses
+- **Tool integration** with ChatKit conversations (MCP, function calling, etc.)
+- **Data persistence** for chat threads and messages (any database)
+- **Authentication patterns** for ChatKit sessions (any auth provider)
+
+**Key capabilities**:
+- **Universal Patterns**: Framework-agnostic implementations for any tech stack
+- **OpenAI Agents SDK**: Integration with Xiaomi "mimo-v2-flash" model
+- **MCP Tools**: Dynamic MCP server creation per request with proper lifecycle management
+- **User Isolation**: JWT-based user filtering in all database operations
+- **Streaming Responses**: SSE format with proper headers for ChatKit compatibility
+- **Enhanced Loading**: Web Components detection with `customElements.whenDefined()`
+- **Single Endpoint Architecture**: Single `/api/chatkit` route handles all operations
+
+**Core patterns**:
+- **Frontend**: CDN script loading in body, `whenDefined()` detection, single proxy endpoint
+- **Backend**: `ChatKitServer` subclass with `respond()` method, dynamic MCP server creation
+- **Store**: PostgreSQL-backed with user isolation via `user_id` filtering
+- **Agents**: OpenAI Agents SDK with Xiaomi model, MCP tool integration
+- **Auth**: JWT token extraction, user context injection, httpOnly cookie patterns
+
+**Documentation**: See `SKILL.md` for complete reference, `concepts/` directory for detailed patterns, and `references/` for API documentation.
+
 ## Active Technologies
 - Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only) (001-cli-todo)
 - In-memory dictionary (no persistence - per spec requirement) (001-cli-todo)
@@ -377,6 +463,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 - Neon PostgreSQL (shared with FastAPI backend) (005-user-auth)
 - Python 3.13+ + FastAPI, SQLModel, uvicorn, python-jose, asyncpg (006-backend-implement)
 - Neon Serverless PostgreSQL (shared with frontend Better Auth) (006-backend-implement)
+- Python 3.13+ (backend), TypeScript 5.x (frontend) (009-agents-mcp)
+- Neon Serverless PostgreSQL (shared with existing Phase 2 backend) (009-agents-mcp)
 
 ## Recent Changes
 - 001-cli-todo: Added Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only)

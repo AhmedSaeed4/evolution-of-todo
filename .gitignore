@@ -70,6 +70,12 @@ frontend/out/
 frontend/build/
 frontend/dist/
 
+# Phase-3 frontend build artifacts
+phase-3/frontend/.next/
+phase-3/frontend/out/
+phase-3/frontend/build/
+phase-3/frontend/dist/
+
 # Dependency locks (keep package.json, ignore lock files if using pnpm/yarn)
 package-lock.json
 yarn.lock
@@ -127,3 +133,26 @@ phase-2/backend/*.egg-info/
 phase-2/backend/.pytest_cache/
 phase-2/backend/coverage/
 phase-2/backend/htmlcov/
+
+# Backend specific (phase-3/backend)
+phase-3/backend/.env
+phase-3/backend/.venv/
+phase-3/backend/uv.lock
+phase-3/backend/__pycache__/
+phase-3/backend/src/backend/__pycache__/
+phase-3/backend/tests/__pycache__/
+phase-3/backend/build/
+phase-3/backend/dist/
+phase-3/backend/*.egg-info/
+phase-3/backend/.pytest_cache/
+phase-3/backend/coverage/
+phase-3/backend/htmlcov/
+
+# Phase-3 server scripts and logs (development/testing only)
+phase-3/logs/
+phase-3/*.pid
+phase-3/*.log
+phase-3/script.md
+phase-3/start.server.sh
+phase-3/stop.server.sh
+phase-3/status.server.sh

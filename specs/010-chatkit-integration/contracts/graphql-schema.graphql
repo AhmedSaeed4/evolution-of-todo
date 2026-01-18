@@ -1,0 +1,203 @@
+# GraphQL Schema for ChatKit Integration
+# Note: This feature primarily uses REST API, but GraphQL schema is provided
+# for potential future expansion or alternative client implementations
+
+scalar DateTime
+scalar UUID
+scalar JSON
+
+# Main Query Type
+type Query {
+  # Chat Session Queries
+  chatSession(id: UUID!): ChatSession
+    @auth
+    @description("Get a specific chat session by ID")
+
+  chatSessions(
+    limit: Int = 50
+    after: String
+    order: ChatSessionOrder = UPDATED_AT_DESC
+  ): ChatSessionConnection!
+    @auth
+    @description("Get paginated list of user's chat sessions")
+
+  # Health Check (public)
+  chatKitHealth: ChatKitHealth!
+    @description("Check ChatKit configuration status")
+}
+
+# Main Mutation Type
+type Mutation {
+  # Chat Session Mutations
+  createChatSession(input: CreateChatSessionInput!): ChatSession!
+    @auth
+    @description("Create a new chat session")
+
+  updateChatSession(
+    id: UUID!
+    input: UpdateChatSessionInput!
+  ): ChatSession!
+    @auth
+    @description("Update chat session metadata")
+
+  deleteChatSession(id: UUID!): Boolean!
+    @auth
+    @description("Delete a chat session (cascade deletes messages)")
+
+  # Message Mutations
+  addChatMessage(input: AddChatMessageInput!): ChatMessage!
+    @auth
+    @description("Add a message to a chat session")
+
+  deleteChatMessage(id: UUID!): Boolean!
+    @auth
+    @description("Delete a chat message")
+}
+
+# Chat Session Type
+type ChatSession {
+  id: UUID!
+  userId: UUID!
+  title: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  metadata: JSON
+
+  # Relationships
+  messages(
+    limit: Int = 50
+    after: String
+    order: ChatMessageOrder = TIMESTAMP_DESC
+  ): ChatMessageConnection!
+
+  # Computed fields
+  messageCount: Int!
+  lastActivity: DateTime!
+}
+
+# Chat Message Type
+type ChatMessage {
+  id: UUID!
+  sessionId: UUID!
+  userId: UUID!
+  content: String!
+  senderType: SenderType!
+  senderName: String
+  timestamp: DateTime!
+  metadata: JSON
+
+  # Relationships
+  session: ChatSession!
+}
+
+# Enum Types
+enum SenderType {
+  USER
+  ASSISTANT
+  TOOL
+}
+
+enum ChatSessionOrder {
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  UPDATED_AT_ASC
+  UPDATED_AT_DESC
+  TITLE_ASC
+  TITLE_DESC
+}
+
+enum ChatMessageOrder {
+  TIMESTAMP_ASC
+  TIMESTAMP_DESC
+}
+
+# Input Types
+input CreateChatSessionInput {
+  title: String
+  metadata: JSON
+}
+
+input UpdateChatSessionInput {
+  title: String
+  metadata: JSON
+}
+
+input AddChatMessageInput {
+  sessionId: UUID!
+  content: String!
+  senderType: SenderType!
+  senderName: String
+  metadata: JSON
+}
+
+# Connection Types (for pagination)
+type ChatSessionConnection {
+  edges: [ChatSessionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ChatSessionEdge {
+  cursor: String!
+  node: ChatSession!
+}
+
+type ChatMessageConnection {
+  edges: [ChatMessageEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ChatMessageEdge {
+  cursor: String!
+  node: ChatMessage!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# Health Check Type
+type ChatKitHealth {
+  openaiKeyConfigured: Boolean!
+  sessionEndpointAvailable: Boolean!
+  storeImplemented: Boolean!
+  timestamp: DateTime!
+}
+
+# Directives
+directive @auth on FIELD_DEFINITION
+directive @description(text: String!) on FIELD_DEFINITION
+
+# Example Usage
+# query GetUserChatSessions {
+#   chatSessions(limit: 10) {
+#     edges {
+#       node {
+#         id
+#         title
+#         updatedAt
+#         messages(limit: 5) {
+#           edges {
+#             node {
+#               content
+#               senderType
+#               timestamp
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
+#
+# mutation CreateSession {
+#   createChatSession(input: { title: "New Chat" }) {
+#     id
+#     title
+#     createdAt
+#   }
+# }

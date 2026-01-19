@@ -120,7 +120,8 @@ async def chat_endpoint(
             params={
                 "command": "uv",
                 "args": ["run", "python", str(mcp_wrapper_path)],
-                "cwd": str(project_root)
+                "cwd": str(project_root),
+                "env": os.environ.copy()
             },
             client_session_timeout_seconds=60
         )

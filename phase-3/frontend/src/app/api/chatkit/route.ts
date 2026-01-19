@@ -18,7 +18,8 @@ async function getJWTTokenFromAuth(request: NextRequest): Promise<string | null>
     if (process.env.NODE_ENV === 'development') console.log('[ChatKit] Requesting JWT token from Better Auth...')
 
     // Call the Better Auth token endpoint with the same cookies
-    const response = await fetch('http://localhost:3000/api/auth/token', {
+    const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000'
+    const response = await fetch(`${authUrl}/api/auth/token`, {
       method: 'GET',
       headers: {
         'cookie': cookieHeader,

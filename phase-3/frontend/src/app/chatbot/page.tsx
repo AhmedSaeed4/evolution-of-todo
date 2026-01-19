@@ -155,15 +155,15 @@ export default function ChatBotPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#F9F7F2]">
+    <div className="flex flex-col h-[100dvh] bg-[#F9F7F2]">
       <Navbar />
-      <main className="flex-1 relative max-w-5xl mx-auto w-full px-4">
+      <main className="flex-1 relative max-w-5xl mx-auto w-full px-4 overflow-hidden">
         <ChatKit
           control={control}
           style={{
             width: '100%',
             height: '100%',
-            minHeight: 'calc(100vh - 64px)' // Subtract navbar height
+            // Remove hardcoded minHeight, let flexbox handle it
           }}
         />
       </main>

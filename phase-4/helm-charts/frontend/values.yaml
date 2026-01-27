@@ -1,0 +1,91 @@
+replicaCount: 1
+
+image:
+  repository: phase4-frontend
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: LoadBalancer
+  port: 3000
+
+# Environment variables for frontend
+# NOTE: NEXT_PUBLIC_* variables are set at BUILD TIME in Dockerfile
+# BACKEND_URL_INTERNAL and AUTH_URL_INTERNAL are for server-side code in Kubernetes pods
+env:
+  NEXT_PUBLIC_BACKEND_URL: "http://127.0.0.1:8000"  # Browser → Backend (via tunnel)
+  NEXT_PUBLIC_AUTH_URL: "http://127.0.0.1:3000"     # Frontend auth URL
+  NEXT_PUBLIC_AUTH_BYPASS: "false"
+  NEXT_PUBLIC_CHATKIT_DOMAIN_KEY: "yourdomain.com"
+  BACKEND_URL_INTERNAL: "http://backend:8000"        # Server → Backend (internal service)
+  AUTH_URL_INTERNAL: "http://frontend:3000"         # Server → Frontend auth (internal service)
+
+# Sensitive values from Kubernetes Secrets
+envFrom:
+  - secretRef:
+      name: phase4-secrets
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+  - name: gateway
+    sectionName: http
+  hostnames:
+  - chart-example.local
+  rules:
+  - matches:
+      - path:
+          type: PathPrefix
+          value: /headers
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

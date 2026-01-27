@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Base Colors (from skill TOKENS.md) */
+  --color-background: #F9F7F2;
+  /* Warm Cream - Main page background */
+  --color-surface: #F0EBE0;
+  /* Darker Cream - Cards, sections */
+  --color-structure: #2A1B12;
+  /* Espresso - Headings, main text */
+  --color-wireframe: #E5E0D6;
+  /* Wireframe Grey - Borders, dividers */
+  --color-text-secondary: #5C4D45;
+  /* Mocha - Supporting text */
+
+  /* Accent Colors */
+  --color-accent: #FF6B4A;
+  /* Vibrant Orange - Primary buttons, highlights */
+  --color-accent-hover: #E55A3D;
+  /* Darker Orange - Hover state */
+  --color-secondary-accent: #2A2A2A;
+  /* Charcoal - Dark sections, footers */
+
+  /* Priority Colors */
+  --color-priority-high: #FF6B4A;
+  --color-priority-medium: #F59E0B;
+  --color-priority-low: #10B981;
+
+  /* Category Colors */
+  --color-category-work: #3B82F6;
+  --color-category-personal: #8B5CF6;
+  --color-category-home: #10B981;
+  --color-category-other: #6B7280;
+
+  /* Spacing & Radius */
+  --radius-editorial: 12px;
+  --radius-technical: 4px;
+  --spacing-editorial: 2.5rem;
+  --spacing-technical: 0.5rem;
+
+  /* Motion */
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-structure);
+    font-family: var(--font-sans);
+  }
+}

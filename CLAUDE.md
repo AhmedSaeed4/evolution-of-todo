@@ -452,6 +452,36 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 
 **Documentation**: See `SKILL.md` for complete reference, `concepts/` directory for detailed patterns, and `references/` for API documentation.
 
+---
+
+### Minikube Deployment Skill
+**Location**: `.claude/skills/minikube-deployment/`
+
+**Purpose**: Defines the standard **Local Kubernetes Deployment Pattern** using Minikube, Docker, and Helm for containerizing and deploying frontend/backend applications.
+
+**When to use**:
+- Deploying projects to local Kubernetes cluster with Minikube
+- Creating Dockerfiles (multi-stage builds) for Next.js, FastAPI, etc.
+- Setting up Helm charts for Kubernetes deployments
+- Configuring Ingress for domain-based routing (e.g., `todo.local`)
+- Troubleshooting Docker build issues (with Gordon AI assistance)
+
+**Key workflows**:
+- **Start Minikube**: `minikube start` (ALWAYS first step)
+- **Configure Docker**: `eval $(minikube docker-env)` — CRITICAL for building images in Minikube
+- **Build images**: `docker build -t <image-name> .` (no registry push needed)
+- **Deploy with Helm**: `helm install <release> <chart>` using customized `values.yaml`
+- **Expose services**: Backend uses ClusterIP, Frontend uses LoadBalancer with `minikube tunnel`
+
+**Core rules**:
+- **ALWAYS** configure Docker daemon: `eval $(minikube docker-env)`
+- **NEVER** push images to external registry for local Minikube deployment
+- **ALWAYS** read `.env` files first to understand environment variable requirements
+- **NEVER** hardcode secrets in values.yaml — use Kubernetes Secrets
+- **ALWAYS** create `.dockerignore` alongside Dockerfiles
+
+**Documentation**: See `CLAUDE.md` for constraints, `patterns/WORKFLOW.md` for step-by-step deployment, `patterns/DOCKERFILE_PATTERNS.md` for Dockerfile templates, and `patterns/HELM_PATTERNS.md` for Helm chart structure.
+
 ## Active Technologies
 - Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only) (001-cli-todo)
 - In-memory dictionary (no persistence - per spec requirement) (001-cli-todo)
@@ -465,6 +495,7 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 - Neon Serverless PostgreSQL (shared with frontend Better Auth) (006-backend-implement)
 - Python 3.13+ (backend), TypeScript 5.x (frontend) (009-agents-mcp)
 - Neon Serverless PostgreSQL (shared with existing Phase 2 backend) (009-agents-mcp)
+- Neon Serverless PostgreSQL (external cloud database, SSL required) (011-minikube-deployment)
 
 ## Recent Changes
 - 001-cli-todo: Added Python 3.13+ (per Constitution VI) + None required for core functionality (Python standard library only)

@@ -14,7 +14,7 @@
 | **Phase I** | In-Memory Python Console App | Python, Claude Code, Spec-Kit Plus | ✅ **COMPLETE** |
 | **Phase II** | Full-Stack Web Application | Next.js 16+, FastAPI, SQLModel, Neon PostgreSQL, Better Auth | ✅ **COMPLETE** |
 | **Phase III** | AI-Powered Todo Chatbot | OpenAI Agents SDK, MCP, Xiaomi mimo-v2-flash | ✅ **COMPLETE** |
-| **Phase IV** | Local Kubernetes Deployment | Docker, Minikube, Helm, kubectl-ai, kagent | ⏳ **PLANNED** |
+| **Phase IV** | Local Kubernetes Deployment | Docker, Minikube, Helm, kubectl-ai | ✅ **COMPLETE** |
 | **Phase V** | Advanced Cloud Deployment | [To be specified] | 📋 **FUTURE** |
 
 ## 🚀 Quick Access
@@ -202,10 +202,25 @@ main (stable, protected)
 ├── 005-user-auth (completed)
 │   ├── specs/           # Authentication specs
 │   └── phase-2/         # Better Auth integration
-└── 006-backend-implement (current)
-    ├── specs/           # FastAPI backend specs
-    ├── phase-2/backend/ # RESTful API implementation
-    └── phase-2/frontend/# Frontend API client updates
+├── 006-backend-implement (completed)
+│   ├── specs/           # FastAPI backend specs
+│   ├── phase-2/backend/ # RESTful API implementation
+│   └── phase-2/frontend/ # Frontend API client updates
+├── 007-frontend-ux-polish (completed)
+│   ├── specs/           # UX enhancements specs
+│   └── phase-2/         # Toast notifications, animations
+├── 008-frontend-backend-integration (completed)
+│   ├── specs/           # Integration specs
+│   └── phase-2/         # Connected frontend to backend
+├── 009-agents-mcp (completed)
+│   ├── specs/           # AI agents specs
+│   └── phase-3/         # OpenAI Agents SDK + MCP
+├── 010-chatkit-integration (completed)
+│   ├── specs/           # ChatKit integration specs
+│   └── phase-3/         # OpenAI ChatKit UI
+└── 011-minikube-deployment (completed)
+    ├── specs/           # Kubernetes deployment specs
+    └── phase-4/         # Docker + Helm + Minikube
 ```
 
 ### Technology Stack
@@ -260,6 +275,7 @@ main (stable, protected)
 - **MCP Integration** - Model Context Protocol tools and servers
 - **OpenAI Agents SDK** - AI agents with Xiaomi mimo-v2-flash model
 - **ChatKit** - Conversational AI interfaces and chat applications
+- **Minikube Deployment** - Local Kubernetes deployment with Docker and Helm
 
 ## 📁 Project Structure
 
@@ -336,6 +352,29 @@ evolution-of-todo/
 │       │   └── page.tsx       # OpenAI ChatKit component
 │       └── src/app/api/chatkit/ # Session endpoints
 │           └── route.ts       # Consolidated session/refresh handler
+├── phase-4/                    # AI Chatbot + Minikube Deployment ✅
+│   ├── frontend/              # Next.js with ChatKit
+│   │   ├── Dockerfile         # Multi-stage build
+│   │   ├── .dockerignore
+│   │   └── src/app/chatbot/   # ChatKit interface
+│   ├── backend/               # FastAPI with AI agents
+│   │   ├── Dockerfile         # Multi-stage build
+│   │   ├── .dockerignore
+│   │   └── src/backend/
+│   │       ├── agents.py      # Dual-agent system
+│   │       ├── main.py
+│   │       ├── api/chatkit.py
+│   │       └── store/
+│   ├── helm-charts/           # Kubernetes manifests
+│   │   ├── frontend/          # Frontend Helm chart
+│   │   └── backend/           # Backend Helm chart
+│   ├── deployment-guide/      # Deployment documentation
+│   │   ├── MINIKUBE_DEPLOYMENT.md
+│   │   └── DEPLOYMENT_ACCESS.md
+│   ├── scripts/               # Utility scripts
+│   │   ├── verify-deployment.sh
+│   │   └── cleanup-deployment.sh
+│   └── README.md               # Phase-4 documentation
 ├── docs/                       # Documentation
 │   ├── architecture.md        # System architecture
 │   ├── api_reference.md       # API documentation
@@ -348,18 +387,23 @@ evolution-of-todo/
 │   ├── 005-user-auth/         # Feature 005 specs (completed)
 │   ├── 006-backend-implement/ # Feature 006 specs (completed)
 │   ├── 009-agents-mcp/        # Feature 009 specs (completed)
-│   └── 010-chatkit-integration/ # Feature 010 specs (completed)
+│   ├── 010-chatkit-integration/ # Feature 010 specs (completed)
+│   │   ├── spec.md            # Requirements
+│   │   ├── plan.md            # Architecture
+│   │   ├── tasks.md           # 56/56 tasks completed
+│   │   ├── quickstart.md      # Setup guide
+│   │   ├── data-model.md      # Database schema
+│   │   └── contracts/         # API contracts
+│   └── 011-minikube-deployment/ # Feature 011 specs (completed)
 │       ├── spec.md            # Requirements
 │       ├── plan.md            # Architecture
-│       ├── tasks.md           # 56/56 tasks completed
-│       ├── quickstart.md      # Setup guide
-│       ├── data-model.md      # Database schema
-│       └── contracts/         # API contracts
+│       └── tasks.md           # Implementation tasks
 ├── history/                    # Development history
 │   ├── adr/                   # Architecture Decision Records
 │   └── prompts/               # Prompt History Records
 │       ├── 009-agents-mcp/    # Phase 3 AI agents history
 │       ├── 010-chatkit-integration/ # ChatKit implementation history
+│       ├── 011-minikube-deployment/ # Minikube deployment history
 │       └── general/           # General prompts
 └── README.md                   # This file
 ```
@@ -375,24 +419,23 @@ This project follows the **Spec-Driven Development** methodology:
 5. **Documentation** (`docs/`) - Architecture and API docs
 6. **History** (`history/`) - Decisions and interactions
 
-### Current Stage: 010-chatkit-integration
+### Current Stage: 011-minikube-deployment
 
-**Complete AI-Powered Chatbot with OpenAI ChatKit**:
+**Local Kubernetes Deployment with Minikube**:
 
-- ✅ **56/56 Tasks Complete** - Full implementation across all phases
-- ✅ **OpenAI ChatKit UI** - Production-ready chat interface
-- ✅ **Persistent History** - PostgreSQL-backed chat sessions
-- ✅ **User Isolation** - Zero-trust multi-tenancy via JWT
-- ✅ **MCP Tool Integration** - 7 task tools with visualization
-- ✅ **Dual-Agent System** - Orchestrator + Urdu Specialist
-- ✅ **Multi-language Support** - Urdu text and cultural context
-- ✅ **Performance Optimization** - Connection pooling, caching, error handling
+- ✅ **Docker Multi-Stage Builds** - Optimized container images
+- ✅ **Helm Charts** - Kubernetes deployment orchestration
+- ✅ **Kubernetes Secrets** - Secure credential management
+- ✅ **Health Probes** - Liveness and readiness checks
+- ✅ **Service Exposure** - LoadBalancer for external access
+- ✅ **Deployment Scripts** - Verification and cleanup automation
 
 **Previous Stages:**
 - `001-cli-todo` - Original CLI with command-line interface ✅
 - `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX ✅
 - `003-frontend-design` - Next.js web frontend with auth bypass ✅
 - `004-profile-editing` - Enhanced profile management system ✅
+- `010-chatkit-integration` - Complete ChatKit integration with 56/56 tasks ✅
 - `005-user-auth` - Production-ready authentication with Better Auth ✅
 - `006-backend-implement` - FastAPI RESTful backend with JWT validation ✅
 - `007-frontend-ux-polish` - Toast notifications, date labels, animations ✅
@@ -816,10 +859,11 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - `008-frontend-backend-integration` - Connected Next.js to FastAPI ✅
 - `009-agents-mcp` - AI agents with MCP task management tools ✅
 - `010-chatkit-integration` - Complete ChatKit integration with 56/56 tasks ✅
+- `011-minikube-deployment` - Local Kubernetes deployment with Minikube ✅
 
 **Current Focus:**
-- **Phase 3 Complete**: AI-powered chatbot with OpenAI ChatKit
-- **Key Innovation**: Full ChatKit integration with persistent history, user isolation, and MCP tool visualization
+- **Phase 4 Complete**: AI Chatbot + Minikube Local Kubernetes Deployment
+- **Key Innovation**: Full-stack containerized application running on local Kubernetes cluster with Helm orchestration
 
 **What's Working:**
 - ✅ **7 RESTful Endpoints** - Full task CRUD + statistics

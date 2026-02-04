@@ -1,0 +1,96 @@
+replicaCount: 1
+
+image:
+  repository: phase4-backend
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: LoadBalancer
+  port: 8000
+
+# Environment variables for backend (non-sensitive)
+env:
+  CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+  API_HOST: "0.0.0.0"
+  API_PORT: "8000"
+  BETTER_AUTH_URL: "http://frontend:3000"
+  DEBUG: "false"
+  ENVIRONMENT: "development"
+
+# Sensitive values from Kubernetes Secrets
+envFrom:
+  - secretRef:
+      name: phase4-secrets
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+  - name: gateway
+    sectionName: http
+  hostnames:
+  - chart-example.local
+  rules:
+  - matches:
+      - path:
+          type: PathPrefix
+          value: /headers
+
+resources: {}
+
+# Health probes - backend has /health endpoint
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 3
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

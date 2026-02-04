@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: Todo API - Audit Log
+  version: 1.0.0
+  description: Audit log API for Branch 012 features
+
+paths:
+  /{user_id}/audit:
+    get:
+      summary: Get audit log
+      description: Retrieve audit log entries for a user with optional filtering
+      tags:
+        - Audit
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: User ID for scoping
+        - name: event_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [created, updated, deleted, completed]
+          description: Filter by event type
+        - name: entity_type
+          in: query
+          required: false
+          schema:
+            type: string
+            default: task
+          description: Filter by entity type
+        - name: entity_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filter by specific entity ID
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 500
+          description: Maximum number of entries to return
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+          description: Number of entries to skip (for pagination)
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLogEntry'
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found
+
+components:
+  schemas:
+    AuditLogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum: [created, updated, deleted, completed]
+        entityType:
+          type: string
+          example: task
+        entityId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          description: Full event details including task title, changes, etc.
+      required:
+        - id
+        - eventType
+        - entityType
+        - entityId
+        - userId
+        - timestamp
+        - data

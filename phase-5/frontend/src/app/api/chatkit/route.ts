@@ -1,15 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+// ChatKit API Route - Dapr Proxy
+// Proxies GET/POST requests to backend-api via Dapr sidecar
+// Note: Browsers cannot access Dapr directly, so Next.js server-side routes act as proxy
 
-// Use internal backend URL for server-side, fallback to NEXT_PUBLIC_BACKEND_URL for local dev
-const BACKEND_URL = process.env.BACKEND_URL_INTERNAL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+import { NextRequest, NextResponse } from 'next/server'
+
+// Dapr configuration
+const DAPR_HOST = process.env.DAPR_HOST || 'localhost'
+const DAPR_HTTP_PORT = process.env.DAPR_HTTP_PORT || '3500'
+const DAPR_URL = `http://${DAPR_HOST}:${DAPR_HTTP_PORT}/v1.0`
 
 // Helper to get JWT token by calling Better Auth API (server-side)
 async function getJWTTokenFromAuth(request: NextRequest): Promise<string | null> {
   try {
-    // Better Auth stores session token in cookies, but we need the actual JWT
-    // Make a server-side request to /api/auth/token with the session cookie
-
     const cookieHeader = request.headers.get('cookie')
     if (!cookieHeader) {
       if (process.env.NODE_ENV === 'development') console.log('[ChatKit] No cookies in request')
@@ -18,7 +20,6 @@ async function getJWTTokenFromAuth(request: NextRequest): Promise<string | null>
 
     if (process.env.NODE_ENV === 'development') console.log('[ChatKit] Requesting JWT token from Better Auth...')
 
-    // Call the Better Auth token endpoint with the same cookies
     // Use internal auth URL for server-side requests in Kubernetes
     const authUrl = process.env.AUTH_URL_INTERNAL || process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000'
     const response = await fetch(`${authUrl}/api/auth/token`, {
@@ -48,10 +49,14 @@ async function getJWTTokenFromAuth(request: NextRequest): Promise<string | null>
   }
 }
 
+// GET /api/chatkit - Proxies to backend-api via Dapr
 export async function GET(request: NextRequest) {
   try {
-    // Forward GET requests to backend ChatKit endpoint
-    const backendResponse = await fetch(`${BACKEND_URL}/api/chatkit`, {
+    // Dapr Service Invocation to backend-api
+    const method = 'api/chatkit'
+    const daprUrl = `${DAPR_URL}/invoke/backend-api/method/${method}`
+
+    const backendResponse = await fetch(daprUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -70,14 +75,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data)
 
   } catch (error) {
-    console.error('ChatKit GET error:', error)
+    console.error('ChatKit GET error (Dapr):', error)
     return NextResponse.json(
-      { error: 'Failed to process ChatKit request' },
-      { status: 500 }
+      { error: 'Failed to proxy ChatKit request to backend service' },
+      { status: 503 }
     )
   }
 }
 
+// POST /api/chatkit - Proxies to backend-api via Dapr
 export async function POST(request: NextRequest) {
   try {
     // Get the raw request body
@@ -86,20 +92,23 @@ export async function POST(request: NextRequest) {
     // Get JWT token by calling Better Auth API
     const token = await getJWTTokenFromAuth(request)
 
-    // Prepare headers - forward auth token if present
+    // Prepare headers - forward auth token if present (Dapr forwards headers to target service)
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     }
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
-      if (process.env.NODE_ENV === 'development') console.log('[ChatKit] Forwarding token to backend')
+      if (process.env.NODE_ENV === 'development') console.log('[ChatKit] Forwarding token to backend via Dapr')
     } else {
       if (process.env.NODE_ENV === 'development') console.log('[ChatKit] No token to forward')
     }
 
-    // Forward the request to backend ChatKit endpoint (single endpoint handles all ChatKit operations)
-    const backendResponse = await fetch(`${BACKEND_URL}/api/chatkit`, {
+    // Dapr Service Invocation to backend-api
+    const method = 'api/chatkit'
+    const daprUrl = `${DAPR_URL}/invoke/backend-api/method/${method}`
+
+    const backendResponse = await fetch(daprUrl, {
       method: 'POST',
       headers,
       body: body,
@@ -117,7 +126,6 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Create a readable stream from the response
       const stream = backendResponse.body
 
       return new Response(stream, {
@@ -143,10 +151,10 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('ChatKit POST error:', error)
+    console.error('ChatKit POST error (Dapr):', error)
     return NextResponse.json(
-      { error: 'Failed to process ChatKit request' },
-      { status: 500 }
+      { error: 'Failed to proxy ChatKit request to backend service' },
+      { status: 503 }
     )
   }
 }

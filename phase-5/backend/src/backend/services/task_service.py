@@ -7,8 +7,6 @@ from dateutil.relativedelta import relativedelta
 
 from ..models.task import Task
 from ..schemas.task import TaskCreate, TaskUpdate
-from .audit_service import AuditService
-from .notification_service import NotificationService
 
 
 class TaskService:
@@ -17,8 +15,6 @@ class TaskService:
     def __init__(self, session: Session):
         """Initialize with database session"""
         self.session = session
-        self.audit_service = AuditService(session)
-        self.notification_service = NotificationService(session)
 
     def get_user_tasks(
         self,
@@ -118,24 +114,6 @@ class TaskService:
         self.session.commit()
         self.session.refresh(task)
 
-        # Audit logging
-        self.audit_service.log_event(
-            event_type="created",
-            entity_type="task",
-            entity_id=task.id,
-            user_id=user_id,
-            data={
-                "title": task.title,
-                "priority": task.priority,
-                "category": task.category,
-                "due_date": task.due_date.isoformat() if task.due_date else None,
-                "recurring_rule": task.recurring_rule,
-                "reminder_at": task.reminder_at.isoformat() if task.reminder_at else None,
-                "tags": task.tags
-            }
-        )
-        self.session.commit()
-
         return task
 
     def update_task(self, user_id: str, task_id: UUID, task_data: TaskUpdate) -> Optional[Task]:
@@ -184,20 +162,6 @@ class TaskService:
         self.session.commit()
         self.session.refresh(task)
 
-        # Audit logging
-        if changes:
-            self.audit_service.log_event(
-                event_type="updated",
-                entity_type="task",
-                entity_id=task.id,
-                user_id=user_id,
-                data={
-                    "title": task.title,
-                    "changes": changes
-                }
-            )
-            self.session.commit()
-
         return task
 
     def delete_task(self, user_id: str, task_id: UUID) -> bool:
@@ -214,21 +178,6 @@ class TaskService:
         task = self.get_task(user_id, task_id)
         if not task:
             return False
-
-        # Audit logging before deletion
-        self.audit_service.log_event(
-            event_type="deleted",
-            entity_type="task",
-            entity_id=task.id,
-            user_id=user_id,
-            data={
-                "title": task.title,
-                "priority": task.priority,
-                "category": task.category,
-                "completed": task.completed
-            }
-        )
-        self.session.commit()
 
         self.session.delete(task)
         self.session.commit()
@@ -261,31 +210,6 @@ class TaskService:
         task.updated_at = datetime.utcnow()
         self.session.commit()
         self.session.refresh(task)
-
-        # Audit logging
-        if not was_completed and task.completed:
-            # Task was just completed
-            audit_data = {
-                "title": task.title,
-                "completed": True
-            }
-
-            # Check if this is a recurring task completion
-            if task.recurring_rule:
-                audit_data["recurring_rule"] = task.recurring_rule
-                # Create next instance
-                next_task = self._create_next_recurring_instance(task)
-                if next_task:
-                    audit_data["next_instance_created"] = str(next_task.id)
-
-            self.audit_service.log_event(
-                event_type="completed",
-                entity_type="task",
-                entity_id=task.id,
-                user_id=user_id,
-                data=audit_data
-            )
-            self.session.commit()
 
         return task
 
@@ -323,12 +247,14 @@ class TaskService:
         base_date = completed_task.due_date or datetime.utcnow()
         next_due_date = self._calculate_next_due_date(base_date, completed_task.recurring_rule)
 
-        # Check if next due date is after end date
+        # Check if next due date is after end date (compare dates, not datetimes)
         if completed_task.recurring_end_date:
             next_due_naive = to_naive(next_due_date)
             end_date_naive = to_naive(completed_task.recurring_end_date)
-            if next_due_naive and end_date_naive and next_due_naive > end_date_naive:
-                return None
+            # Compare dates only (ignore time) to allow tasks on the end date itself
+            if next_due_naive and end_date_naive:
+                if next_due_naive.date() > end_date_naive.date():
+                    return None
 
         # Calculate adjusted reminder time for the new instance
         next_reminder_at = None
@@ -363,24 +289,8 @@ class TaskService:
         self.session.add(next_task)
         self.session.commit()
         self.session.refresh(next_task)
-
-        # Audit log for the new instance
-        self.audit_service.log_event(
-            event_type="created",
-            entity_type="task",
-            entity_id=next_task.id,
-            user_id=completed_task.user_id,
-            data={
-                "title": next_task.title,
-                "priority": next_task.priority,
-                "category": next_task.category,
-                "due_date": next_task.due_date.isoformat() if next_task.due_date else None,
-                "recurring_rule": next_task.recurring_rule,
-                "parent_task_id": str(completed_task.id),
-                "auto_created": True
-            }
-        )
-        self.session.commit()
+        # Note: Audit is handled by audit-service via task-created event subscription
+        # The caller (recurring_service) will publish the event
 
         import sys
         print(f"DEBUG: New recurring task created - id={next_task.id}, title={next_task.title}, due_date={next_task.due_date}, status={next_task.status}", file=sys.stderr)

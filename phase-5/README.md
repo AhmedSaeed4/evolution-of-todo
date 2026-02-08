@@ -1,114 +1,254 @@
-# Phase IV: AI Chatbot + Minikube Deployment
+# Phase V: Microservices Event-Driven Architecture with Dapr
 
-> Intelligent task management chatbot with dual-agent system, bilingual support, MCP integration, AND production-ready Kubernetes deployment using Minikube, Docker, and Helm.
+> Production-ready microservices architecture with event-driven communication, Dapr sidecars, Redpanda message broker, and Kubernetes deployment using Minikube, Docker, and Helm.
 
-## 🎯 Phase Overview
-
-**Phase IV** delivers a production-ready AI chatbot system with full Kubernetes deployment:
-- **AI Model**: Xiaomi mimo-v2-flash via OpenAI Agents SDK
-- **Architecture**: Dual-agent system (Orchestrator + Urdu Specialist)
-- **MCP Integration**: 7 task management tools with user isolation
-- **Language Support**: English + Urdu bilingual responses
-- **Backend**: Enhanced FastAPI with AI chat endpoints
-- **Frontend**: Next.js 16.1.1 with ChatKit integration
-- **🆕 Deployment**: Containerized with Docker + Minikube + Helm
-- **🆕 Orchestration**: Kubernetes with LoadBalancer services
-- **🆕 Secrets**: Kubernetes Secrets for secure credential management
-- **Foundation**: Phase 2 full-stack application (Next.js + FastAPI + Neon DB)
-
-**Status**: ✅ **COMPLETE** (Chatbot + Minikube Deployment) 
+**Status**: ✅ **COMPLETE** - All 5 user stories delivered with full microservices architecture
 
 ---
 
-## 🏗️ Architecture
+## 🎯 Phase Overview
 
-### Technology Stack
+**Phase V** transforms the monolithic Phase 4 application into a resilient, event-driven microservices architecture:
+
+- **Event-Driven Communication**: Dapr Pub/Sub with Redpanda (Kafka-compatible)
+- **5 Independent Microservices**: backend-api, websocket-service, notification-service, audit-service, recurring-service
+- **Idempotency**: Dapr State Store (Redis) for duplicate event handling
+- **Real-time Updates**: WebSocket with SSE fallback for stable tunnel connections
+- **Shared Database**: Neon PostgreSQL with user isolation (shared database pattern)
+
+### Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                              FRONTEND (Next.js)                                     │
+│                        LoadBalancer: 127.0.0.1:3000                                 │
+│                   Dapr Sidecar: localhost:3500 (Service Invocation)                 │
+└───────────────────────────────────────┬─────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           KUBERNETES SERVICES (Minikube)                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │   frontend   │  │   backend    │  │  websocket   │  │  recurring   │           │
+│  │  :3000/Dapr  │  │  :8000/Dapr  │  │  :8001/Dapr  │  │  :8002/Dapr  │           │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                             │
+│  │ notification │  │    audit     │  │    REDPANDA  │                             │
+│  │  :8003/Dapr  │  │  :8004/Dapr  │  │   (Kafka)    │                             │
+│  └──────────────┘  └──────────────┘  └──────────────┘                             │
+│                                                                                     │
+│  Kafka Topics: task-created, task-updated, task-completed, task-deleted            │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+                    ┌──────────────────────────────────┐
+                    │       NEON POSTGRESQL            │
+                    │  (tasks, notifications, audit)  │
+                    └──────────────────────────────────┘
+```
+
+### 5 Microservices Overview
+
+| Service | Port | Purpose | Subscribes To | Publishes |
+|---------|------|---------|---------------|-----------|
+| **backend-api** | 8000 | Task CRUD operations | - | task-created, task-updated, task-completed, task-deleted |
+| **websocket-service** | 8001 | Real-time updates (WS/SSE) | task-created, task-updated, task-completed, task-deleted | - |
+| **notification-service** | 8002 | Reminder processing | Dapr Cron (@every 1m) | reminder-due (optional) |
+| **audit-service** | 8004 | Complete audit trail | task-created, task-updated, task-completed, task-deleted | - |
+| **recurring-service** | 8002 | Auto-generate recurring tasks | task-completed | task-created (new instances) |
+
+### Event Flow Examples
+
+**1. Creating a Task:**
+```
+User → Frontend → Dapr Invoke → backend-api
+                                    ↓
+                            Publish task-created to Kafka
+                                    ↓
+        ┌───────────────────────┼───────────────────────┐
+        ▼                       ▼                       ▼
+   websocket-service      audit-service            (other services)
+   (broadcast to clients)  (log to database)
+```
+
+**2. Completing a Recurring Task:**
+```
+User → Frontend → Dapr Invoke → backend-api
+                                    ↓
+                            Publish task-completed to Kafka
+                                    ↓
+        ┌───────────────────────┼───────────────────────┐
+        ▼                       ▼                       ▼
+   recurring-service      websocket-service        audit-service
+   (create next task)      (broadcast update)      (log event)
+        ↓
+Publish task-created (new instance)
+```
+
+---
+
+## 🏗️ Technology Stack
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| **AI Model** | Xiaomi mimo-v2-flash | Primary language model |
-| **Agent SDK** | OpenAI Agents SDK | Agent orchestration |
-| **MCP Server** | FastMCP | Tool integration |
-| **Frontend** | Next.js 16.1.1 (App Router) | React framework with ChatKit |
-| **Language** | TypeScript 5.x | Type-safe development |
-| **Styling** | Tailwind CSS v4 | Utility-first CSS |
-| **Animations** | Framer Motion v12.23.26 | Smooth transitions |
+| **Orchestration** | Dapr 1.14+ | Microservices sidecar pattern, pub/sub, state management |
+| **Message Broker** | Redpanda (Kafka-compatible) | Event streaming with persistence |
+| **State Store** | Redis | Dapr state for idempotency checking |
+| **Frontend** | Next.js 16.1.1 (App Router) | React framework with Server Components |
+| **Language** | TypeScript 5.x | Type-safe frontend development |
+| **Styling** | Tailwind CSS v4 | Utility-first CSS with design tokens |
+| **Animations** | Framer Motion v12.23.26 | Smooth UI transitions |
 | **Icons** | Lucide React v0.562.0 | Technical iconography |
-| **Toasts** | Sonner v2.0.7 | Notification system |
-| **ChatKit** | @openai/chatkit-react | OpenAI ChatKit UI |
+| **Toasts** | Sonner v2.0.7 | Toast notifications |
+| **ChatKit** | @openai/chatkit-react | AI chat interface |
 | **Backend** | FastAPI 0.128.0 | Async Python web framework |
+| **Language** | Python 3.13+ | Backend services |
 | **ORM** | SQLModel 0.0.31 | Pydantic + SQLAlchemy hybrid |
-| **Database** | Neon PostgreSQL | Serverless PostgreSQL |
+| **Database** | Neon PostgreSQL | Serverless PostgreSQL (SSL required) |
 | **Auth** | Better Auth v1.4.9 | Authentication framework |
 | **Driver** | asyncpg | High-performance async DB driver |
 | **JWT** | python-jose | Token generation/validation |
+| **HTTP Client** | httpx | Async HTTP for Dapr communication |
+| **Container** | Docker | Multi-stage builds |
+| **Orchestration** | Kubernetes (Minikube) | Local cluster deployment |
+| **Package Manager** | Helm | Kubernetes deployments |
 
-### System Flow
+### Dapr Components
 
-```
-User → ChatKit Interface → Session API → AI Agents → MCP Tools → Database
-                    ↓                    ↓
-            Language Selection    Enhanced Input (user_id)
-                    ↓                    ↓
-         Conversation History    Bilingual Response (English/Urdu)
+**Pub/Sub Component** (`k8s-dapr/components/pubsub.yaml`):
+- Type: Kafka (via Redpanda)
+- Brokers: `redpanda.default.svc.cluster.local:9093`
+- Consumer Group: `{appID}-v2` (auto-generated per service)
+- Initial Offset: `newest` (start from newest messages)
+- Redeliver Interval: 60s
+- Processing Timeout: 15s
+- Max Retries: 0 (disable retries to prevent stuck offsets)
 
-[Phase 2 Foundation: Next.js → Better Auth → FastAPI → Neon DB]
-```
+**State Store Component** (`k8s-dapr/components/statestore.yaml`):
+- Type: Redis
+- Host: `redis:6379`
+- Key Prefix: `none` (enable key-based access)
+- Purpose: Idempotency checking for event processing
+- Key Format: `processed-{event_id}-{service_name}`
+
+**Cron Binding** (`k8s-dapr/bindings/cron-binding.yaml`):
+- Type: Cron
+- Schedule: `@every 1m`
+- Direction: `input`
+- Purpose: Trigger reminder checking in notification-service
+
+**Programmatic Subscriptions** (via `/dapr/subscribe` endpoints):
+- Each microservice declares which topics it subscribes to
+- Dapr automatically routes events to matching endpoints
 
 ---
 
 ## 📁 Project Structure
 
 ```
-phase-4/
-├── frontend/              # Next.js 16+ App Router with ChatKit
-│   ├── src/
-│   │   ├── app/          # App Router pages & routes
-│   │   │   ├── chatbot/  # ChatKit interface
-│   │   │   │   └── page.tsx
-│   │   │   ├── api/      # API routes (Better Auth + ChatKit)
-│   │   │   │   ├── auth/
-│   │   │   │   └── chatkit/
-│   │   │   ├── (auth)/
-│   │   │   ├── (dashboard)/
-│   │   │   └── layout.tsx
-│   │   ├── components/
-│   │   ├── lib/
-│   │   └── hooks/
-│   ├── Dockerfile         # 🆕 Multi-stage build
-│   ├── .dockerignore      # 🆕 Build exclusions
-│   └── next.config.ts
-│
-├── backend/               # AI Chatbot Backend with ChatKit
+phase-5/
+├── backend/                              # FastAPI Backend Services
+│   ├── Dockerfile                        # Multi-entrypoint Dockerfile
+│   ├── pyproject.toml                    # Python dependencies (uv)
+│   ├── .env.example                      # Environment variables template
 │   ├── src/backend/
-│   │   ├── agents.py
-│   │   ├── main.py
-│   │   ├── api/chatkit.py
-│   │   ├── store/
-│   │   ├── models/
-│   │   ├── task_serves_mcp_tools.py
-│   │   └── auth/jwt.py
-│   ├── Dockerfile         # 🆕 Multi-stage build
-│   ├── .dockerignore      # 🆕 Build exclusions
-│   └── pyproject.toml
+│   │   ├── main.py                       # Backend API entrypoint
+│   │   ├── config.py                     # Configuration management
+│   │   ├── database.py                   # Neon PostgreSQL connection
+│   │   ├── agents.py                     # OpenAI Agents SDK setup
+│   │   ├── routers/                      # API route handlers
+│   │   │   ├── tasks.py                  # Task CRUD with event publishing
+│   │   │   ├── notifications.py          # Notification endpoints
+│   │   │   └── audit.py                  # Audit log endpoints
+│   │   ├── services/                     # Business logic
+│   │   │   ├── task_service.py           # Task operations (no direct calls)
+│   │   │   ├── audit_service.py          # Audit logging (called by microservice)
+│   │   │   ├── notification_service.py   # Notifications (called by microservice)
+│   │   │   └── reminder_service.py       # Legacy reminder polling (replaced by cron)
+│   │   ├── models/                       # Database models
+│   │   │   ├── task.py                   # Task SQLModel
+│   │   │   ├── notification.py           # Notification SQLModel
+│   │   │   └── audit_log.py              # AuditLog SQLModel
+│   │   ├── microservices/                # Microservice entrypoints
+│   │   │   ├── __init__.py
+│   │   │   ├── websocket_service.py      # Real-time updates (WS/SSE)
+│   │   │   ├── recurring_service.py      # Recurring task generation
+│   │   │   ├── notification_service.py   # Reminder processing
+│   │   │   └── audit_service.py          # Event logging
+│   │   ├── utils/                        # Utilities
+│   │   │   ├── event_publisher.py        # Dapr event publishing helper
+│   │   │   ├── dapr_state.py             # Dapr state store helper
+│   │   │   └── idempotency.py            # Idempotency checking
+│   │   └── api/                          # Additional API modules
+│   │       └── chatkit.py                # ChatKit session management
+│   └── migrations/                       # Database migrations
+│       └── 003_dapr_state.sql            # Dapr state table
 │
-├── helm-charts/           # 🆕 Kubernetes manifests
-│   ├── frontend/          # Frontend Helm chart
+├── frontend/                             # Next.js Frontend
+│   ├── Dockerfile                        # Multi-stage Docker build
+│   ├── .env.local.example                # Environment variables template
+│   ├── src/
+│   │   ├── app/                          # App Router pages
+│   │   │   ├── api/                      # API routes (Dapr proxy)
+│   │   │   │   ├── tasks/                # Task CRUD proxy
+│   │   │   │   │   ├── route.ts          # GET/POST → Dapr → backend-api
+│   │   │   │   │   └── [id]/route.ts     # GET/PATCH/DELETE → Dapr
+│   │   │   │   ├── notifications/        # Notification proxy
+│   │   │   │   │   ├── route.ts          # GET → Dapr → notification-service
+│   │   │   │   │   └── [id]/route.ts     # PATCH/DELETE → Dapr
+│   │   │   │   ├── chatkit/              # ChatKit endpoint
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── auth/                 # Better Auth routes
+│   │   │   ├── (dashboard)/               # Protected pages
+│   │   │   │   ├── tasks/                # Task management page
+│   │   │   │   │   └── page.tsx          # Real-time updates via useTaskRealtimeUpdates
+│   │   │   │   └── chatbot/              # AI chat interface
+│   │   │   └── layout.tsx
+│   │   ├── components/                   # React components
+│   │   ├── hooks/                        # Custom React hooks
+│   │   │   ├── useWebSocket.ts           # WebSocket/SSE hook with fallback
+│   │   │   ├── useNotifications.ts       # Notification management
+│   │   │   └── ...
+│   │   ├── lib/                          # Utilities
+│   │   │   ├── websocket.ts              # WebSocket manager
+│   │   │   ├── auth-server.ts            # Better Auth client
+│   │   │   └── ...
+│   │   └── styles/                       # Global styles
+│   └── package.json                      # Dependencies
+│
+├── helm-charts/                          # Kubernetes Helm Charts
+│   ├── backend/                          # Backend API chart
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml                   # Dapr config, image, resources
+│   │   └── templates/
+│   │       ├── deployment.yaml           # Dapr pod annotations
+│   │       ├── service.yaml              # ClusterIP
+│   │       └── ...
+│   ├── frontend/                         # Frontend chart
 │   │   ├── Chart.yaml
 │   │   ├── values.yaml
 │   │   └── templates/
-│   └── backend/           # Backend Helm chart
-│       ├── Chart.yaml
-│       ├── values.yaml
-│       └── templates/
+│   ├── websocket-service/                # WebSocket microservice chart
+│   ├── notification-service/             # Notification microservice chart
+│   ├── audit-service/                    # Audit microservice chart
+│   └── recurring-service/                # Recurring microservice chart
 │
-├── deployment-guide/      # 🆕 Deployment docs
-│   ├── MINIKUBE_DEPLOYMENT.md
-│   └── DEPLOYMENT_ACCESS.md
+├── k8s-dapr/                             # Dapr Infrastructure
+│   ├── components/                       # Dapr components
+│   │   ├── pubsub.yaml                   # Kafka Pub/Sub component
+│   │   ├── statestore.yaml               # Redis State Store component
+│   │   └── secrets.yaml                  # Kubernetes Secret Store
+│   ├── bindings/                         # Dapr bindings
+│   │   └── cron-binding.yaml             # Cron binding for reminders
+│   ├── subscriptions/                    # Dapr subscriptions (declarative)
+│   │   ├── websocket-service-subscription.yaml
+│   │   ├── audit-service-subscription.yaml
+│   │   └── recurring-service-subscription.yaml
+│   ├── configurations/                   # Dapr configurations
+│   │   └── no-statestore-config.yaml     # Config for services without state
+│   └── redis-deployment.yaml             # Redis for state store
 │
-└── scripts/               # 🆕 Utility scripts
-    ├── verify-deployment.sh
-    └── cleanup-deployment.sh
+└── START.md                              # Deployment quickstart guide
 ```
 
 ---
@@ -117,476 +257,353 @@ phase-4/
 
 ### Prerequisites
 
-- **Python 3.13+** (for backend AI chatbot)
-- **uv package manager** (for backend)
-- **Neon PostgreSQL database** (shared with Phase 2)
-- **Xiaomi API Key** (for mimo-v2-flash model)
-- **Node.js 18+** (for frontend - future ChatKit integration)
+- **Minikube** - Local Kubernetes cluster
+- **kubectl** - Kubernetes CLI
+- **helm** - Kubernetes package manager
+- **docker** - Container building
+- **uv** - Python package manager for backend
+- **Dapr CLI** - Dapr management (optional, k8s mode only)
 
-### 1. Environment Setup
+### 1. Start Minikube
 
-**Backend (.env):**
 ```bash
-cd backend
-cat > .env << EOF
-DATABASE_URL="postgresql://user:password@host:port/database?sslmode=require"
-BETTER_AUTH_SECRET="your-generated-secret-key"
-OPENAI_API_KEY="sk-..."  # Required for ChatKit session management
-XIAOMI_API_KEY="your-xiaomi-api-key"
-CORS_ORIGINS="http://localhost:3000"
-API_HOST="0.0.0.0"
-API_PORT="8000"
-DEBUG="true"
-EOF
+# Start Minikube with adequate resources
+minikube start --cpus=4 --memory=8192 --disk-size=50g
+
+# Configure Docker to use Minikube's daemon
+eval $(minikube docker-env)
+
+# Verify (should show "minikube" as server name)
+docker info | grep Server
 ```
 
-**Frontend (.env.local):**
+### 2. Install Dapr
+
 ```bash
-cd frontend
-echo "NEXT_PUBLIC_AUTH_BYPASS=false" > .env.local
-echo "DATABASE_URL=postgresql://user:pass@host:5432/dbname?sslmode=require" >> .env.local
-echo "BETTER_AUTH_SECRET=your-64-char-secret" >> .env.local
-echo "NEXT_PUBLIC_AUTH_URL=http://localhost:3000" >> .env.local
-echo "NEXT_PUBLIC_BACKEND_URL=http://localhost:8000" >> .env.local
+# Install Dapr in Kubernetes
+dapr init -k
+
+# Verify Dapr system pods are running
+kubectl get pods -n dapr-system
 ```
 
-### 2. Install & Run
+### 3. Deploy Redpanda (Kafka)
 
-**Backend (AI Chatbot):**
 ```bash
-cd backend
-uv sync
-uv run uvicorn src.backend.main:app --reload --host 0.0.0.0 --port 8000
-# API docs: http://localhost:8000/docs
-# Chat endpoint: POST http://localhost:8000/chat
+# Add Redpanda Helm repository
+helm repo add redpanda https://charts.redpanda.com
+helm repo update
+
+# Install Redpanda
+helm install redpanda redpanda/redpanda \
+  --set resources.cpu.cores=1 \
+  --set resources.memory.container.max=1Gi
+
+# Wait for Redpanda to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=redpanda --timeout=300s
+
+# Create Kafka topics
+kubectl exec -it redpanda-0 -- rpk topic create \
+  task-created task-completed task-updated task-deleted reminder-due task-updates
+
+# Verify topics
+kubectl exec -it redpanda-0 -- rpk topic list
 ```
 
-**Frontend (Next.js - Phase 2 Foundation):**
+### 4. Deploy Redis for State Store
+
 ```bash
-cd frontend
-npm install
-npm run dev
-# App: http://localhost:3000
+kubectl apply -f phase-5/k8s-dapr/redis-deployment.yaml
+
+# Verify Redis is running
+kubectl get pods -l app=redis
+kubectl get svc redis
 ```
 
-### 3. Test the AI Chatbot
+### 5. Apply Dapr Components
 
-**ChatKit Session Creation (for frontend):**
 ```bash
-# Create ChatKit session (returns client_secret for frontend)
-curl -X POST http://localhost:8000/api/chatkit/session
+# Apply Dapr components (pubsub, statestore, secrets)
+kubectl apply -f phase-5/k8s-dapr/components/
 
-# Refresh expired session
-curl -X POST http://localhost:8000/api/chatkit/refresh
+# Apply Dapr bindings (cron)
+kubectl apply -f phase-5/k8s-dapr/bindings/
 
-# Check ChatKit health
-curl http://localhost:8000/api/chatkit/health
+# Verify components
+kubectl get components
 ```
 
-**Chat with Agents (English):**
+### 6. Create Kubernetes Secrets
+
 ```bash
-curl -X POST \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Create a task: Buy milk", "user_id": "user_123"}' \
-  http://localhost:8000/chat
+kubectl create secret generic app-secrets \
+  --from-literal=DATABASE_URL="postgresql://user:password@host/database?sslmode=require" \
+  --from-literal=BETTER_AUTH_SECRET="your-64-char-secret" \
+  --from-literal=JWT_SECRET="your-jwt-secret" \
+  --from-literal=OPENAI_API_KEY="sk-your-openai-key" \
+  --from-literal=XIAOMI_API_KEY="your-xiaomi-key"
 ```
 
-**Chat with Agents (Urdu):**
+### 7. Build Container Images
+
 ```bash
-curl -X POST \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"message": "نیا ٹاسک بنائیں: کل کی ڈیڈ لائن کے ساتھ پراجیکٹ رپورٹ مکمل کریں", "user_id": "user_123"}' \
-  http://localhost:8000/chat
+cd phase-5
+
+# Build backend image (supports all microservices via SERVICE env var)
+docker build -t phase5-backend:v1 -f backend/Dockerfile backend
+
+# Build frontend image
+docker build -t phase5-frontend:v1 \
+  --build-arg NEXT_PUBLIC_BACKEND_URL="http://127.0.0.1:8000" \
+  --build-arg NEXT_PUBLIC_AUTH_URL="http://127.0.0.1:3000" \
+  --build-arg NEXT_PUBLIC_AUTH_BYPASS="false" \
+  --build-arg NEXT_PUBLIC_CHATKIT_DOMAIN_KEY="local-dev" \
+  --build-arg NEXT_PUBLIC_WEBSOCKET_URL="ws://127.0.0.1:8001" \
+  --build-arg NEXT_PUBLIC_SSE_URL="http://127.0.0.1:8001/api/sse" \
+  -f frontend/Dockerfile frontend
 ```
 
-**Traditional API Endpoints (Still Available):**
+### 8. Deploy Microservices
+
 ```bash
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     http://localhost:8000/api/user_123/tasks
+# Deploy all services via Helm
+helm upgrade --install backend helm-charts/backend --set image.tag=v1
+helm upgrade --install frontend helm-charts/frontend --set image.tag=v1
+helm upgrade --install websocket-service helm-charts/websocket-service
+helm upgrade --install notification-service helm-charts/notification-service
+helm upgrade --install audit-service helm-charts/audit-service
+helm upgrade --install recurring-service helm-charts/recurring-service
+
+# Verify all pods are running (should show 2/2 - app + Dapr sidecar)
+kubectl get pods
 ```
 
-**ChatKit Frontend Integration:**
+### 9. Start Minikube Tunnel
+
 ```bash
-# Visit ChatKit interface
-# http://localhost:3000/chatbot
-# - Loads OpenAI ChatKit component
-# - Full-height responsive layout
-# - Cream background matching design system
-# - Session creation via backend API
-# - Tool execution visual feedback
+# Run in separate terminal and keep running
+minikube tunnel
+```
+
+### 10. Access the Application
+
+| Service | URL |
+|---------|-----|
+| **Frontend** | http://127.0.0.1:3000 |
+| **Backend API** | http://127.0.0.1:8000 |
+| **Backend Docs** | http://127.0.0.1:8000/docs |
+| **WebSocket Service** | http://127.0.0.1:8001/health |
+| **WebSocket Endpoint** | ws://127.0.0.1:8001/ws?user_id={id} |
+| **SSE Endpoint** | http://127.0.0.1:8001/api/sse/{user_id} |
+
+---
+
+## 🔧 Troubleshooting
+
+### Issue: Pods stuck in `ImagePullBackOff` or `ErrImageNeverPull`
+
+**Cause**: Image not found in Minikube's Docker daemon
+
+**Solution**:
+```bash
+# Make sure you ran this before building
+eval $(minikube docker-env)
+
+# Rebuild the image
+docker build -t phase5-backend:v1 -f backend/Dockerfile backend
+
+# Redeploy
+helm upgrade backend helm-charts/backend --set image.tag=v1
+```
+
+### Issue: Events not being consumed by microservices
+
+**Cause**: Kafka consumer offset stuck or Dapr subscription not registered
+
+**Solution**:
+```bash
+# Check Dapr subscriptions
+kubectl get subscriptions
+
+# Check pod logs for subscription errors
+kubectl logs -l app=recurring-service -c recurring-service
+
+# Restart consumer group by changing consumerGroup in pubsub.yaml
+# Edit: k8s-dapr/components/pubsub.yaml
+# Change: consumerGroup: "{appID}-v3"
+# Then: kubectl apply -f k8s-dapr/components/pubsub.yaml
+```
+
+### Issue: Real-time updates not working in browser
+
+**Cause**: WebSocket connection blocked by tunnel or SSE fallback not triggered
+
+**Solution**:
+```bash
+# 1. Verify frontend was built with correct WebSocket URL
+grep NEXT_PUBLIC_WEBSOCKET_URL .next/BUILD_ID  # Should show ws://127.0.0.1:8001
+
+# 2. Verify WebSocket service is accessible
+curl http://127.0.0.1:8001/health
+
+# 3. Check browser console for [Realtime] logs
+# Should see: "[Realtime] Switching to SSE after 2 WebSocket errors"
+
+# 4. If wrong URL, rebuild frontend with correct build arg
+docker build -t phase5-frontend:v1 \
+  --build-arg NEXT_PUBLIC_WEBSOCKET_URL="ws://127.0.0.1:8001" \
+  -f frontend/Dockerfile frontend
+```
+
+### Issue: Recurring tasks not auto-generating
+
+**Cause**: Recurring service not consuming task-completed events
+
+**Solution**:
+```bash
+# Check recurring-service logs for CloudEvents parsing errors
+kubectl logs -l app=recurring-service --tail=50
+
+# Verify task-completed topic has messages
+kubectl exec -it redpanda-0 -- rpk topic consume task-completed --num 1
+
+# Check event payload includes recurring_rule
+# Expected: {"data": {"recurring_rule": "daily", ...}, "event_id": ..., ...}
+```
+
+### Issue: Idempotency not working (duplicate processing)
+
+**Cause**: Redis state store not accessible or key format mismatch
+
+**Solution**:
+```bash
+# Verify Redis is running
+kubectl get pods -l app=redis
+
+# Test Redis connection from a microservice pod
+kubectl exec -it deployment/recurring-service -- \
+  sh -c 'curl -v http://localhost:3500/v1.0/state/statestore/key'
+
+# Check dapr_state.py logs for "DAPR_STATE_URL" value
+# Should be: http://localhost:3500/v1.0/state/statestore
 ```
 
 ---
 
-## ✅ Features Delivered
+## 📊 Event Schema Reference
 
-### AI Chatbot System (Phase 3)
+All events follow the CloudEvents format with the following structure:
 
-**ChatKit Integration:**
-- ✅ **OpenAI ChatKit UI**: Production-ready chat interface via CDN
-- ✅ **Session Management**: JWT bridging between Better Auth and OpenAI
-- ✅ **Persistent History**: PostgreSQL-backed chat sessions and messages
-- ✅ **Full-Height Layout**: Responsive interface that fills screen space
-- ✅ **Modern Technical Editorial Design**: Cream backgrounds, orange accents
-- ✅ **Loading States**: Centered spinner animations
-- ✅ **Error Handling**: Retry functionality with clear error messages
-- ✅ **Mobile Responsive**: Works on all screen sizes
-
-**Dual-Agent Architecture:**
-- ✅ **Orchestrator Agent**: Main coordinator with language detection
-- ✅ **Urdu Specialist Agent**: Urdu-only responses with cultural context
-- ✅ **Language Detection**: Automatic detection based on Urdu characters
-- ✅ **Bilingual Responses**: English + Urdu support
-
-**Xiaomi Model Integration:**
-- ✅ **Xiaomi mimo-v2-flash**: Primary language model
-- ✅ **OpenAI Agents SDK**: Agent orchestration framework
-- ✅ **Enhanced Input**: User context preservation via JWT
-
-**MCP Tool Integration (7 Tools):**
-- ✅ `create_task` - Create new tasks with due dates
-- ✅ `list_tasks` - Filter by status, priority, category, search
-- ✅ `get_task` - Retrieve single task details
-- ✅ `update_task` - Modify task properties
-- ✅ `delete_task` - Remove tasks
-- ✅ `toggle_complete` - Toggle task completion
-- ✅ `get_stats` - Get task statistics
-
-**ChatKit Store Implementation:**
-- ✅ **14 Methods**: Complete store interface with user isolation
-- ✅ **Thread Operations**: Load, save, list, delete threads
-- ✅ **Item Operations**: Load, add, save, delete messages
-- ✅ **Attachment Operations**: Store, load, delete file attachments
-- ✅ **Database Schema**: chat_sessions and chat_messages tables
-
-**User Isolation & Security:**
-- ✅ JWT-based user identification
-- ✅ Enhanced input with user_id context
-- ✅ Database queries scoped to user
-- ✅ Zero-trust security model
-
-### Authentication System (Better Auth)
-
-**Endpoints:**
-- `POST /api/auth/sign-up/email` - User registration
-- `POST /api/auth/sign-in/email` - User login
-- `GET /api/auth/get-session` - Session validation
-
-**Security:**
-- ✅ bcrypt password hashing
-- ✅ JWT tokens (HS256)
-- ✅ Constant-time comparison
-- ✅ Generic error messages (no enumeration)
-- ✅ SSL connections to Neon PostgreSQL
-
-### Task Management (Full CRUD)
-
-**Frontend Operations:**
-- ✅ Create tasks with title, description, priority, category
-- ✅ List tasks with filters (status, priority, category, search)
-- ✅ Complete/uncomplete tasks with animations
-- ✅ Edit task details
-- ✅ Delete tasks
-- ✅ Task statistics dashboard
-
-**Backend API (7 Endpoints):**
-- `GET /api/{user_id}/tasks` - List with filters
-- `POST /api/{user_id}/tasks` - Create (201)
-- `GET /api/{user_id}/tasks/{task_id}` - Get single
-- `PUT /api/{user_id}/tasks/{task_id}` - Update
-- `DELETE /api/{user_id}/tasks/{task_id}` - Delete (204)
-- `PATCH /api/{user_id}/tasks/{task_id}/complete` - Toggle
-- `GET /api/{user_id}/stats` - Statistics
-
-### Profile Management
-
-**5 Specialized Components:**
-- **ProfileInfoCard** - Editable name/email
-- **PasswordChangeCard** - Secure password updates
-- **AccountInfoCard** - User statistics
-- **TaskStatsCard** - Task analytics
-- **DangerZoneCard** - Account deletion
-
-### UX Polish (007-frontend-ux-polish)
-
-**Sonner Toast Notifications (7 scenarios):**
-- Login → "Welcome back!" (bottom-right, 4s)
-- Create task → "Task created"
-- Update task → "Task updated"
-- Delete task → "Task deleted"
-- Toggle task → "Task completed" / "Task reopened"
-- Logout → "Logged out"
-- Password change → "Password changed successfully"
-
-**Enhanced Date Labels:**
-- Due: [date] with Calendar icon
-- Created: [date] with Clock icon
-- Updated: [date] with Pencil icon (conditional)
-- Mono typography, uppercase labels, proper spacing
-
-**Task Completion Animations:**
-- Scale: 0.98 (completed) ↔ 1 (pending)
-- Opacity: 0.6 (completed) ↔ 1 (pending)
-- Editorial ease curve: [0.22, 1, 0.36, 1]
-- Duration: 0.2s
-- Performance: 60fps GPU-accelerated
-
-**Modern Technical Editorial Design:**
-- Background: #F9F7F2 (Cream)
-- Text: #2A1B12 (Espresso)
-- Accent: #FF6B4A (Orange)
-- Structure: #E5E0D6 (Wireframe)
-- Typography: Playfair Display, DM Sans, JetBrains Mono
-
----
-
-## 🔐 Authentication Flow
-
-### JWT Integration
-
-```
-1. User signs up/logs in → Better Auth → JWT token issued
-2. Frontend stores token in session
-3. API calls include: Authorization: Bearer <token>
-4. Backend validates via JWKS endpoint
-5. Backend scopes all queries to user_id
-6. Multi-tenant data isolation enforced
+```json
+{
+  "event_id": "uuid-v4",
+  "event_type": "task-created",
+  "timestamp": "2026-02-08T10:00:00Z",
+  "user_id": "user-123",
+  "correlation_id": "optional-correlation-id",
+  "data": {
+    "task_id": "uuid",
+    "title": "Task title",
+    "priority": "high",
+    "category": "work",
+    "status": "pending"
+  }
+}
 ```
 
-### Backend JWT Validation
+### Event Types
+
+| Event Type | Trigger | Published By | Subscribed By |
+|------------|---------|--------------|---------------|
+| `task-created` | New task created | backend-api | websocket-service, audit-service, recurring-service |
+| `task-updated` | Task modified | backend-api | websocket-service, audit-service |
+| `task-completed` | Task marked complete | backend-api | websocket-service, audit-service, recurring-service |
+| `task-deleted` | Task removed | backend-api | websocket-service, audit-service |
+| `reminder-due` | Reminder triggered (optional) | notification-service | (future: notification consumers) |
+
+### Event Publishing Example
 
 ```python
-# In FastAPI routers
-from auth.jwt import validate_token
+# In backend-api routers
+from backend.utils.event_publisher import publish_task_created
 
-@router.get("/api/{user_id}/tasks")
-async def get_tasks(user_id: str, token: str = Header(...)):
-    validated = await validate_token(token)
-    if validated.user_id != user_id:
-        raise HTTPException(403, "Access denied")
-    # Continue with scoped query...
+await publish_task_created(
+    user_id=user_id,
+    task_id=str(task.id),
+    title=task.title,
+    description=task.description,
+    priority=task.priority,
+    due_date=task.due_date.isoformat() if task.due_date else None,
+    reminder_at=task.reminder_at.isoformat() if task.reminder_at else None,
+    recurring_rule=task.recurring_rule,
+    recurring_end_date=task.recurring_end_date.isoformat() if task.recurring_end_date else None,
+    tags=task.tags or []
+)
 ```
 
 ---
 
-## 🧪 Testing
+## 🎯 User Stories Delivered
 
-### Frontend Testing
+### US1: Real-Time Task Updates Across Devices (P1) ✅
 
-**UX Polish Features:**
-```bash
-# Enable bypass mode
-echo "NEXT_PUBLIC_AUTH_BYPASS=true" > frontend/.env.local
-cd frontend && npm run dev
+**Independent Test**: Open two browser tabs to the same user account, create a task in Tab A, verify it appears in Tab B within 2 seconds without manual refresh.
 
-# Test checklist:
-# ✅ Toast notifications (7 scenarios)
-# ✅ Date labels (3 scenarios: new, edited, with due date)
-# ✅ Animations (3 scenarios: complete, reopen, performance)
-# ✅ Mobile navigation (hamburger menu)
-```
+**Implementation**:
+- `websocket-service.py` - WebSocket and SSE endpoints
+- `useTaskRealtimeUpdates()` hook - WebSocket/SSE with automatic fallback
+- Subscribes to: `task-created`, `task-updated`, `task-completed`, `task-deleted`
 
-**Real Authentication:**
-```bash
-# Test registration
-curl -X POST http://localhost:3000/api/auth/sign-up/email \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Test","email":"test@example.com","password":"password123"}'
+### US2: Automatic Recurring Task Generation (P1) ✅
 
-# Test login
-curl -X POST http://localhost:3000/api/auth/sign-in/email \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
-```
+**Independent Test**: Create a daily recurring task, mark it complete, verify a new task for tomorrow is created within 5 seconds.
 
-### Backend Testing
+**Implementation**:
+- `recurring_service.py` - Consumes `task-completed` events
+- Calls `TaskService._create_next_recurring_instance()` for recurring tasks
+- Publishes `task-created` event for new instance
 
-**API Endpoint Testing:**
-```bash
-cd backend
+### US3: Timely Reminder Notifications (P2) ✅
 
-# Run all tests
-uv run pytest
+**Independent Test**: Set a reminder for 1 minute in the future, verify notification appears at the correct time.
 
-# Run with coverage
-uv run pytest --cov=src/backend
+**Implementation**:
+- `notification_service.py` - Cron binding triggered every 1 minute
+- Queries tasks where `reminder_at <= NOW() - 1m` and `reminder_sent = False`
+- Creates notifications via `NotificationService`
 
-# Manual API testing (requires JWT token)
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     http://localhost:8000/api/user_123/tasks
-```
+### US4: Complete Audit Trail (P2) ✅
 
-**Auto-Generated Documentation:**
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+**Independent Test**: Perform CRUD operations on tasks, verify all events are logged with timestamps and user IDs.
 
----
+**Implementation**:
+- `audit_service.py` - Consumes all task events
+- Logs to `audit_logs` table via `AuditService.log_event()`
+- Idempotency via Dapr State Store
 
-## 📊 Performance & Metrics
+### US5: Resilient Service Operation (P3) ✅
 
-### Frontend
-- **Bundle Size**: ~2.9kb (Sonner only)
-- **Animation**: 60fps, GPU-accelerated
-- **TypeScript**: 100% coverage
-- **Components**: 25+ React components
+**Independent Test**: Stop the audit-service pod, verify task creation still works, restart service and verify events are processed.
 
-### Backend
-- **Endpoints**: 7 RESTful + 3 Auth
-- **Response Time**: <100ms (p95)
-- **Database**: Neon PostgreSQL with SSL
-- **Async**: Full async/await patterns
+**Implementation**:
+- Idempotency checking via `idempotency.py` with Redis state store
+- Resource limits on all microservices
+- Health probes for self-healing
 
 ---
 
 ## 🔗 Related Documentation
 
-- **Main Project**: [../../README.md](../../README.md)
-- **Spec 010**: [../../specs/010-chatkit-integration/spec.md](../../specs/010-chatkit-integration/spec.md)
-- **Spec 009**: [../../specs/009-agents-mcp/spec.md](../../specs/009-agents-mcp/spec.md)
-- **Phase 3 Backend**: [backend/README.md](backend/README.md)
-- **Phase 3 Frontend**: [frontend/README.md](frontend/README.md)
-- **OpenAI Agents SDK**: [../../.claude/skills/openai-agents-sdk/SKILL.md](../../.claude/skills/openai-agents-sdk/SKILL.md)
-- **MCP Integration**: [../../.claude/skills/mcp-integration/SKILL.md](../../.claude/skills/mcp-integration/SKILL.md)
-- **ChatKit Skill**: [../../.claude/skills/chatkit/SKILL.md](../../.claude/skills/chatkit/SKILL.md)
-- **Phase 3 History**: [../../history/prompts/009-agents-mcp/](../../history/prompts/009-agents-mcp/)
-- **ChatKit History**: [../../history/prompts/010-chatkit-integration/](../../history/prompts/010-chatkit-integration/)
-- **Spec 007**: [../../specs/007-frontend-ux-polish/spec.md](../../specs/007-frontend-ux-polish/spec.md)
-- **Spec 006**: [../../specs/006-backend-implement/spec.md](../../specs/006-backend-implement/spec.md)
-- **Spec 005**: [../../specs/005-user-auth/spec.md](../../specs/005-user-auth/spec.md)
-- **Design System**: [../../.claude/skills/ui-design/TOKENS.md](../../.claude/skills/ui-design/TOKENS.md)
-- **Auth Bypass**: [AUTH_BYPASS_IMPLEMENTATION.md](AUTH_BYPASS_IMPLEMENTATION.md)
+- **Spec**: [../specs/013-microservices-dapr/spec.md](../specs/013-microservices-dapr/spec.md)
+- **Plan**: [../specs/013-microservices-dapr/plan.md](../specs/013-microservices-dapr/plan.md)
+- **Tasks**: [../specs/013-microservices-dapr/tasks.md](../specs/013-microservices-dapr/tasks.md)
+- **Quickstart**: [START.md](START.md)
+- **Backend README**: [backend/README.md](backend/README.md)
+- **Frontend README**: [frontend/README.md](frontend/README.md)
+- **Dapr Docs**: https://docs.dapr.io/
+- **Redpanda Docs**: https://docs.redpanda.com/
 
 ---
 
-## 🎯 Success Criteria (Phase III)
-
-### ✅ All Met
-- [x] Dual-agent system (Orchestrator + Urdu Specialist)
-- [x] Xiaomi mimo-v2-flash model integration
-- [x] MCP server with 7 task management tools
-- [x] User isolation via JWT + enhanced input
-- [x] Bilingual support (English/Urdu)
-- [x] Automatic language detection
-- [x] Immediate tool calling (no describing)
-- [x] Proper response formatting
-- [x] Due date parameter fix (camelCase)
-- [x] Agent name detection in responses
-- [x] All Phase 2 features preserved
-- [x] Traditional CRUD endpoints still functional
-- [x] JWT authentication for both chat and API
-
-### ✅ ChatKit Integration Complete
-- [x] OpenAI ChatKit UI integration (React component via CDN)
-- [x] Real-time streaming responses (SSE support)
-- [x] Conversation history (PostgreSQL persistence)
-- [x] ChatKit Store implementation (14 methods with user isolation)
-- [x] Session management (JWT bridging between Better Auth and OpenAI)
-- [x] Database migrations (chat_sessions and chat_messages tables)
-- [x] Modern Technical Editorial UI design (cream backgrounds, orange accents)
-- [x] Full-height responsive layout (fills screen space)
-- [x] Loading and error states with retry functionality
-- [x] Mobile responsive design
-- [x] Tool execution visual feedback
-
----
-
-## 🐳 Phase IV: Minikube Deployment
-
-> Production-ready containerization and Kubernetes deployment for this full-stack AI chatbot application.
-
-### Deployment Overview
-
-The Phase-4 application is now fully deployable to local Kubernetes using Minikube, Docker, and Helm charts.
-
-**Status**: ✅ **Complete** (92% - 61/65 tasks)
-
-### Quick Deploy
-
-```bash
-# 1. Start Minikube
-minikube start
-
-# 2. Configure Docker for Minikube
-eval $(minikube docker-env)
-
-# 3. Create Secrets (from your .env files)
-kubectl create secret generic phase4-secrets \
-  --from-literal=DATABASE_URL='your-neon-url' \
-  --from-literal=BETTER_AUTH_SECRET='your-jwt-secret' \
-  --from-literal=OPENAI_API_KEY='your-openai-key' \
-  --from-literal=XIAOMI_API_KEY='your-xiaomi-key'
-
-# 4. Build Images
-docker build -t phase4-backend:v1 ./backend
-docker build -t phase4-frontend:v1 \
-  --build-arg NEXT_PUBLIC_BACKEND_URL="http://127.0.0.1:8000" \
-  --build-arg NEXT_PUBLIC_AUTH_URL="http://127.0.0.1:3000" \
-  --build-arg NEXT_PUBLIC_AUTH_BYPASS="false" \
-  --build-arg NEXT_PUBLIC_CHATKIT_DOMAIN_KEY="yourdomain.com" \
-  ./frontend
-
-# 5. Deploy
-helm install backend ./helm-charts/backend
-helm install frontend ./helm-charts/frontend
-
-# 6. Start tunnel (in new terminal)
-minikube tunnel
-```
-
-### Access the Application
-
-| Service | URL |
-|---------|-----|
-| **Frontend (Chatbot UI)** | http://127.0.0.1:3000 |
-| **Backend (API)** | http://127.0.0.1:8000 |
-
-### Deployment Features
-
-**Containerization:**
-- ✅ Multi-stage Docker builds (node:20-alpine, python:3.13-slim)
-- ✅ Optimized images (frontend: 254MB, backend: 336MB)
-- ✅ Next.js standalone output mode
-
-**Kubernetes:**
-- ✅ Helm charts for frontend and backend
-- ✅ LoadBalancer services with external IPs via minikube tunnel
-- ✅ Kubernetes Secrets for sensitive data (no hardcoded secrets)
-- ✅ Health probes (liveness/readiness) for self-healing
-
-**Scripts & Tools:**
-- ✅ `scripts/verify-deployment.sh` - Deployment health check
-- ✅ `scripts/cleanup-deployment.sh` - Resource cleanup
-- ✅ `deployment-guide/MINIKUBE_DEPLOYMENT.md` - Full deployment guide
-- ✅ `deployment-guide/DEPLOYMENT_ACCESS.md` - Quick access info
-
-### Project Structure (Updated)
-
-```
-phase-4/
-├── frontend/              # Next.js 16+ with ChatKit
-├── backend/               # FastAPI with AI agents
-├── helm-charts/           # 🆕 Kubernetes manifests
-│   ├── frontend/          # Frontend Helm chart
-│   └── backend/           # Backend Helm chart
-├── deployment-guide/      # 🆕 Deployment docs
-│   ├── MINIKUBE_DEPLOYMENT.md
-│   └── DEPLOYMENT_ACCESS.md
-└── scripts/               # 🆕 Utility scripts
-    ├── verify-deployment.sh
-    └── cleanup-deployment.sh
-```
-
-### Documentation
-
-- **Full Guide**: [deployment-guide/MINIKUBE_DEPLOYMENT.md](deployment-guide/MINIKUBE_DEPLOYMENT.md)
-- **Access Info**: [deployment-guide/DEPLOYMENT_ACCESS.md](deployment-guide/DEPLOYMENT_ACCESS.md)
-- **Spec**: [../specs/011-minikube-deployment/spec.md](../specs/011-minikube-deployment/spec.md)
-- **Tasks**: [../specs/011-minikube-deployment/tasks.md](../specs/011-minikube-deployment/tasks.md)
-
----
-
-**Phase IV Complete** ✅
-*AI Chatbot with Minikube containerization and Kubernetes deployment*
-Built with ❤️ using Spec-Driven Development
+**Phase V Complete** ✅
+*Microservices Event-Driven Architecture with Dapr*

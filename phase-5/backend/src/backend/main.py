@@ -4,8 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 import logging
-import asyncio
-from typing import Optional
+import os
 
 from .config import settings
 from .routers import tasks_router
@@ -19,6 +18,7 @@ from agents.mcp import MCPServerStdio
 from .services.reminder_service import ReminderService
 from dotenv import load_dotenv
 load_dotenv()
+
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG if settings.debug else logging.INFO,
@@ -43,7 +43,16 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+
+# ========================================
+# NOTE: WebSocket and SSE are handled by websocket-service microservice
+# See: backend/src/backend/microservices/websocket_service.py
+# ========================================
+
+
+# ========================================
 # Include routers
+# ========================================
 app.include_router(tasks_router)
 app.include_router(notifications_router)
 app.include_router(audit_router)
@@ -83,7 +92,7 @@ class ChatResponse(BaseModel):
     timestamp: str
 
 
-async def get_token_from_header(authorization: Optional[str] = Header(None)) -> str:
+async def get_token_from_header(authorization: str | None = Header(None)) -> str:
     """Extract Bearer token from Authorization header"""
     if not authorization:
         raise HTTPException(
@@ -141,7 +150,7 @@ async def chat_endpoint(
 
         # Run the agent with MCP tools
         logger.info(f"Running agent with input: {enhanced_input}")
-        result = await Runner.run(orchestrator_agent, enhanced_input, run_config=config)
+        result = await Runner.run(orchestrator_agent, enhanced_input, run_config=config, max_turns=30)
         logger.info(f"Agent result: {result.final_output}, agent: {getattr(result, 'agent', result.last_agent.name)}")
 
         # Cleanup
@@ -179,6 +188,9 @@ async def startup_event():
     logger.info(f"CORS origins: {origins}")
     logger.info(f"API running on {settings.api_host}:{settings.api_port}")
 
+    # NOTE: WebSocket/SSE managers removed - handled by websocket-service
+    logger.info("✅ Real-time updates handled by websocket-service microservice")
+
     # Validate ChatKit configuration
     try:
         from .config import validate_chatkit_config
@@ -189,15 +201,17 @@ async def startup_event():
         # Don't block startup, but log clearly
 
     # Start reminder service
-    try:
-        reminder_service = ReminderService(interval_seconds=60)
-        await reminder_service.start()
-        # Store in app state for shutdown
-        app.state.reminder_service = reminder_service
-        logger.info("✅ Reminder service started")
-    except Exception as e:
-        logger.error(f"❌ Failed to start reminder service: {e}")
-        # Don't block startup, but log clearly
+    # DISABLED: Now using notification-service microservice with Dapr cron binding
+    # try:
+    #     reminder_service = ReminderService(interval_seconds=60)
+    #     await reminder_service.start()
+    #     # Store in app state for shutdown
+    #     app.state.reminder_service = reminder_service
+    #     logger.info("✅ Reminder service started")
+    # except Exception as e:
+    #     logger.error(f"❌ Failed to start reminder service: {e}")
+    #     # Don't block startup, but log clearly
+    logger.info("✅ Reminder service disabled - using notification-service microservice")
 
 
 @app.on_event("shutdown")
@@ -206,9 +220,10 @@ async def shutdown_event():
     logger.info("Shutting down FastAPI Todo Backend")
 
     # Stop reminder service
-    if hasattr(app.state, 'reminder_service'):
-        try:
-            await app.state.reminder_service.stop()
-            logger.info("✅ Reminder service stopped")
-        except Exception as e:
-            logger.error(f"❌ Error stopping reminder service: {e}")
+    # DISABLED: Now using notification-service microservice with Dapr cron binding
+    # if hasattr(app.state, 'reminder_service'):
+    #     try:
+    #         await app.state.reminder_service.stop()
+    #         logger.info("✅ Reminder service stopped")
+    #     except Exception as e:
+    #         logger.error(f"❌ Error stopping reminder service: {e}")

@@ -39,6 +39,6 @@ export const auth = betterAuth({
     minPasswordLength: 8,
     requireEmailVerification: false,
   },
-  trustedOrigins: ['http://localhost:3000'],
+  trustedOrigins: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   plugins: [jwt()],
 });

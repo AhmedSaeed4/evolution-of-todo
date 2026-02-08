@@ -30,7 +30,8 @@ const mockTasks: Task[] = [
     dueDate: '2025-01-15',
     createdAt: '2025-01-01T10:00:00Z',
     updatedAt: '2025-01-01T10:00:00Z',
-    userId: 'test-user'
+    userId: 'test-user',
+    reminderSent: false
   },
   {
     id: '2',
@@ -43,7 +44,8 @@ const mockTasks: Task[] = [
     dueDate: '2025-01-10',
     createdAt: '2025-01-02T10:00:00Z',
     updatedAt: '2025-01-02T10:00:00Z',
-    userId: 'test-user'
+    userId: 'test-user',
+    reminderSent: false
   },
   {
     id: '3',
@@ -55,7 +57,8 @@ const mockTasks: Task[] = [
     completed: false,
     createdAt: '2025-01-03T10:00:00Z',
     updatedAt: '2025-01-03T10:00:00Z',
-    userId: 'test-user'
+    userId: 'test-user',
+    reminderSent: false
   }
 ];
 
@@ -73,7 +76,8 @@ export default function TestPage() {
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: 'test-user'
+      userId: 'test-user',
+      reminderSent: false
     };
     setTasks([...tasks, newTask]);
     setIsModalOpen(false);

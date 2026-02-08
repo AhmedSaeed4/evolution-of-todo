@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: websocket-service
+  labels:
+    app: websocket-service
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: websocket-service

@@ -15,7 +15,7 @@
 | **Phase II** | Full-Stack Web Application | Next.js 16+, FastAPI, SQLModel, Neon PostgreSQL, Better Auth | ✅ **COMPLETE** |
 | **Phase III** | AI-Powered Todo Chatbot | OpenAI Agents SDK, MCP, Xiaomi mimo-v2-flash | ✅ **COMPLETE** |
 | **Phase IV** | Local Kubernetes Deployment | Docker, Minikube, Helm, kubectl-ai | ✅ **COMPLETE** |
-| **Phase V** | Advanced Cloud Deployment | [To be specified] | 📋 **FUTURE** |
+| **Phase V** | Microservices + Cloud Deployment | Dapr, Redpanda, Redis, 5 Microservices, Cloud K8s | 🔥 **95%** |
 
 ## 🚀 Quick Access
 
@@ -24,6 +24,7 @@
 | **Backend CLI** | ✅ Complete | `cd backend && uv run python -m backend.main` |
 | **Backend API** | ✅ Complete | `cd phase-2/backend && uv run uvicorn src.backend.main:app --reload` |
 | **Frontend Web** | ✅ Phase 2 | `cd phase-2/frontend && npm run dev` |
+| **Microservices** | ✅ Phase 5 | `cd phase-5/ && ./start.server.sh` |
 | **Authentication** | ✅ Production-Ready | See `specs/005-user-auth/quickstart.md` |
 | **Auth Bypass** | 🎯 Testing Mode | `echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local` |
 | **Documentation** | 📚 Complete | See below for phase-specific docs |
@@ -218,9 +219,17 @@ main (stable, protected)
 ├── 010-chatkit-integration (completed)
 │   ├── specs/           # ChatKit integration specs
 │   └── phase-3/         # OpenAI ChatKit UI
-└── 011-minikube-deployment (completed)
-    ├── specs/           # Kubernetes deployment specs
-    └── phase-4/         # Docker + Helm + Minikube
+├── 011-minikube-deployment (completed)
+│   ├── specs/           # Kubernetes deployment specs
+│   └── phase-4/         # Docker + Helm + Minikube
+├── 012-features (completed)
+│   ├── specs/           # Phase 5 features specs
+│   └── phase-5/         # Recurring tasks, reminders, notifications, audit
+├── 013-microservices-dapr (completed) ✅ CURRENT
+│   ├── specs/           # Microservices + Dapr specs
+│   └── phase-5/         # Event-driven architecture with 5 microservices
+└── 014-cloud-deployment (upcoming)
+    └── phase-5/         # Cloud Kubernetes deployment
 ```
 
 ### Technology Stack
@@ -262,6 +271,16 @@ main (stable, protected)
 - **Authentication**: JWT bridging between Better Auth and OpenAI ChatKit
 - **Performance**: Connection pooling, caching, comprehensive error handling
 
+**Microservices (Phase 5):**
+- **Orchestration**: Dapr 1.14+ (Distributed Application Runtime)
+- **Message Broker**: Redpanda (Kafka-compatible) with 6 topics
+- **State Store**: Redis 7 for idempotency tracking
+- **Architecture**: 5 independent microservices (backend-api, websocket, notification, audit, recurring)
+- **Event Pattern**: CloudEvents envelope with event_id, timestamp, user_id
+- **Real-time**: WebSocket + SSE fallback for live updates
+- **Deployment**: 6 Helm charts for Kubernetes
+- **Features**: Recurring tasks, automated reminders, complete audit trail
+
 ## 🛠️ Development Skills
 
 **Available Claude Skills in `.claude/skills/`:**
@@ -276,6 +295,7 @@ main (stable, protected)
 - **OpenAI Agents SDK** - AI agents with Xiaomi mimo-v2-flash model
 - **ChatKit** - Conversational AI interfaces and chat applications
 - **Minikube Deployment** - Local Kubernetes deployment with Docker and Helm
+- **Dapr Microservices** - Event-driven architecture with Dapr sidecars
 
 ## 📁 Project Structure
 
@@ -375,6 +395,33 @@ evolution-of-todo/
 │   │   ├── verify-deployment.sh
 │   │   └── cleanup-deployment.sh
 │   └── README.md               # Phase-4 documentation
+├── phase-5/                    # Microservices + Dapr ✅ (95% Complete)
+│   ├── frontend/              # Next.js with Dapr proxy + ChatKit
+│   │   ├── Dockerfile         # Multi-stage build
+│   │   └── src/app/api/       # Dapr proxy routes
+│   ├── backend/               # FastAPI + 5 Microservices
+│   │   ├── Dockerfile         # Multi-service entrypoint
+│   │   ├── src/backend/
+│   │   │   ├── microservices/ # 5 microservice implementations
+│   │   │   ├── utils/         # Dapr event publisher, state, idempotency
+│   │   │   ├── routers/       # API endpoints with event publishing
+│   │   │   └── services/      # Business logic
+│   │   └── migrations/        # Database migrations
+│   ├── helm-charts/           # 6 Kubernetes Helm charts
+│   │   ├── backend/           # backend-api service
+│   │   ├── frontend/          # Next.js frontend
+│   │   ├── websocket-service/ # Real-time updates
+│   │   ├── audit-service/     # Event logging
+│   │   ├── notification-service/ # Reminder processing
+│   │   └── recurring-service/ # Recurring task generation
+│   ├── k8s-dapr/              # Dapr components for Kubernetes
+│   │   ├── components/        # Pub/Sub (Kafka), State Store (Redis)
+│   │   ├── bindings/          # Cron binding for reminders
+│   │   ├── subscriptions/     # Declarative event subscriptions
+│   │   └── configurations/    # Dapr configuration
+│   ├── scripts/               # Verification and cleanup scripts
+│   ├── minikube-deployment.md # Deployment guide
+│   └── README.md              # Phase-5 documentation
 ├── docs/                       # Documentation
 │   ├── architecture.md        # System architecture
 │   ├── api_reference.md       # API documentation
@@ -398,6 +445,16 @@ evolution-of-todo/
 │       ├── spec.md            # Requirements
 │       ├── plan.md            # Architecture
 │       └── tasks.md           # Implementation tasks
+│   ├── 012-features/          # Phase 5 features specs (completed)
+│   └── 013-microservices-dapr/ # Microservices + Dapr specs (completed)
+│       ├── spec.md            # Requirements (214 lines)
+│       ├── plan.md            # Architecture (1,621 lines)
+│       ├── tasks.md           # 215 tasks (203/215 complete)
+│       ├── research.md        # Research findings (506 lines)
+│       ├── data-model.md      # Entity definitions (438 lines)
+│       ├── contracts/         # API contracts (731 lines)
+│       ├── quickstart.md      # Deployment guide (571 lines)
+│       └── checklists/        # Quality validation
 ├── history/                    # Development history
 │   ├── adr/                   # Architecture Decision Records
 │   └── prompts/               # Prompt History Records
@@ -419,10 +476,24 @@ This project follows the **Spec-Driven Development** methodology:
 5. **Documentation** (`docs/`) - Architecture and API docs
 6. **History** (`history/`) - Decisions and interactions
 
-### Current Stage: 011-minikube-deployment
+### Current Stage: 013-microservices-dapr ✅ COMPLETE
 
-**Local Kubernetes Deployment with Minikube**:
+**Event-Driven Microservices Architecture with Dapr:**
 
+- ✅ **5 Independent Microservices** - backend-api, websocket-service, notification-service, audit-service, recurring-service
+- ✅ **Dapr Integration** - Pub/Sub, State Store, Cron Binding, Secret Store
+- ✅ **Redpanda (Kafka)** - Message broker for event streaming (6 topics)
+- ✅ **Redis State Store** - Idempotency tracking for reliable event processing
+- ✅ **Real-time Updates** - WebSocket with SSE fallback
+- ✅ **Recurring Tasks** - Auto-generation on completion
+- ✅ **Reminder Processing** - Dapr cron binding every minute
+- ✅ **Complete Audit Trail** - All events logged
+- ✅ **6 Helm Charts** - Full Kubernetes deployment ready
+- ✅ **203/215 Tasks** - 94% implementation complete (Docker Compose skipped per user request)
+
+**Upcoming: 014-cloud-deployment** - Cloud Kubernetes deployment to complete Phase 5
+
+**Phase 4 (011-minikube-deployment):**
 - ✅ **Docker Multi-Stage Builds** - Optimized container images
 - ✅ **Helm Charts** - Kubernetes deployment orchestration
 - ✅ **Kubernetes Secrets** - Secure credential management
@@ -430,7 +501,7 @@ This project follows the **Spec-Driven Development** methodology:
 - ✅ **Service Exposure** - LoadBalancer for external access
 - ✅ **Deployment Scripts** - Verification and cleanup automation
 
-**Previous Stages:**
+**Earlier Stages:**
 - `001-cli-todo` - Original CLI with command-line interface ✅
 - `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX ✅
 - `003-frontend-design` - Next.js web frontend with auth bypass ✅
@@ -685,11 +756,24 @@ git push -u origin 002-next-feature
 
 ### Current Branches
 
+**Completed (001-013):**
 - `main` - Stable base (protected, default)
-- `004-profile-editing` - Enhanced profile management system (current)
-- `003-frontend-design` - Next.js web frontend with auth bypass
+- `001-cli-todo` - Original CLI todo application
 - `002-cli-ui-update` - Menu-driven CLI interface with enhanced UX
-- `001-cli-todo` - Original CLI todo application (previous version)
+- `003-frontend-design` - Next.js web frontend with auth bypass
+- `004-profile-editing` - Enhanced profile management system
+- `005-user-auth` - Production-ready authentication with Better Auth
+- `006-backend-implement` - FastAPI RESTful backend with JWT validation
+- `007-frontend-ux-polish` - Toast notifications, animations, UX enhancements
+- `008-frontend-backend-integration` - Connected Next.js to FastAPI
+- `009-agents-mcp` - AI agents with MCP task management tools
+- `010-chatkit-integration` - Complete ChatKit integration with OpenAI
+- `011-minikube-deployment` - Local Kubernetes deployment with Minikube
+- `012-features` - Recurring tasks, reminders, notifications, audit logging
+- `013-microservices-dapr` - ✅ **CURRENT**: Event-driven microservices with Dapr
+
+**Upcoming:**
+- `014-cloud-deployment` - Cloud Kubernetes deployment to complete Phase 5
 
 ## 🧪 Testing
 
@@ -818,12 +902,25 @@ npm run dev
 - **Dependencies**: Better Auth v1.4.9, pg v8.16.3, Next.js 16.1.1
 - **Features**: Full task management + real authentication + profile management
 
+### Microservices (Phase 5 - 95% Complete)
+- **Total Files**: 50+ Python files across 5 microservices
+- **Microservices**: 5 independent services (backend-api, websocket, notification, audit, recurring)
+- **Dapr Components**: Pub/Sub (Kafka), State Store (Redis), Cron Binding, Secret Store
+- **Kafka Topics**: 6 event topics (task-created, task-updated, task-completed, task-deleted, reminder-due, task-updates)
+- **Helm Charts**: 6 Kubernetes deployment charts
+- **Python Version**: 3.13+
+- **Dependencies**: FastAPI, Dapr SDK, httpx, asyncpg
+- **Features**: Event-driven architecture, real-time updates, recurring tasks, automated reminders, complete audit trail
+- **Implementation**: 203/215 tasks complete (94%)
+
 ### Overall
 - **Architecture**: Spec-Driven Development framework
-- **Branches**: 6 feature branches (001-006)
+- **Branches**: 14 feature branches (001-013 complete, 014 upcoming)
+- **Current Branch**: 013-microservices-dapr ✅ COMPLETE
 - **Documentation**: Complete ADR + PHR tracking
-- **Database**: Neon PostgreSQL (shared between auth and API)
+- **Database**: Neon PostgreSQL (shared across all services)
 - **Authentication**: Better Auth + JWT validation via JWKS
+- **Phase 5 Status**: 95% complete - Microservices done, Cloud deployment pending (014)
 
 ## 🤝 Contributing
 
@@ -860,10 +957,21 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - `009-agents-mcp` - AI agents with MCP task management tools ✅
 - `010-chatkit-integration` - Complete ChatKit integration with 56/56 tasks ✅
 - `011-minikube-deployment` - Local Kubernetes deployment with Minikube ✅
+- `012-features` - Recurring tasks, reminders, notifications, audit logging ✅
+- `013-microservices-dapr` - Event-driven microservices with Dapr ✅ **COMPLETE**
 
 **Current Focus:**
-- **Phase 4 Complete**: AI Chatbot + Minikube Local Kubernetes Deployment
-- **Key Innovation**: Full-stack containerized application running on local Kubernetes cluster with Helm orchestration
+- **Phase 5 (95% Complete)**: Event-Driven Microservices + Cloud Deployment
+- **Key Innovation**: Full microservices architecture with Dapr, Redpanda, Redis
+- **Current Branch**: `013-microservices-dapr` ✅ Complete
+- **Next Branch**: `014-cloud-deployment` - Cloud Kubernetes deployment to finalize Phase 5
+
+**Phase 5 Microservices Architecture:**
+- **backend-api** (port 8000) - Task CRUD operations + ChatKit
+- **websocket-service** (port 8001) - Real-time updates (WS/SSE)
+- **notification-service** (port 8002) - Reminder processing via Dapr cron
+- **audit-service** (port 8004) - Complete audit trail
+- **recurring-service** (port 8002) - Auto-generate recurring tasks
 
 **What's Working:**
 - ✅ **7 RESTful Endpoints** - Full task CRUD + statistics
@@ -888,14 +996,12 @@ MIT License - feel free to use this as a template for your own SDD projects.
 - ✅ **Modern Technical Editorial Design** - Cream backgrounds, sharp corners, mono labels
 - ✅ **Mobile Hamburger Menu** - Framer Motion animated navigation
 
-**Future Stages:**
-- `008-frontend-backend-integration` - Connect Next.js to FastAPI endpoints
-- `009-websocket-realtime` - Real-time updates and notifications
-- `010-mobile-app` - React Native mobile application
-- `011-oauth-providers` - Google, GitHub authentication
-- `012-2fa-security` - Two-factor authentication
-- `013-mcp-integration` - Model Context Protocol for AI agents
-- `014-docker-deployment` - Containerized production deployment
+**Upcoming Branches:**
+- `014-cloud-deployment` - Cloud Kubernetes deployment (Phase 5 completion)
+
+---
+
+**Phase 5 Documentation:** See `specs/013-microservices-dapr/` for complete microservices specification
 
 ---
 

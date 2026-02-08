@@ -1,683 +1,673 @@
-# Evolution of Todo - Frontend (Phase 3)
+# Phase 5: Event-Driven Microservices Frontend
 
-> Modern Next.js web frontend with AI Chatbot integration and Spec-Driven Development framework
+> Production-ready Next.js 16 frontend with Dapr microservices integration, real-time WebSocket/SSE updates, and AI Chatbot capabilities.
 
-## 🚀 Project Overview
+## 🎯 Overview
 
-This is the **Phase 3** frontend application built with Next.js 16+, featuring:
+This is the **Phase 5** frontend application built with Next.js 16+, featuring event-driven microservices architecture:
 
-**Phase 3 AI Chatbot Features:**
-- **OpenAI ChatKit Integration**: Production-ready chat interface via CDN
-- **Dual-Agent System**: Support for Orchestrator + Urdu Specialist agents
-- **Real-time Streaming**: Live agent responses with streaming support
-- **Bilingual UI**: English/Urdu language toggle and display
-- **Tool Visualization**: Visual indicators for MCP tool execution
-- **Conversation History**: Persistent chat sessions with PostgreSQL backend
-- **Modern Technical Editorial Design**: Cream backgrounds, orange accents
-- **Full Height Layout**: Responsive chat interface that fills screen space
-- **Session Management**: JWT bridging between Better Auth and OpenAI
+### Phase 5 Microservices Features
+- **Dapr Proxy Pattern**: Frontend API routes proxy requests through Dapr sidecar
+- **Real-time Updates**: WebSocket connections with SSE fallback for live task updates
+- **Microservices Integration**: 5 independent backend services via Dapr Pub/Sub
+- **Recurring Tasks**: Auto-generation of next instance on completion
+- **Automated Reminders**: Dapr cron binding triggers notification processing
+- **Complete Audit Trail**: View all task events with full context
+- **Multi-Service Docker**: Standalone output for Kubernetes deployment
 
-**Phase 2 Features (Inherited):**
-
-- **App Router Architecture** with TypeScript
+### Phase 2-4 Features (Inherited)
+- **App Router Architecture** with TypeScript 5.x
 - **Modern Technical Editorial Design System**
-- **Framer Motion Animations**
-- **Production Authentication** with Better Auth + Neon PostgreSQL
-- **Profile Management System** with comprehensive user settings
+- **Framer Motion Animations** with editorial easing
+- **Better Auth v1.4.9** with Neon PostgreSQL
+- **Profile Management** with comprehensive user settings
 - **Task Management** with full CRUD operations
-- **JWT Integration** ready for FastAPI backend
-- **UX Polish** with Sonner toasts, enhanced date labels, and smooth animations
+- **Dual-Agent System** with Xiaomi mimo-v2-flash
+- **ChatKit Integration** with persistent chat history (14-method store)
+
+**Status**: ✅ **COMPLETE** (95% - Cloud deployment pending in 014)
 
 ---
-
-## 🤖 Phase 3: AI Chatbot Integration
-
-### ✅ Completed Features
-
-**ChatKit Integration:**
-- **OpenAI ChatKit** React component via CDN (script loading)
-- **Real-time streaming** responses from AI agents (SSE)
-- **Conversation history** with PostgreSQL persistence
-- **Tool integration** for MCP task operations (visual feedback)
-- **Modern Technical Editorial Design** (cream backgrounds, orange accents)
-
-**Bilingual Support:**
-- **Language toggle** between English and Urdu
-- **Right-to-left** text support for Urdu
-- **Auto-detection** based on agent responses
-- **Cultural formatting** for Urdu content
-
-**Modern Chat Interface:**
-- **Message bubbles** with user/agent distinction
-- **Typing indicators** for real-time streaming
-- **Tool execution** visual indicators
-- **Error handling** with graceful fallbacks
-- **Mobile-responsive** design
-- **Full height layout** that fills screen space
-
-### 🏗️ Architecture (Implemented)
-
-```
-User → ChatKit Interface → Streaming API → AI Agents → MCP Tools → Backend
-                    ↓
-            Language Selection & Context
-                    ↓
-         Conversation History & Memory (PostgreSQL)
-```
-
-### 📅 Timeline
-
-**Current Status**: Complete ✅ (56/56 tasks)
-**Branch**: `010-chatkit-integration` (merged)
-
----
-
-## 🎯 UX Polish & Enhancements (007-frontend-ux-polish) ✅
-
-### ✅ Authentication System Features
-
-1. **Better Auth Server Configuration** (`src/lib/auth-server.ts`)
-   - PostgreSQL adapter with Neon database
-   - JWT plugin for token generation
-   - Email/password authentication
-   - SSL connection support
-   - Automatic session management
-
-2. **API Route Handler** (`src/app/api/auth/[...all]/route.ts`)
-   - Single file handles all auth endpoints
-   - RESTful API design
-   - Cookie-based session management
-   - Automatic endpoint generation
-
-3. **Working API Endpoints**
-   - **Registration**: `POST /api/auth/sign-up/email`
-     - Email validation
-     - Password minimum 8 chars
-     - Duplicate email prevention
-     - Returns JWT token immediately
-   - **Login**: `POST /api/auth/sign-in/email`
-     - Credential verification
-     - Generic error messages (security)
-     - Session creation
-     - JWT token issuance
-   - **Session**: `GET /api/auth/get-session`
-     - Cookie validation
-     - User data retrieval
-     - Session persistence
-
-4. **Security Features**
-   - **bcrypt hashing** for passwords
-   - **Constant-time comparison** (timing attack prevention)
-   - **JWT tokens** (HS256 algorithm)
-   - **Generic error messages** (prevents user enumeration)
-   - **SSL connections** to Neon PostgreSQL
-
-5. **Backend Integration Ready**
-   - JWT format: `header.payload.signature`
-   - Payload: `sub` (user_id), `email`, `name`, `iat`, `exp`
-   - Shared secret: `BETTER_AUTH_SECRET`
-   - User isolation via `user_id` for multi-tenancy
-
-6. **Client Integration** (`src/lib/auth.ts`)
-   - Auth client with JWT plugin
-   - Helper functions for session management
-   - Bypass mode support for testing
-   - Ready for frontend UI integration
-
-### ✅ UX Polish Features (007-frontend-ux-polish)
-
-**Sonner Toast Notifications:**
-- **7 Toast Scenarios** - Complete coverage of all user actions
-  - Login → "Welcome back!" (bottom-right, 4s)
-  - Create task → "Task created"
-  - Update task → "Task updated"
-  - Delete task → "Task deleted"
-  - Toggle task → "Task completed" / "Task reopened"
-  - Logout → "Logged out"
-  - Password change → "Password changed successfully"
-- **Error Handling** - All errors display with toast.error()
-- **Modern Styling** - Cream background (#F9F7F2), sharp corners, mono font
-
-**Enhanced Date Labels:**
-- **Clear Labels** - "Due:", "Created:", "Updated:" with uppercase mono typography
-- **Lucide Icons** - Calendar, Clock, Pencil with strokeWidth={1.5}
-- **Conditional Rendering** - "Updated:" only shows when task was modified
-- **Accent Styling** - Updated dates use orange accent color (#FF6B4A)
-- **Proper Spacing** - Flex-wrap layout with gap-3 spacing
-
-**Task Completion Animations:**
-- **Scale Effect** - 0.98x when completed, 1x when pending
-- **Opacity Fade** - 0.6 when completed, 1 when pending
-- **Editorial Ease** - [0.22, 1, 0.36, 1] curve for smooth transitions
-- **Layout Prop** - Smooth reordering when state changes
-- **Performance** - GPU-accelerated transform/opacity only (60fps)
-
-**Mobile Navigation:**
-- **Hamburger Menu** - Framer Motion animated for mobile devices
-- **Smooth Transitions** - Staggered entrance animations
-- **Responsive Design** - Works seamlessly across all screen sizes
-
-### 🎨 Design System Integration
-
-**Typography:**
-- **Serif**: Playfair Display (headings)
-- **Sans**: DM Sans (body text)
-- **Mono**: JetBrains Mono (labels, data)
-
-**Colors:**
-- **Background**: #F9F7F2 (Cream)
-- **Accent**: #FF6B4A (Vibrant Orange)
-- **Structure**: #2A1B12/10 (Technical lines)
-
-**Animations:**
-- Framer Motion with staggered entrances
-- Smooth eased transitions
-- Hover scale effects (1.02x)
 
 ## 🏗️ Architecture
 
-### File Structure
+### Technology Stack
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Frontend** | Next.js 16.1.6 | React framework with App Router |
+| **Language** | TypeScript 5.x | Type safety |
+| **Styling** | Tailwind CSS 4.x | Utility-first CSS |
+| **Animations** | Framer Motion 12.23.26 | Motion design |
+| **Icons** | Lucide React 0.562.0 | Icon library |
+| **Toasts** | Sonner 2.0.7 | Notification toasts |
+| **Auth** | Better Auth 1.4.9 | Authentication framework |
+| **Database** | Neon PostgreSQL (pg 8.16.3) | Shared database |
+| **ChatKit** | @openai/chatkit-react 1.4.1 | AI chat interface |
+| **Microservices** | Dapr 1.14+ | Service mesh & sidecar |
+| **Real-time** | WebSocket + SSE | Live updates |
+
+### Microservices Communication Flow
 
 ```
-src/
-├── app/
-│   ├── (auth)/           # Authentication pages
-│   │   ├── login/page.tsx
-│   │   └── signup/page.tsx
-│   ├── (dashboard)/      # Protected routes
-│   │   ├── layout.tsx
-│   │   ├── tasks/page.tsx
-│   │   └── profile/page.tsx
-│   ├── api/              # API routes
-│   │   ├── auth/         # Authentication endpoints
-│   │   │   └── [...all]/ # Better Auth handler
+┌─────────────────────────────────────────────────────────────────┐
+│                         Next.js Frontend                        │
+│  ┌──────────────┐  ┌───────────────┐  ┌──────────────────────┐ │
+│  │  App Router  │  │  API Routes   │  │  WebSocket/SSE Hook  │ │
+│  │  (/tasks)    │  │  (Dapr Proxy) │  │  (Real-time)         │ │
+│  └──────────────┘  └───────────────┘  └──────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                    ┌─────────┴─────────┐
+                    │                   │
+                    ▼                   ▼
+         ┌──────────────────┐   ┌──────────────────┐
+         │   Dapr Sidecar   │   │   WebSocket Svc  │
+         │   (Port 3500)    │   │   (Port 8001)    │
+         └──────────────────┘   └──────────────────┘
+                    │                   │
+                    ▼                   ▼
+         ┌──────────────────┐   ┌──────────────────┐
+         │   backend-api    │   │  Real-time       │
+         │   (Port 8000)    │◄──┤  Updates         │
+         └──────────────────┘   └──────────────────┘
+                    │
+                    ▼
+         ┌──────────────────┐
+         │     Kafka        │
+         │   (Redpanda)     │
+         └──────────────────┘
+                    │
+    ┌───────────────┼───────────────┐
+    ▼               ▼               ▼
+┌─────────┐   ┌─────────┐   ┌─────────┐
+│  audit  │   │ recurring│  │notification│
+│ service │   │ service │  │  service  │
+└─────────┘   └─────────┘   └─────────┘
+```
+
+### Dapr Proxy Pattern
+
+Since browsers cannot access Dapr directly, frontend API routes act as proxies:
+
+```typescript
+// Frontend API Route → Dapr Sidecar → Backend Microservice
+/api/tasks → http://localhost:3500/v1.0/invoke/backend-api/method/api/{userId}/tasks
+```
+
+---
+
+## 📁 Project Structure
+
+```
+phase-5/frontend/
+├── src/
+│   ├── app/                       # Next.js 16 App Router
+│   │   ├── (auth)/               # Authentication route group
+│   │   │   ├── layout.tsx        # Auth layout (centered, no navbar)
+│   │   │   ├── login/            # Login page
+│   │   │   └── signup/           # Signup page
+│   │   │
+│   │   ├── (dashboard)/          # Protected route group
+│   │   │   ├── layout.tsx        # Dashboard layout (navbar, container)
+│   │   │   ├── tasks/            # Task management page
+│   │   │   │   └── page.tsx      # Tasks with real-time updates
+│   │   │   └── profile/          # Profile settings page
+│   │   │       └── page.tsx
+│   │   │
+│   │   ├── chatbot/              # AI ChatKit page
+│   │   │   └── page.tsx          # OpenAI ChatKit component
+│   │   │
+│   │   ├── test/                 # Component testing playground
+│   │   │   └── page.tsx
+│   │   │
+│   │   ├── api/                  # API Routes (Dapr proxy + ChatKit)
+│   │   │   ├── auth/[...all]/    # Better Auth handler
+│   │   │   │   └── route.ts
+│   │   │   ├── chatkit/          # ChatKit Dapr proxy
+│   │   │   │   ├── route.ts      # Main ChatKit endpoint
+│   │   │   │   └── mock/         # Mock ChatKit endpoint
+│   │   │   ├── tasks/            # Tasks Dapr proxy
+│   │   │   │   ├── route.ts      # List/Create tasks
+│   │   │   │   └── [id]/         # Single task CRUD
+│   │   │   │       └── route.ts
+│   │   │   ├── notifications/    # Notifications Dapr proxy
+│   │   │   │   ├── route.ts      # List notifications
+│   │   │   │   └── [id]/         # Notification actions
+│   │   │   │       └── route.ts
+│   │   │   └── health/           # Health check
 │   │   │       └── route.ts
-│   │   └── chatkit/      # ChatKit session endpoints
-│   │       └── route.ts  # Session creation & refresh
-│   ├── chatbot/          # ChatKit page
-│   │   └── page.tsx      # OpenAI ChatKit component
-│   ├── page.tsx          # Landing page
-│   └── layout.tsx        # Root layout
-├── components/
-│   ├── profile/          # Profile management
-│   │   ├── ProfileInfoCard.tsx
-│   │   ├── PasswordChangeCard.tsx
-│   │   ├── AccountInfoCard.tsx
-│   │   ├── TaskStatsCard.tsx
-│   │   └── DangerZoneCard.tsx
-│   ├── tasks/            # Task management
-│   │   ├── TaskCard.tsx
-│   │   ├── TaskForm.tsx
-│   │   ├── TaskList.tsx
-│   │   ├── TaskFilters.tsx
-│   │   └── TaskSearch.tsx
-│   ├── auth/             # Auth components
-│   │   └── ProtectedRoute.tsx
-│   ├── layout/           # Layout components
-│   │   └── Navbar.tsx
-│   └── ui/               # Reusable UI
-│       ├── Button.tsx
-│       ├── Card.tsx
-│       ├── Input.tsx
-│       ├── Checkbox.tsx
-│       ├── Modal.tsx
-│       ├── Select.tsx
-│       └── Badge.tsx
-├── hooks/                # Custom hooks
-│   ├── useAuth.ts
-│   ├── useTasks.ts
-│   └── useFilters.ts
-├── lib/                  # Utilities & Auth
-│   ├── auth.ts           # Client auth config
-│   ├── auth-server.ts    # Better Auth server ⭐ NEW
-│   ├── api.ts            # API client
-│   └── utils.ts          # Helper functions
-└── motion/               # Animations
-    └── variants.ts       # Framer Motion variants
+│   │   │
+│   │   ├── globals.css           # Tailwind + design tokens
+│   │   ├── layout.tsx            # Root layout with ChatKit CDN
+│   │   └── page.tsx              # Landing page
+│   │
+│   ├── components/               # React components
+│   │   ├── auth/                 # Authentication components
+│   │   │   └── ProtectedRoute.tsx
+│   │   ├── home/                 # Landing page components
+│   │   │   ├── hero-section.tsx
+│   │   │   ├── features-grid.tsx
+│   │   │   ├── tech-stack.tsx
+│   │   │   ├── footer.tsx
+│   │   │   └── nav-bar.tsx
+│   │   ├── layout/               # Layout components
+│   │   │   └── Navbar.tsx        # Navigation with notifications
+│   │   ├── notifications/        # Notification components
+│   │   │   ├── NotificationPanel.tsx
+│   │   │   └── NotificationItem.tsx
+│   │   ├── profile/              # Profile management
+│   │   │   ├── ProfileInfoCard.tsx
+│   │   │   ├── PasswordChangeCard.tsx
+│   │   │   ├── AccountInfoCard.tsx
+│   │   │   ├── TaskStatsCard.tsx
+│   │   │   └── DangerZoneCard.tsx
+│   │   ├── tasks/                # Task management
+│   │   │   ├── TaskList.tsx
+│   │   │   ├── TaskCard.tsx
+│   │   │   ├── TaskForm.tsx
+│   │   │   ├── TaskFilters.tsx
+│   │   │   ├── TaskSearch.tsx
+│   │   │   ├── RecurringOptions.tsx
+│   │   │   └── DateTimePicker.tsx
+│   │   └── ui/                   # Reusable UI components
+│   │       ├── Button.tsx
+│   │       ├── Card.tsx
+│   │       ├── Input.tsx
+│   │       ├── Select.tsx
+│   │       ├── Checkbox.tsx
+│   │       ├── Modal.tsx
+│   │       └── Badge.tsx
+│   │
+│   ├── contexts/                 # React contexts
+│   │   └── AuthContext.tsx       # Authentication context provider
+│   │
+│   ├── hooks/                    # Custom hooks
+│   │   ├── useAuth.ts            # Auth hook (re-export)
+│   │   ├── useTasks.ts           # Task CRUD with real-time updates
+│   │   ├── useFilters.ts         # Task filtering (status, priority, category, tags)
+│   │   ├── useNotifications.ts   # Notification management
+│   │   ├── useAudit.ts           # Audit log hook
+│   │   ├── useWebSocket.ts       # WebSocket/SSE real-time updates
+│   │   └── use-auth-state.ts     # Auth state utilities
+│   │
+│   ├── lib/                      # Utilities & libraries
+│   │   ├── auth.ts               # Better Auth client config
+│   │   ├── auth-server.ts        # Better Auth server config
+│   │   ├── api.ts                # API methods (tasks, notifications, audit)
+│   │   ├── api-client.ts         # Generic API client with JWT
+│   │   ├── utils.ts              # Helper functions
+│   │   ├── websocket.ts          # WebSocket manager
+│   │   └── tagSearch.ts          # Tag search parsing
+│   │
+│   ├── motion/                   # Framer Motion configuration
+│   │   ├── variants.ts           # Motion variants (fadeInUp, stagger, etc.)
+│   │   └── patterns.ts           # Animation patterns
+│   │
+│   └── types/                    # TypeScript types
+│       └── index.ts              # Type definitions
+│
+├── public/                       # Static assets
+├── scripts/                      # Database initialization scripts
+├── .dockerignore                 # Docker build exclusions
+├── .env.local.example            # Environment variable template
+├── Dockerfile                    # Multi-stage Docker build
+├── next.config.ts                # Next.js standalone config
+├── package.json                  # Dependencies and scripts
+├── postcss.config.mjs            # PostCSS + Tailwind v4
+├── tsconfig.json                 # TypeScript configuration
+├── eslint.config.mjs             # ESLint configuration
+├── README.md                     # This file
+├── BACKEND_INTEGRATION.md        # Backend integration guide
+├── INTEGRATION_CHECKLIST.md      # Backend requirements checklist
+└── PROJECT_COMPLETION_SUMMARY.md # Project status
 ```
 
-## 🚀 Getting Started
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- npm, yarn, or pnpm
-- Neon PostgreSQL database (for real authentication)
+- **Node.js 18+**
+- **npm** or **yarn**
+- **Neon PostgreSQL database** (shared with backend)
+- **Dapr CLI 1.14+** (for local development with sidecar)
+- **Backend microservices** running
 
-### Installation
+### 1. Environment Setup
 
 ```bash
 # Navigate to frontend directory
-cd phase-3/frontend
+cd phase-5/frontend
 
-# Install dependencies (includes ChatKit)
+# Install dependencies
 npm install
 
-# Set up authentication environment
-# Generate secure secret: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# Create environment file
 cat > .env.local << EOF
+# Auth Bypass (for testing without backend)
 NEXT_PUBLIC_AUTH_BYPASS=false
+
+# Database (shared with backend)
 DATABASE_URL=postgresql://user:pass@host:5432/dbname?sslmode=require
+
+# Better Auth
 BETTER_AUTH_SECRET=your-generated-64-char-secret
 NEXT_PUBLIC_AUTH_URL=http://localhost:3000
+
+# Backend URLs (for Dapr proxy)
 NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+NEXT_PUBLIC_AUTH_URL=http://localhost:3000
+
+# WebSocket/SSE (real-time updates)
+NEXT_PUBLIC_WEBSOCKET_URL=ws://127.0.0.1:8001
+NEXT_PUBLIC_SSE_URL=http://127.0.0.1:8001/api/sse
+
+# Dapr Configuration
+DAPR_HOST=localhost
+DAPR_HTTP_PORT=3500
+
+# Internal URLs (server-side)
+BACKEND_URL_INTERNAL=http://backend:8000
 EOF
-
-# Run development server
-npm run dev
 ```
 
-### Quick Start
-
-**Real Authentication Mode:**
-1. **Visit**: http://localhost:3000
-2. **Signup**: Navigate to `/signup` and create account
-3. **Login**: Use credentials to authenticate
-4. **Session**: Access `/tasks` and `/profile` with valid session
-
-**Bypass Mode (for testing):**
-```bash
-echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local
-npm run dev
-# Visit http://localhost:3000 - instant access to all features
-
-## 🔐 Real Authentication Testing
-
-### API Endpoint Testing
+### 2. Run Development Server
 
 ```bash
-# Start server (with real auth enabled)
+# Start development server
 npm run dev
 
-# Test registration
-curl -X POST http://localhost:3000/api/auth/sign-up/email \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Test User","email":"test@example.com","password":"testpassword123"}'
-
-# Test login
-curl -X POST http://localhost:3000/api/auth/sign-in/email \
-  -H "Content-Type: application/json" \
-  -c cookies.txt \
-  -d '{"email":"test@example.com","password":"testpassword123"}'
-
-# Test session validation
-curl http://localhost:3000/api/auth/get-session \
-  -b cookies.txt
-
-# Test error scenarios
-curl -X POST http://localhost:3000/api/auth/sign-up/email \
-  -H "Content-Type: application/json" \
-  -d '{"name":"User","email":"test@example.com","password":"short"}'
+# Visit http://localhost:3000
 ```
 
-### Expected Results
-
-**Registration:**
-- ✅ Success: HTTP 200 with user + token
-- ❌ Duplicate: HTTP 422 with error message
-- ❌ Weak password: HTTP 400 with validation error
-- ❌ Invalid email: HTTP 400 with validation error
-
-**Login:**
-- ✅ Success: HTTP 200 with user + token
-- ❌ Wrong credentials: HTTP 401 (generic error)
-
-**Session:**
-- ✅ Valid: HTTP 200 with user data
-- ❌ Invalid: HTTP 401 or null user
-
-### Database Verification
-
-```sql
--- Check user table
-SELECT id, email, name, createdAt FROM user;
-
--- Check session table
-SELECT id, userId, expiresAt FROM session;
-
--- Verify password hashing (should show bcrypt hash)
-SELECT email, passwordHash FROM user WHERE email = 'test@example.com';
-```
-
-## 🔧 Authentication Bypass
-
-### Enable Bypass Mode
+### 3. Run with Dapr (Local Development)
 
 ```bash
-# Enable bypass
-echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local
-
-# Start dev server
-npm run dev
+# Start Dapr sidecar with frontend
+dapr run --app-id frontend --app-port 3000 --dapr-http-port 3500 \
+    --components-path ../k8s-dapr/components \
+    npm run dev
 ```
 
-### Features in Bypass Mode
+---
 
-- ✅ **Instant access** to all routes
-- ✅ **Mock user** system
-- ✅ **Visual indicator** "(Bypass)" in navbar
-- ✅ **Full functionality** without backend
-- ✅ **Profile management** with local state
+## 📡 Real-time Updates (WebSocket + SSE)
 
-### Safety Features
+### WebSocket Hook (`useWebSocket.ts`)
 
-- **Default**: Disabled (`false`)
-- **Visual indicators**: Bypass badge in UI
-- **Environment only**: No code changes required
-- **Production safe**: Cannot be enabled accidentally
+Automatically manages real-time connections:
 
-## 🤖 ChatKit Setup
+```typescript
+const { isConnected, connectionError } = useWebSocket(userId);
 
-### Environment Configuration
-```bash
-# Required for ChatKit session management
-NEXT_PUBLIC_BACKEND_URL=http://localhost:8000  # Backend API URL
+// Features:
+// - Primary: WebSocket connection to ws://127.0.0.1:8001/ws?user_id={id}
+// - Fallback: SSE after 2 WebSocket errors
+// - Auto-reconnect on disconnect
+// - Task list auto-refresh on updates
 ```
 
-### ChatKit Integration
-The ChatKit integration uses:
-- **OpenAI ChatKit React component** via CDN script loading
-- **Backend session endpoints** for authentication
-- **LocalStorage** for thread persistence
-- **Modern Technical Editorial** design system
+### WebSocket Service Endpoints
 
-### Accessing ChatKit
-1. **Start backend**: `cd phase-3/backend && uv run uvicorn src.backend.main:app --reload`
-2. **Start frontend**: `cd phase-3/frontend && npm run dev`
-3. **Visit**: `http://localhost:3000/chatbot`
-4. **ChatKit loads automatically** with task-related prompts
+| Endpoint | Purpose |
+|----------|---------|
+| `ws://localhost:8001/ws?user_id={id}` | WebSocket connection |
+| `http://localhost:8001/api/sse/{user_id}` | SSE fallback |
 
-### Features
-- **Full-height chat interface** that fills screen space
-- **Cream background** (#F9F7F2) matching design system
-- **Orange accents** (#FF6B4A) for interactive elements
-- **Loading states** with centered spinner animations
-- **Error handling** with retry functionality
-- **Navbar integration** matching dashboard pages
+### Real-time Events
+
+- `task-created` - New task added → auto-refresh task list
+- `task-updated` - Task modified → update task in list
+- `task-completed` - Task toggled → update completion status
+- `task-deleted` - Task removed → remove from list
+- `reminder-due` - Reminder triggered → show notification toast
+
+---
+
+## 🔌 API Routes (Dapr Proxy)
+
+### Tasks API
+
+| Method | Route | Dapr Target | Purpose |
+|--------|-------|-------------|---------|
+| GET | `/api/tasks` | backend-api | List tasks with filters |
+| POST | `/api/tasks` | backend-api | Create task |
+| GET | `/api/tasks/[id]` | backend-api | Get single task |
+| PATCH | `/api/tasks/[id]` | backend-api | Update task |
+| DELETE | `/api/tasks/[id]` | backend-api | Delete task |
+
+### Notifications API
+
+| Method | Route | Dapr Target | Purpose |
+|--------|-------|-------------|---------|
+| GET | `/api/notifications` | backend-api | List notifications |
+| PATCH | `/api/notifications/[id]/read` | backend-api | Mark as read |
+| DELETE | `/api/notifications/[id]` | backend-api | Delete notification |
+
+### ChatKit API
+
+| Method | Route | Dapr Target | Purpose |
+|--------|-------|-------------|---------|
+| GET | `/api/chatkit` | backend-api | Get/create session |
+| POST | `/api/chatkit` | backend-api | Chat streaming (SSE) |
+
+---
+
+## 🎨 Design System
+
+### Modern Technical Editorial Aesthetic
+
+#### Colors
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--color-background` | `#F9F7F2` | Main page background (Cream) |
+| `--color-surface` | `#F0EBE0` | Cards, sections (Darker Cream) |
+| `--color-structure` | `#2A1B12` | Headings, main text (Espresso) |
+| `--color-wireframe` | `#E5E0D6` | Borders, dividers (Wireframe Grey) |
+| `--color-accent` | `#FF6B4A` | Primary buttons, highlights (Vibrant Orange) |
+
+#### Typography
+| Type | Font | Usage |
+|------|------|-------|
+| Serif | **Playfair Display** (400, 700) | Headings |
+| Sans | **DM Sans** (400, 500, 700) | Body text |
+| Mono | **JetBrains Mono** (400, 500) | Labels, navigation, data |
+
+#### Spacing
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--spacing-editorial` | `2.5rem` | Content sections |
+| `--spacing-technical` | `0.5rem` | Technical elements |
+
+#### Animation
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--ease-editorial` | `cubic-bezier(0.22, 1, 0.36, 1)` | Smooth, premium feel |
+
+#### Motion Variants
+| Variant | Purpose |
+|---------|---------|
+| `fadeInUp` | Signature entrance (0.8s) |
+| `staggerContainer` | List/grid staggering (0.1s delay) |
+| `scaleIn` | Checkbox spring physics |
+| `fadeOut` | Deletion animations |
+| `lineDraw` | Technical dividers (1.2s) |
+| `hoverScale` | Minimal interaction (1.02x) |
+
+---
 
 ## 📊 Pages & Routes
 
 ### Public Routes
-- `/` - Landing page with project info
-- `/login` - Login form (disabled in bypass)
-- `/signup` - Signup form (disabled in bypass)
+| Route | File | Purpose |
+|-------|------|---------|
+| `/` | `app/page.tsx` | Landing page (Hero, Features, Tech Stack, Footer) |
+| `/login` | `app/(auth)/login/page.tsx` | Login form |
+| `/signup` | `app/(auth)/signup/page.tsx` | Signup form |
 
-### Protected Routes (with bypass support)
-- `/tasks` - Task management dashboard
-- `/profile` - Profile settings page
-- `/chatbot` - AI ChatKit interface ✨ NEW
+### Protected Routes (via `ProtectedRoute`)
+| Route | File | Purpose |
+|-------|------|---------|
+| `/tasks` | `app/(dashboard)/tasks/page.tsx` | Task management with real-time updates |
+| `/profile` | `app/(dashboard)/profile/page.tsx` | User profile settings |
+| `/chatbot` | `app/chatbot/page.tsx` | AI ChatKit agent |
 
 ### Development Routes
-- `/test` - Component testing playground
+| Route | File | Purpose |
+|-------|------|---------|
+| `/test` | `app/test/page.tsx` | Component testing playground |
+
+---
+
+## 🔐 Authentication
+
+### Better Auth Configuration
+
+**Server Config** (`src/lib/auth-server.ts`):
+```typescript
+- Database: Neon PostgreSQL with SSL
+- JWT Plugin: Enabled for backend token generation
+- Email/Password: Enabled with 8-char minimum
+- Trusted Origins: localhost:3000, 127.0.0.1:3000
+```
+
+**Client Config** (`src/lib/auth.ts`):
+```typescript
+- JWT Plugin: For backend token generation
+- Base URL: Configurable via NEXT_PUBLIC_AUTH_URL
+- Bypass Mode: Mock user for testing (NEXT_PUBLIC_AUTH_BYPASS=true)
+```
+
+### Auth Flow
+
+1. User enters credentials in `/login` or `/signup`
+2. Better Auth validates against PostgreSQL
+3. JWT token generated and stored in httpOnly cookie
+4. Session state managed in `AuthContext`
+5. Protected routes check `isAuthenticated`
+6. API requests include JWT via `Authorization: Bearer <token>`
+
+### JWT Token Structure
+
+```json
+{
+  "sub": "user_id",
+  "email": "user@example.com",
+  "name": "User Name",
+  "iat": 1234567890,
+  "exp": 1234570490
+}
+```
+
+---
+
+## 🤖 ChatKit Integration
+
+### Features
+
+- **OpenAI ChatKit UI** - Production-ready chat interface via CDN
+- **Streaming Responses** - Real-time agent responses via SSE
+- **Tool Visualization** - MCP tool calls displayed in chat
+- **Thread Persistence** - localStorage + PostgreSQL
+- **Modern Design** - Cream background matching design system
+- **Enhanced Loading** - Web Components detection with `customElements.whenDefined()`
+
+### Accessing ChatKit
+
+1. Ensure backend is running: `cd ../backend && uv run uvicorn src.backend.main:app --reload`
+2. Start frontend: `npm run dev`
+3. Visit: `http://localhost:3000/chatbot`
+4. ChatKit loads automatically with task-related prompts
+
+---
 
 ## 🧪 Testing
 
-### UX Polish Testing (007-frontend-ux-polish)
+### Run Development Server
 
 ```bash
-# Enable bypass mode for quick testing
-echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local
+npm run dev
+# Visit http://localhost:3000
+```
+
+### Test Real-time Updates
+
+```bash
+# 1. Start WebSocket service
+cd ../backend
+SERVICE=websocket-service uv run uvicorn src.backend.microservices.websocket_service:app --reload --port 8001
+
+# 2. Start frontend
+cd ../frontend
 npm run dev
 
-# Test all UX polish features:
-# ✅ Toast Notifications:
-#    - Login → "Welcome back!" (bottom-right, 4s)
-#    - Create task → "Task created"
-#    - Update task → "Task updated"
-#    - Delete task → "Task deleted"
-#    - Toggle task → "Task completed" / "Task reopened"
-#    - Logout → "Logged out"
-#    - Password change → "Password changed successfully"
-
-# ✅ Date Labels:
-#    - Create new task → Shows "Created:" only
-#    - Edit existing task → Shows "Created:" + "Updated:"
-#    - Task with due date → Shows all three labels
-#    - Visual check: Mono font, uppercase labels, proper icons
-
-# ✅ Animations:
-#    - Click checkbox → Smooth scale to 0.98
-#    - Complete task → Opacity fade to 0.6
-#    - Reopen task → Return to full opacity/scale
-#    - Performance: Chrome DevTools → 60fps, no dropped frames
-
-# ✅ Mobile Navigation:
-#    - Resize window to mobile width
-#    - Check hamburger menu appears
-#    - Verify smooth Framer Motion animations
+# 3. Open browser to http://localhost:3000/tasks
+# 4. Create/edit/delete tasks
+# 5. Verify real-time updates across browser tabs
 ```
 
-### Real Authentication Testing
+### Test Checklist
+
+- ✅ Task creation triggers real-time update
+- ✅ WebSocket connection established
+- ✅ SSE fallback works when WebSocket fails
+- ✅ Notifications appear for new events
+- ✅ Task list auto-refreshes on changes
+- ✅ Recurring tasks spawn new instances
+- ✅ Reminders create notifications
+- ✅ ChatKit loads at /chatbot
+- ✅ JWT authentication works
+- ✅ Bypass mode works for testing
+
+---
+
+## 🐳 Docker Deployment
+
+### Multi-stage Dockerfile
+
+```dockerfile
+# Stage 1: Dependencies
+FROM node:18-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+# Stage 2: Build
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+# Stage 3: Production
+FROM node:18-alpine AS start
+WORKDIR /app
+COPY --from=build /app/public ./public
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/.next/standalone ./
+COPY --from=build /app/.next/static ./.next/static
+ENV NODE_ENV=production
+ENV PORT=3000
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+### Build & Run
 
 ```bash
-# Enable real authentication
-echo "NEXT_PUBLIC_AUTH_BYPASS=false" > .env.local
-# Ensure DATABASE_URL and BETTER_AUTH_SECRET are set
+# Build image
+docker build -t phase5-frontend:v1 phase-5/frontend/
 
-# Start development server
-npm run dev
-
-# Test checklist:
-# ✅ Visit http://localhost:3000 - should show login page
-# ✅ Navigate to /signup - create new account
-# ✅ Register with valid credentials - should redirect to /tasks
-# ✅ Logout and login again - session should persist
-# ✅ Test error scenarios (duplicate email, weak password)
-# ✅ Check database for user and session records
+# Run container
+docker run -p 3000:3000 phase5-frontend:v1
 ```
 
-### API Testing (curl)
+---
 
-```bash
-# Test all endpoints programmatically
-curl -X POST http://localhost:3000/api/auth/sign-up/email \
-  -H "Content-Type: application/json" \
-  -d '{"name":"API Test","email":"api@test.com","password":"apitest123"}'
+## ☸️ Kubernetes Deployment
 
-# Verify registration worked
-curl http://localhost:3000/api/auth/get-session \
-  -b "better-auth.session_token=YOUR_TOKEN"
-```
+### Helm Chart
 
-### Bypass Mode Testing
+See `../helm-charts/frontend/` for complete Kubernetes deployment:
 
-```bash
-# Enable bypass mode
-echo "NEXT_PUBLIC_AUTH_BYPASS=true" > .env.local
+- **Dapr enabled**: `dapr.enabled: true`
+- **App ID**: `frontend`
+- **App Port**: `3000`
+- **Service Type**: LoadBalancer (exposed via Minikube tunnel)
 
-# Start development server
-npm run dev
+### Environment Variables
 
-# Test checklist:
-# ✅ Visit http://localhost:3000 - should redirect to /tasks
-# ✅ Check navbar shows "(Bypass)" indicator
-# ✅ Navigate to /profile - should load with mock user
-# ✅ Test profile form validation and submission
-# ✅ Test password change form
-# ✅ Test all profile components
-```
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `NEXT_PUBLIC_BACKEND_URL` | Backend service URL | Client-side API calls |
+| `NEXT_PUBLIC_AUTH_URL` | Frontend URL | Better Auth callback |
+| `NEXT_PUBLIC_WEBSOCKET_URL` | WebSocket service URL | Real-time updates |
+| `NEXT_PUBLIC_SSE_URL` | SSE endpoint URL | Fallback for WebSocket |
+| `DAPR_HOST` | `localhost` | Dapr sidecar host |
+| `DAPR_HTTP_PORT` | `3500` | Dapr sidecar port |
+| `BACKEND_URL_INTERNAL` | `http://backend:8000` | Server-side API calls |
 
-### ChatKit Integration Testing
-
-```bash
-# Ensure backend is running
-cd phase-3/backend && uv run uvicorn src.backend.main:app --reload
-
-# Start frontend
-cd phase-3/frontend && npm run dev
-
-# Test checklist:
-# ✅ Visit http://localhost:3000/chatbot
-# ✅ ChatKit component loads with cream background
-# ✅ Loading states appear centered on screen
-# ✅ Error states show retry functionality
-# ✅ Navbar shows "Agent" link (not "Chatbot")
-# ✅ Full-height layout fills screen space
-# ✅ Session creation works via backend API
-# ✅ Tool execution visual feedback displays
-# ✅ Mobile responsive layout works
-```
-
-### ChatKit Component States Testing
-```bash
-# Test loading state (no OpenAI key)
-echo "OPENAI_API_KEY=invalid" > phase-3/backend/.env
-# Visit /chatbot → Should show centered loading spinner
-
-# Test error state (missing backend)
-echo "NEXT_PUBLIC_BACKEND_URL=http://localhost:9999" > phase-3/frontend/.env.local
-# Visit /chatbot → Should show error with retry button
-
-# Test success state (valid configuration)
-echo "NEXT_PUBLIC_BACKEND_URL=http://localhost:8000" > phase-3/frontend/.env.local
-# Visit /chatbot → Should load ChatKit interface
-```
-
-### Component Testing
-
-```bash
-# Run development server
-npm run dev
-
-# Visit test page
-# http://localhost:3000/test
-```
-
-## 📝 Scripts
-
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run type-check   # TypeScript type checking
-```
+---
 
 ## 🔗 Related Documentation
 
 - **Main Project**: [../../README.md](../../README.md)
-- **Spec 010**: [../../specs/010-chatkit-integration/spec.md](../../specs/010-chatkit-integration/spec.md) - ChatKit integration specification
-- **Spec 007**: [../../specs/007-frontend-ux-polish/spec.md](../../specs/007-frontend-ux-polish/spec.md) - UX polish specification
-- **Spec 005**: [../../specs/005-user-auth/spec.md](../../specs/005-user-auth/spec.md) - Authentication specification
-- **Auth Quickstart**: [../../specs/005-user-auth/quickstart.md](../../specs/005-user-auth/quickstart.md) - Complete setup guide
-- **API Contracts**: [../../specs/005-user-auth/contracts/auth-api.md](../../specs/005-user-auth/contracts/auth-api.md) - RESTful endpoints
-- **Data Model**: [../../specs/005-user-auth/data-model.md](../../specs/005-user-auth/data-model.md) - Database schema
-- **Spec 004**: [../../specs/004-profile-editing/spec.md](../../specs/004-profile-editing/spec.md) - Profile management
-- **Auth Bypass**: [../../phase-2/AUTH_BYPASS_IMPLEMENTATION.md](../../phase-2/AUTH_BYPASS_IMPLEMENTATION.md) - Bypass feature docs
-- **Design System**: [../../../.claude/skills/ui-design/TOKENS.md](../../../.claude/skills/ui-design/TOKENS.md) - Design tokens
-- **ChatKit Skill**: [../../../.claude/skills/chatkit/SKILL.md](../../../.claude/skills/chatkit/SKILL.md) - ChatKit integration patterns
-- **ChatKit History**: [../../history/prompts/010-chatkit-integration/](../../history/prompts/010-chatkit-integration/) - Implementation history
-- **Sonner Docs**: [npmjs.com/package/sonner](https://npmjs.com/package/sonner) - Toast notification library
-
-## 🎯 Key Features
-
-### Authentication System ✅
-- ✅ **User Registration** - Email/password signup with validation
-- ✅ **User Login** - Secure authentication with JWT tokens
-- ✅ **Session Management** - Persistent sessions via cookies
-- ✅ **Password Security** - bcrypt hashing, constant-time comparison
-- ✅ **JWT Integration** - Ready for FastAPI backend validation
-- ✅ **API Endpoints** - `/api/auth/sign-up/email`, `/api/auth/sign-in/email`, `/api/auth/get-session`
-- ✅ **Database Integration** - Neon PostgreSQL with SSL
-- ✅ **Error Handling** - Generic messages prevent user enumeration
-
-### Profile Management
-- ✅ Editable profile information
-- ✅ Secure password changes
-- ✅ Account information display
-- ✅ Task statistics dashboard
-- ✅ Account deletion with confirmation
-
-### Task Management
-- ✅ Create tasks with title and description
-- ✅ Complete/uncomplete tasks with animations
-- ✅ Edit task details
-- ✅ Delete tasks
-- ✅ Filter and search tasks
-- ✅ Enhanced date labels (Due/Created/Updated)
-- ✅ Visual completion feedback
-
-### UI/UX & Polish
-- ✅ Modern Technical Editorial design
-- ✅ Sonner toast notifications (7 scenarios)
-- ✅ Smooth animations and transitions (editorial easing)
-- ✅ Task completion scale/opacity effects
-- ✅ Enhanced date display with icons and labels
-- ✅ Mobile hamburger menu with Framer Motion
-- ✅ Responsive mobile-first layout
-- ✅ Accessibility features
-- ✅ Loading states and error handling
-- ✅ 60fps performance optimization
-
-### AI ChatKit Integration ✅
-- ✅ OpenAI ChatKit React component via CDN
-- ✅ Full-height chat interface (fills screen space)
-- ✅ Cream background (#F9F7F2) matching design system
-- ✅ Orange accent (#FF6B4A) for interactive elements
-- ✅ Loading states with centered spinner animations
-- ✅ Error handling with retry functionality
-- ✅ Session creation via backend API
-- ✅ Thread persistence (localStorage + PostgreSQL)
-- ✅ Navbar integration with "Agent" link
-- ✅ Mobile responsive layout
-- ✅ Tool execution visual feedback
-- ✅ Streaming responses (SSE support)
-
-## 📦 Dependencies
-
-**Core:**
-- Next.js 16.1.1 (App Router)
-- React 19.2.3
-- TypeScript 5.x
-
-**Authentication:**
-- Better Auth v1.4.9 (authentication framework)
-- pg v8.16.3 (PostgreSQL driver for Neon)
-- @types/pg v8.16.0 (TypeScript types)
-
-**UI & Animations:**
-- Framer Motion v12.23.26 (animations)
-- Lucide React v0.562.0 (icons)
-- Sonner v2.0.7 (toast notifications)
-- Tailwind CSS v4 (styling)
-
-**AI ChatKit:**
-- @openai/chatkit-react (OpenAI ChatKit React component)
-- ChatKit CDN script loading (Web Components)
-
-**Development:**
-- ESLint v9 (linting)
-- TypeScript (type safety)
-- @types/node v20 (Node.js types)
-
-## 🎨 Design Principles
-
-### Modern Technical Editorial
-- **Editorial warmth**: Serif headings, cream backgrounds
-- **Technical precision**: Mono fonts, subtle lines
-- **Spacious layout**: Open, breathing room
-- **Vibrant accents**: Orange for interactions
-
-### Animation Philosophy
-- **No abrupt appearances**: Fade-in transitions
-- **Physics over duration**: Smooth easing
-- **Subtle interactions**: 1.02x hover scales
-- **Staggered cascades**: Sequential animations
-
-## 🤝 Contributing
-
-This project follows Spec-Driven Development:
-
-1. **Specification** - Define requirements
-2. **Planning** - Design architecture
-3. **Tasks** - Break down implementation
-4. **Implementation** - Write code with tests
-5. **Documentation** - Record decisions
-
-## 📜 License
-
-MIT License - See main project README for details.
+- **Spec 013**: [../../specs/013-microservices-dapr/spec.md](../../specs/013-microservices-dapr/spec.md)
+- **Plan 013**: [../../specs/013-microservices-dapr/plan.md](../../specs/013-microservices-dapr/plan.md)
+- **Tasks 013**: [../../specs/013-microservices-dapr/tasks.md](../../specs/013-microservices-dapr/tasks.md)
+- **Quickstart**: [../../specs/013-microservices-dapr/quickstart.md](../../specs/013-microservices-dapr/quickstart.md)
+- **Phase 5 README**: [../README.md](../README.md)
+- **Minikube Deployment**: [../minikube-deployment.md](../minikube-deployment.md)
+- **Backend README**: [../backend/README.md](../backend/README.md)
+- **Next.js Skill**: [../../.claude/skills/nextjs/](../../.claude/skills/nextjs/)
+- **UI Design Skill**: [../../.claude/skills/ui-design/](../../.claude/skills/ui-design/)
+- **ChatKit Skill**: [../../.claude/skills/chatkit/SKILL.md](../../.claude/skills/chatkit/SKILL.md)
 
 ---
 
-**Built with ❤️ using Next.js and Spec-Driven Development**
+## 📦 Dependencies
+
+### Core
+- **Next.js**: 16.1.6 (App Router, standalone output)
+- **React**: 19.2.3
+- **TypeScript**: 5.x
+
+### Authentication
+- **Better Auth**: 1.4.9
+- **pg**: 8.16.3 (PostgreSQL driver)
+
+### UI & Styling
+- **Tailwind CSS**: 4.x
+- **Framer Motion**: 12.23.26
+- **Lucide React**: 0.562.0 (icons)
+- **Sonner**: 2.0.7 (toast notifications)
+
+### AI Chat
+- **@openai/chatkit-react**: 1.4.1
+
+### Development
+- **ESLint**: 9.x
+- **PostCSS**: 8.x
+- **TypeScript**: 5.x
+
+---
+
+## 🎯 Success Criteria (Phase V)
+
+### ✅ Frontend Complete
+- [x] Dapr proxy API routes implemented
+- [x] Real-time updates via WebSocket/SSE
+- [x] useWebSocket hook with auto-reconnect
+- [x] Task list auto-refreshes on events
+- [x] Notification panel with real-time badges
+- [x] Recurring task UI options
+- [x] Reminder datetime picker
+- [x] Tag search with # syntax
+- [x] Audit log viewing page
+- [x] ChatKit integration maintained
+- [x] Modern Technical Editorial design
+- [x] JWT authentication with Better Auth
+- [x] Bypass mode for testing
+
+### ✅ Deployment Ready
+- [x] Multi-stage Dockerfile
+- [x] Next.js standalone output
+- [x] Helm chart configured
+- [x] Dapr annotations ready
+- [x] Environment variables externalized
+- [x] Minikube deployment tested
+
+---
+
+## 🚀 Upcoming (014-cloud-deployment)
+
+- Cloud Kubernetes deployment to complete Phase 5
+- Production-ready infrastructure setup
+- Monitoring and observability
+
+---
+
+**Phase V Frontend Complete** ✅ (95% - Cloud deployment pending in 014)
+*Built with ❤️ using Next.js 16, Dapr Microservices, & Spec-Driven Development*

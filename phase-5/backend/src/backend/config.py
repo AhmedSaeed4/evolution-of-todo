@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     # JWT Authentication
     better_auth_secret: str
 
-    # CORS
-    cors_origins: str = "http://localhost:3000"
+    # CORS (support both localhost and 127.0.0.1 for Minikube)
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # API Server
     api_host: str = "0.0.0.0"

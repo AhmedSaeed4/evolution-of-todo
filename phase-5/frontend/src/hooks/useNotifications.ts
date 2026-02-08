@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { Notification } from '@/types';
 import { useAuth } from './useAuth';
+import { useNotificationRealtimeUpdates } from './useWebSocket';
 import { isAuthBypassEnabled } from '@/lib/auth';
+import { toast } from 'sonner';
 
 interface NotificationState {
   notifications: Notification[];
@@ -43,6 +45,20 @@ export function useNotifications(pollInterval: number = 30000) {
       }));
     }
   }, [effectiveUserId]);
+
+  // Enable real-time updates via WebSocket for notifications
+  // This will automatically refresh notifications when new ones arrive
+  useNotificationRealtimeUpdates<{ message: string; notification_id: string }>(
+    effectiveUserId,
+    (notification) => {
+      console.log('[WebSocket] New notification received:', notification);
+      // Show toast for new notification
+      toast.info(notification.message);
+      // Refresh notifications to get updated count
+      fetchNotifications();
+    },
+    true // enabled
+  );
 
   useEffect(() => {
     if (effectiveUserId) {

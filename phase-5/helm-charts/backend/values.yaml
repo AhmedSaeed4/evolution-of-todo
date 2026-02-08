@@ -1,13 +1,23 @@
 replicaCount: 1
 
 image:
-  repository: phase4-backend
+  repository: phase5-backend
   pullPolicy: IfNotPresent
-  tag: "v1"
+  tag: "toggle-fix"
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+
+# Dapr configuration
+dapr:
+  enabled: true
+  appId: "backend-api"
+  appPort: "8000"
+  appProtocol: "http"
+  logLevel: "info"
+  enableAppHealthCheck: "true"
+  appHealthCheckPath: "/health"
 
 serviceAccount:
   create: true
@@ -27,6 +37,7 @@ service:
 
 # Environment variables for backend (non-sensitive)
 env:
+  SERVICE: "backend-api"
   CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
   API_HOST: "0.0.0.0"
   API_PORT: "8000"
@@ -37,7 +48,7 @@ env:
 # Sensitive values from Kubernetes Secrets
 envFrom:
   - secretRef:
-      name: phase4-secrets
+      name: app-secrets
 
 ingress:
   enabled: false
@@ -64,7 +75,23 @@ httpRoute:
           type: PathPrefix
           value: /headers
 
-resources: {}
+# Resource limits for the backend API container
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# Dapr sidecar resource limits
+daprResources:
+  limits:
+    cpu: 300m
+    memory: 384Mi
+  requests:
+    cpu: 150m
+    memory: 192Mi
 
 # Health probes - backend has /health endpoint
 livenessProbe:

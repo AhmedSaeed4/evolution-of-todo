@@ -8,6 +8,13 @@ from ..database import get_session
 from ..auth.jwt import verify_token, get_user_id_from_token, validate_token_user_match
 from ..services.task_service import TaskService
 from ..schemas.task import TaskCreate, TaskUpdate, TaskResponse, StatsResponse
+from ..utils.event_publisher import (
+    publish_event,
+    publish_task_created,
+    publish_task_updated,
+    publish_task_completed,
+    publish_task_deleted,
+)
 
 
 router = APIRouter(prefix="/api", tags=["tasks"])
@@ -75,6 +82,21 @@ async def create_task(
 
     service = TaskService(session)
     task = service.create_task(user_id, task_data)
+
+    # Publish event to Kafka via Dapr (fire-and-forget)
+    await publish_task_created(
+        user_id=user_id,
+        task_id=str(task.id),
+        title=task.title,
+        description=task.description,
+        priority=task.priority,
+        due_date=task.due_date.isoformat() if task.due_date else None,
+        reminder_at=task.reminder_at.isoformat() if task.reminder_at else None,
+        recurring_rule=task.recurring_rule,
+        recurring_end_date=None,
+        tags=task.tags
+    )
+
     return task
 
 
@@ -109,8 +131,6 @@ async def update_task(
     session: Session = Depends(get_session)
 ):
     """Update existing task"""
-    import sys
-    print(f"DEBUG update_task: task_data.model_dump() = {task_data.model_dump()}", file=sys.stderr)
     validate_token_user_match(user_payload, user_id)
 
     service = TaskService(session)
@@ -121,6 +141,18 @@ async def update_task(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Task not found"
         )
+
+    # Publish event to Kafka via Dapr (fire-and-forget)
+    await publish_event(
+        topic="task-updated",
+        event_type="task-updated",
+        user_id=user_id,
+        data={
+            "task_id": str(task.id),
+            "title": task.title,
+            "changes": task_data.model_dump(exclude_unset=True)
+        }
+    )
 
     return task
 
@@ -144,6 +176,13 @@ async def delete_task(
             detail="Task not found"
         )
 
+    # Publish event to Kafka via Dapr (fire-and-forget)
+    await publish_task_deleted(
+        user_id=user_id,
+        task_id=str(task_id),
+        title=""
+    )
+
 
 @router.patch("/{user_id}/tasks/{task_id}/complete", response_model=TaskResponse)
 async def toggle_complete(
@@ -156,12 +195,59 @@ async def toggle_complete(
     validate_token_user_match(user_payload, user_id)
 
     service = TaskService(session)
+
+    # Capture state before toggle for event publishing
+    task_before = service.get_task(user_id, task_id)
+    if not task_before:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+
+    before_state = {
+        "id": str(task_before.id),
+        "title": task_before.title,
+        "description": task_before.description,
+        "status": task_before.status,
+        "completed": task_before.completed,
+        "priority": task_before.priority,
+    }
+
+    # Toggle the task
     task = service.toggle_complete(user_id, task_id)
 
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Task not found"
+        )
+
+    # Capture state after toggle
+    after_state = {
+        "id": str(task.id),
+        "title": task.title,
+        "description": task.description,
+        "status": task.status,
+        "completed": task.completed,
+        "priority": task.priority,
+    }
+
+    # Publish task-updated event for BOTH mark and unmark operations
+    await publish_task_updated(
+        user_id=user_id,
+        task_id=str(task.id),
+        before=before_state,
+        after=after_state,
+    )
+
+    # Also publish task-completed event for recurring-service if task was just completed
+    if task.completed:
+        await publish_task_completed(
+            user_id=user_id,
+            task_id=str(task.id),
+            title=task.title,
+            recurring_rule=task.recurring_rule,
+            recurring_end_date=None
         )
 
     return task

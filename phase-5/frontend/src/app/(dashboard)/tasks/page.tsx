@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useTasks } from '@/hooks/useTasks';
 import { useFilters } from '@/hooks/useFilters';
+import { useTaskRealtimeUpdates } from '@/hooks/useWebSocket';
 import { Task, CreateTaskDTO, UpdateTaskDTO, TaskFilters } from '@/types';
 import { TaskList } from '@/components/tasks/TaskList';
 import { TaskForm } from '@/components/tasks/TaskForm';
@@ -17,7 +18,7 @@ import { isAuthBypassEnabled } from '@/lib/auth';
 
 export default function TasksPage() {
   const { user, isAuthenticated } = useAuth();
-  const { tasks, loading, error, createTask, updateTask, deleteTask, toggleTask } = useTasks();
+  const { tasks, loading, error, createTask, updateTask, deleteTask, toggleTask, refetch } = useTasks();
   const { filters, setFilters, filteredTasks } = useFilters(tasks);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -25,6 +26,21 @@ export default function TasksPage() {
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+
+  // Get effective user ID for WebSocket connection
+  const effectiveUserId = isAuthBypassEnabled() ? 'bypass-user' : user?.id;
+
+  // Enable real-time updates via WebSocket → SSE fallback
+  // This will automatically refresh the task list when changes are detected
+  useTaskRealtimeUpdates(
+    effectiveUserId,
+    (event) => {
+      console.log('[Realtime] Task update received:', event);
+      // Refresh tasks when any task event is received
+      refetch();
+    },
+    true // enabled
+  );
 
   // Redirect if not authenticated (only when bypass is disabled)
   useEffect(() => {

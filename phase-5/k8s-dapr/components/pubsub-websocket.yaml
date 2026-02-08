@@ -1,0 +1,27 @@
+# Kafka Pub/Sub Component for WebSocket Service
+# Separate component ensures this service gets ALL messages for its subscriptions
+
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub-websocket
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+  - name: brokers
+    value: redpanda.default.svc.cluster.local:9093
+  - name: consumerGroup
+    value: websocket-service
+  - name: consumerID
+    value: "{podName}"
+  - name: authRequired
+    value: "false"
+  - name: redeliverInterval
+    value: 60s
+  - name: processingTimeout
+    value: 15s
+  - name: queueDepth
+    value: "100"
+  - name: concurrency
+    value: "10"

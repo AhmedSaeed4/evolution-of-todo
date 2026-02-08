@@ -1,0 +1,74 @@
+replicaCount: 1
+
+image:
+  repository: phase5-backend
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+# Dapr configuration
+dapr:
+  enabled: true
+  appId: "audit-service"
+  appPort: "8000"
+  appProtocol: "http"
+  logLevel: "info"
+  enableAppHealthCheck: "true"
+  appHealthCheckPath: "/health"
+
+service:
+  type: ClusterIP
+  port: 8000  # All microservices use port 8000
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+# Environment variables for audit service
+env:
+  SERVICE: "audit-service"
+  ENVIRONMENT: "development"
+
+# Sensitive values from Kubernetes Secrets
+envFrom:
+  - secretRef:
+      name: app-secrets
+
+# Resource limits for the microservice container
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Dapr sidecar resource limits
+daprResources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

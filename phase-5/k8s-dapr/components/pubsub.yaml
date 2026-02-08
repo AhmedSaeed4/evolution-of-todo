@@ -1,0 +1,33 @@
+# Kafka Pub/Sub Component - Shared by all services
+# Each service gets its own consumer group via {appID} template
+
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+  - name: brokers
+    value: redpanda.default.svc.cluster.local:9093
+  - name: consumerGroup
+    value: "{appID}-v2"  # New consumer group to start fresh
+  - name: consumerID
+    value: "{podName}"
+  - name: initialOffset
+    value: newest  # Start from newest message, skip old stuck events
+  - name: authRequired
+    value: "false"
+  - name: redeliverInterval
+    value: 60s
+  - name: processingTimeout
+    value: 15s
+  - name: queueDepth
+    value: "100"
+  - name: concurrency
+    value: "10"
+  - name: maxRetries
+    value: "0"  # Disable retries to prevent stuck consumer offset
+  - name: consumeRetryEnabled
+    value: "false"  # Disable retry on consume errors

@@ -1,0 +1,120 @@
+replicaCount: 1
+
+image:
+  repository: phase5-frontend
+  pullPolicy: IfNotPresent
+  tag: "sse-fix"
+
+# Dapr configuration
+dapr:
+  enabled: true
+  appId: "frontend"
+  appPort: "3000"
+  appProtocol: "http"
+  logLevel: "info"
+  enableAppHealthCheck: "true"
+  appHealthCheckPath: "/api/health"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: LoadBalancer
+  port: 3000
+
+# Environment variables for frontend
+# NOTE: NEXT_PUBLIC_* variables are set at BUILD TIME in Dockerfile
+# BACKEND_URL_INTERNAL and AUTH_URL_INTERNAL are for server-side code in Kubernetes pods
+env:
+  NEXT_PUBLIC_BACKEND_URL: "http://127.0.0.1:8000"  # Browser → Backend (via tunnel)
+  NEXT_PUBLIC_AUTH_URL: "http://127.0.0.1:3000"     # Frontend auth URL
+  NEXT_PUBLIC_AUTH_BYPASS: "false"
+  NEXT_PUBLIC_CHATKIT_DOMAIN_KEY: "yourdomain.com"
+  NEXT_PUBLIC_WEBSOCKET_URL: "ws://127.0.0.1:8001"  # WebSocket via websocket-service (port 8001)
+  NEXT_PUBLIC_SSE_URL: "http://127.0.0.1:8001/api/sse"  # SSE via websocket-service (port 8001)
+  BACKEND_URL_INTERNAL: "http://backend:8000"        # Server → Backend (internal service)
+  AUTH_URL_INTERNAL: "http://frontend:3000"         # Server → Frontend auth (internal service)
+  DAPR_HOST: "localhost"                             # Dapr sidecar host (sidecar runs in same pod)
+  DAPR_HTTP_PORT: "3500"                             # Dapr HTTP port
+  HOSTNAME: "0.0.0.0"                                # Bind to all interfaces for service access
+  PORT: "3000"                                       # Explicit port
+
+# Sensitive values from Kubernetes Secrets
+envFrom:
+  - secretRef:
+      name: app-secrets
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+  - name: gateway
+    sectionName: http
+  hostnames:
+  - chart-example.local
+  rules:
+  - matches:
+      - path:
+          type: PathPrefix
+          value: /headers
+
+resources: {}
+
+# Use exec probe for health check since app listens on localhost
+livenessProbe:
+  exec:
+    command:
+    - wget
+    - -q
+    - --spider
+    - http://localhost:3000/api/health
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 3
+readinessProbe:
+  exec:
+    command:
+    - wget
+    - -q
+    - --spider
+    - http://localhost:3000/api/health
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

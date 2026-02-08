@@ -1,0 +1,74 @@
+replicaCount: 1
+
+image:
+  repository: phase5-backend
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+# Dapr configuration
+dapr:
+  enabled: true
+  appId: "notification-service"
+  appPort: "8000"
+  appProtocol: "http"
+  logLevel: "info"
+  enableAppHealthCheck: "true"
+  appHealthCheckPath: "/health"
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8000  # All microservices use port 8000
+
+# Environment variables for notification service
+env:
+  SERVICE: "notification-service"
+  ENVIRONMENT: "development"
+
+# Sensitive values from Kubernetes Secrets
+envFrom:
+  - secretRef:
+      name: app-secrets
+
+# Resource limits for the microservice container
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Dapr sidecar resource limits
+daprResources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 40
+  periodSeconds: 30
+  timeoutSeconds: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 35
+  periodSeconds: 10
+  timeoutSeconds: 3
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

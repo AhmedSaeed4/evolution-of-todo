@@ -1,0 +1,6 @@
+apiVersion: v2
+name: websocket-service
+description: WebSocket microservice for real-time task updates
+type: application
+version: 0.1.0
+appVersion: "1.0"

@@ -1,0 +1,88 @@
+replicaCount: 1
+
+image:
+  repository: phase5-backend
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: LoadBalancer
+  port: 8001  # Exposed on port 8001 to avoid conflict with backend (8000)
+
+# Dapr configuration
+dapr:
+  enabled: true
+  appId: "websocket-service"
+  appPort: "8001"
+  appProtocol: "http"
+  logLevel: "info"
+  enableAppHealthCheck: "true"
+  appHealthCheckPath: "/health"
+
+# Environment variables for websocket service
+env:
+  SERVICE: "websocket-service"
+  ENVIRONMENT: "development"
+  PORT: "8001"
+
+# Command to run the websocket-service directly
+command: ["/bin/sh", "-c"]
+args: ["exec uvicorn backend.microservices.websocket_service:app --host 0.0.0.0 --port ${PORT}"]
+
+# Sensitive values from Kubernetes Secrets
+envFrom:
+  - secretRef:
+      name: app-secrets
+
+# Resource limits for the microservice container
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Dapr sidecar resource limits
+daprResources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

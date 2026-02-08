@@ -1,0 +1,14 @@
+# Dapr Configuration to disable statestore component
+# Used by services that don't need idempotency (notification-service, websocket-service)
+
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: no-statestore
+  namespace: default
+spec:
+  components:
+    deny:
+      - state.postgresql
+      - state.redis
+      - state.in-memory

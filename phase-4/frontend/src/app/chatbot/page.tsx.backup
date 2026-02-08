@@ -1,0 +1,305 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { ChatKit, useChatKit } from '@openai/chatkit-react'
+
+export default function ChatBotPage() {
+  const [token, setToken] = useState<string | null>(null)
+  const [initialThread, setInitialThread] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [scriptStatus, setScriptStatus] = useState<'pending' | 'ready' | 'error'>('pending')
+
+  // Get JWT token from localStorage (set by Better Auth)
+  useEffect(() => {
+    // Try to get token from localStorage where Better Auth might store it
+    const storedToken = localStorage.getItem('better-auth-token') ||
+                       localStorage.getItem('auth_token') ||
+                       sessionStorage.getItem('better-auth-token')
+
+    if (storedToken) {
+      setToken(storedToken)
+    } else {
+      // Development fallback: create a bypass token for testing
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Development mode: Using bypass token')
+        const devToken = btoa(JSON.stringify({
+          sub: 'dev-user-123',
+          id: 'dev-user-123',
+          email: 'dev@example.com',
+          exp: Math.floor(Date.now() / 1000) + 3600
+        })) + '.bypass-signature'
+        setToken(devToken)
+      } else {
+        setError('Authentication required. Please log in first.')
+      }
+    }
+  }, [])
+
+  // Load saved thread ID from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('chatkit-thread-id')
+    setInitialThread(saved)
+  }, [])
+
+  // Enhanced ChatKit script loading detection
+  useEffect(() => {
+    if (typeof window === 'undefined' || scriptStatus !== 'pending') return
+
+    // Check if ChatKit web component is already loaded
+    if (window.customElements?.get('openai-chatkit')) {
+      setScriptStatus('ready')
+      return
+    }
+
+    // Wait for ChatKit to be defined
+    customElements.whenDefined('openai-chatkit').then(() => {
+      setScriptStatus('ready')
+    }).catch(() => {
+      setScriptStatus('error')
+      setError('ChatKit failed to load. Please check your internet connection and refresh.')
+    })
+  }, [scriptStatus])
+
+  const { control } = useChatKit({
+    api: {
+      async getClientSecret(existing) {
+        // For development, we'll use a direct approach
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Development mode: Using direct OpenAI API key')
+
+          // In development, we can try to get the OpenAI key directly
+          // This is a workaround for the token format issue
+          try {
+            const res = await fetch('/api/chatkit/session', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+            })
+
+            if (!res.ok) {
+              let errorData
+              try {
+                errorData = await res.json()
+              } catch {
+                errorData = { error: `HTTP ${res.status}: ${res.statusText}` }
+              }
+              throw new Error(errorData.detail || errorData.error || 'Failed to create session')
+            }
+
+            const data = await res.json()
+            console.log('ChatKit session created:', data) // Debug log
+
+            if (!data.client_secret) {
+              throw new Error('No client_secret returned from session endpoint')
+            }
+
+            return data.client_secret
+          } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : 'Unknown authentication error'
+            console.error('Session creation failed:', err) // Debug log
+            setError(`ChatKit session failed: ${errorMsg}`)
+            throw err
+          }
+        }
+
+        // Production: Use the standard approach
+        if (!token) {
+          throw new Error('No authentication token available')
+        }
+
+        try {
+          // For testing, use mock endpoint first to verify ChatKit works
+          const useMock = true // Set to false to use real backend
+          const endpoint = useMock ? '/api/chatkit-mock/' : '/api/chatkit/session'
+
+          console.log('Using ChatKit endpoint:', endpoint)
+
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(useMock ? {} : { 'Authorization': `Bearer ${token}` })
+            },
+          })
+
+          if (!res.ok) {
+            let errorData
+            try {
+              errorData = await res.json()
+            } catch {
+              errorData = { error: `HTTP ${res.status}: ${res.statusText}` }
+            }
+            throw new Error(errorData.detail || errorData.error || 'Failed to create session')
+          }
+
+          const data = await res.json()
+          console.log('ChatKit session created:', data) // Debug log
+          console.log('Client secret format:', data.client_secret?.substring(0, 20) + '...') // Log first 20 chars
+
+          if (!data.client_secret) {
+            throw new Error('No client_secret returned from session endpoint')
+          }
+
+          // Validate the client_secret format
+          if (!data.client_secret.startsWith('sk-')) {
+            console.warn('Client secret does not start with sk-:', data.client_secret.substring(0, 10))
+          }
+
+          return data.client_secret
+        } catch (err) {
+          const errorMsg = err instanceof Error ? err.message : 'Unknown authentication error'
+          console.error('Session creation failed:', err) // Debug log
+          setError(`ChatKit session failed: ${errorMsg}`)
+          throw err
+        }
+      },
+    },
+    initialThread,
+    onThreadChange: ({ threadId }) => {
+      if (threadId) {
+        localStorage.setItem('chatkit-thread-id', threadId)
+      }
+    },
+    theme: {
+      colorScheme: 'light',
+      color: {
+        grayscale: { hue: 220, tint: 6, shade: -1 },
+        accent: { primary: '#FF6B4A', level: 1 }, // Match editorial orange
+      },
+      radius: 'round',
+    },
+    startScreen: {
+      greeting: `Hello! How can I help you with your tasks?`,
+      prompts: [
+        { label: 'Create a new task', prompt: 'Create a task for buying groceries' },
+        { label: 'List my tasks', prompt: 'Show me all my current tasks' },
+        { label: 'Help me understand', prompt: 'Help me understand what I can do' },
+      ],
+    },
+    composer: {
+      placeholder: 'Ask me to create, list, or manage your tasks...',
+    },
+    // Try without domainKey first, then add if needed
+    // domainKey: 'localhost',
+    onError: ({ error }) => {
+      console.error('ChatKit runtime error:', error)
+      console.error('Error type:', typeof error)
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      // Set error state to show in UI
+      setError(`ChatKit runtime error: ${error.message || error.toString()}`)
+    },
+  })
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+          <h2 className="text-xl font-serif text-red-800 mb-2">ChatKit Setup Error</h2>
+          <p className="text-red-600 mb-4">{error}</p>
+          <div className="text-sm text-red-500 space-y-1">
+            <p><strong>Possible causes:</strong></p>
+            <ul className="list-disc list-inside ml-2">
+              <li>ChatKit CDN failed to load - check internet connection</li>
+              <li>Not logged in - please authenticate first</li>
+              <li>OPENAI_API_KEY not configured in backend</li>
+              <li>Invalid OpenAI API key format</li>
+              <li>Domain not allowed in OpenAI Platform</li>
+            </ul>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading state while ChatKit script is loading
+  if (scriptStatus === 'pending') {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-8">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-md">
+          <h2 className="text-xl font-serif text-blue-800 mb-2">Loading ChatKit...</h2>
+          <p className="text-blue-600">Please wait while the ChatKit interface loads.</p>
+          <div className="mt-4 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (scriptStatus === 'error') {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+          <h2 className="text-xl font-serif text-red-800 mb-2">ChatKit Failed to Load</h2>
+          <p className="text-red-600 mb-4">The ChatKit interface could not be loaded.</p>
+          <div className="text-sm text-red-500 space-y-1">
+            <p><strong>Try these steps:</strong></p>
+            <ul className="list-disc list-inside ml-2">
+              <li>Check your internet connection</li>
+              <li>Disable ad blockers or VPN</li>
+              <li>Ensure OpenAI CDN is accessible</li>
+              <li>Clear browser cache and refresh</li>
+            </ul>
+          </div>
+          <button
+            onClick={() => {
+              setScriptStatus('pending')
+              setError(null)
+              // Re-trigger script loading
+              setTimeout(() => {
+                if (window.customElements?.get('openai-chatkit')) {
+                  setScriptStatus('ready')
+                }
+              }, 1000)
+            }}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!token) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-8">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md">
+          <h2 className="text-xl font-serif text-yellow-800 mb-2">Authentication Required</h2>
+          <p className="text-yellow-600 mb-4">Please log in to access the ChatBot.</p>
+          <p className="text-sm text-yellow-500">
+            The ChatKit integration requires an authenticated session.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Only render ChatKit when script is ready
+  if (scriptStatus !== 'ready') {
+    return null // Or could show loading state
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="p-4 border-b border-orange-200 bg-orange-50">
+        <h1 className="text-2xl font-serif text-gray-900">AI Task Assistant</h1>
+        <p className="text-sm text-gray-600 mt-1">
+          Powered by OpenAI ChatKit with MCP task management tools
+        </p>
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <ChatKit control={control} className="h-full w-full" />
+      </div>
+    </div>
+  )
+}

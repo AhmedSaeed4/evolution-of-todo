@@ -28,7 +28,7 @@ export default function TaskStatsCard() {
     if (effectiveUserId) {
       const fetchStats = async () => {
         try {
-          const data = await api.getTaskStats(effectiveUserId);
+          const data = await api.getTaskStats();
           setStats([
             { label: 'Total', value: data.total, color: 'text-structure' },
             { label: 'Pending', value: data.pending, color: 'text-priority-medium' },

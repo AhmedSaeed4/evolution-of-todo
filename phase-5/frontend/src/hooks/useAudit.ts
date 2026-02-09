@@ -30,7 +30,7 @@ export function useAudit(filters?: {
 
     setAuditState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const auditLogs = await api.getAuditLogs(effectiveUserId, filters);
+      const auditLogs = await api.getAuditLogs(filters);
       setAuditState({
         auditLogs,
         loading: false,

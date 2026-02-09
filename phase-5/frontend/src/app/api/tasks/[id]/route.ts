@@ -50,7 +50,55 @@ export async function GET(
   }
 }
 
-// PATCH /api/tasks/[id] - Update task
+// PUT /api/tasks/[id] - Update task (frontend calls this for edits)
+// PATCH /api/tasks/[id] - Update task (also supported)
+async function updateTask(request: NextRequest, userId: string, id: string) {
+  const body = await request.json();
+  const method = `api/${userId}/tasks/${id}`;
+  const daprUrl = `${DAPR_URL}/invoke/backend-api/method/${method}`;
+
+  const response = await fetch(daprUrl, {
+    method: 'PUT', // Backend uses PUT for updates
+    headers: {
+      'Content-Type': 'application/json',
+      // Forward JWT token for backend authentication (Dapr forwards headers to target service)
+      'Authorization': request.headers.get('Authorization') || '',
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json();
+  return NextResponse.json(data, { status: response.status });
+}
+
+// PUT /api/tasks/[id] - Update task
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  if (!session) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
+
+  const userId = session.user.id;
+  const { id } = await params;
+
+  try {
+    return await updateTask(request, userId, id);
+  } catch (error) {
+    console.error('Dapr proxy error (PUT /api/tasks/[id]):', error);
+    return NextResponse.json(
+      { error: 'Failed to proxy request to backend service' },
+      { status: 503 }
+    );
+  }
+}
+
+// PATCH /api/tasks/[id] - Update task (also supported for compatibility)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -67,22 +115,7 @@ export async function PATCH(
   const { id } = await params;
 
   try {
-    const body = await request.json();
-    const method = `api/${userId}/tasks/${id}`;
-    const daprUrl = `${DAPR_URL}/invoke/backend-api/method/${method}`;
-
-    const response = await fetch(daprUrl, {
-      method: 'PUT', // Backend uses PUT for updates
-      headers: {
-        'Content-Type': 'application/json',
-        // Forward JWT token for backend authentication (Dapr forwards headers to target service)
-        'Authorization': request.headers.get('Authorization') || '',
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    return await updateTask(request, userId, id);
   } catch (error) {
     console.error('Dapr proxy error (PATCH /api/tasks/[id]):', error);
     return NextResponse.json(

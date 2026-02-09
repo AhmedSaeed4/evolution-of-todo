@@ -5,7 +5,7 @@ import { getAuthToken, getCurrentUserId, isAuthBypassEnabled } from './auth';
 // API Methods - Now using real backend
 export const api = {
   // GET all tasks
-  async getAll(userId: string, filters?: TaskFilters): Promise<Task[]> {
+  async getAll(filters?: TaskFilters): Promise<Task[]> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
@@ -19,16 +19,16 @@ export const api = {
     if (filters?.sortOrder) params.append('sort_order', filters.sortOrder);
 
     const queryString = params.toString() ? `?${params.toString()}` : '';
-    return apiClient<Task[]>(`/api/${userId}/tasks${queryString}`, {}, token);
+    return apiClient<Task[]>(`/api/tasks${queryString}`, {}, token);
   },
 
   // CREATE task
-  async create(userId: string, data: CreateTaskDTO): Promise<Task> {
+  async create(data: CreateTaskDTO): Promise<Task> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
     return apiClient<Task>(
-      `/api/${userId}/tasks`,
+      `/api/tasks`,
       {
         method: 'POST',
         body: JSON.stringify(data)
@@ -38,12 +38,12 @@ export const api = {
   },
 
   // UPDATE task
-  async update(userId: string, taskId: string, data: UpdateTaskDTO): Promise<Task> {
+  async update(taskId: string, data: UpdateTaskDTO): Promise<Task> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
     return apiClient<Task>(
-      `/api/${userId}/tasks/${taskId}`,
+      `/api/tasks/${taskId}`,
       {
         method: 'PUT',
         body: JSON.stringify(data)
@@ -53,12 +53,12 @@ export const api = {
   },
 
   // DELETE task
-  async delete(userId: string, taskId: string): Promise<void> {
+  async delete(taskId: string): Promise<void> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
     return apiClient<void>(
-      `/api/${userId}/tasks/${taskId}`,
+      `/api/tasks/${taskId}`,
       {
         method: 'DELETE'
       },
@@ -67,12 +67,12 @@ export const api = {
   },
 
   // TOGGLE COMPLETE
-  async toggleComplete(userId: string, taskId: string): Promise<Task> {
+  async toggleComplete(taskId: string): Promise<Task> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
     return apiClient<Task>(
-      `/api/${userId}/tasks/${taskId}/complete`,
+      `/api/tasks/${taskId}/complete`,
       {
         method: 'PATCH'
       },
@@ -81,7 +81,7 @@ export const api = {
   },
 
   // UPDATE PROFILE
-  async updateProfile(userId: string, data: { name: string }): Promise<User> {
+  async updateProfile(data: { name: string }): Promise<User> {
     // Note: This endpoint is not implemented in the backend yet
     // Keeping mock behavior for now
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -91,8 +91,9 @@ export const api = {
     }
 
     // For now, return mock user since profile endpoint isn't in backend spec
+    const userId = await getCurrentUserId();
     return {
-      id: userId,
+      id: userId || '',
       email: 'demo@example.com',
       name: data.name,
       createdAt: new Date().toISOString()
@@ -100,7 +101,7 @@ export const api = {
   },
 
   // CHANGE PASSWORD
-  async changePassword(userId: string, data: { currentPassword: string; newPassword: string }): Promise<void> {
+  async changePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
     // Note: This endpoint is not implemented in the backend yet
     // Keeping mock behavior for now
     await new Promise(resolve => setTimeout(resolve, 400));
@@ -121,19 +122,19 @@ export const api = {
   },
 
   // GET TASK STATISTICS
-  async getTaskStats(userId: string): Promise<{ total: number; pending: number; completed: number }> {
+  async getTaskStats(): Promise<{ total: number; pending: number; completed: number }> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
     return apiClient<{ total: number; pending: number; completed: number }>(
-      `/api/${userId}/stats`,
+      `/api/stats`,
       {},
       token
     );
   },
 
   // NEW: NOTIFICATIONS API
-  async getNotifications(userId: string, unreadOnly: boolean = false, limit: number = 50): Promise<Notification[]> {
+  async getNotifications(unreadOnly: boolean = false, limit: number = 50): Promise<Notification[]> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
@@ -142,37 +143,37 @@ export const api = {
     if (limit !== 50) params.append('limit', String(limit));
 
     const queryString = params.toString() ? `?${params.toString()}` : '';
-    return apiClient<Notification[]>(`/api/${userId}/notifications${queryString}`, {}, token);
+    return apiClient<Notification[]>(`/api/notifications${queryString}`, {}, token);
   },
 
-  async markNotificationAsRead(userId: string, notificationId: string): Promise<Notification> {
+  async markNotificationAsRead(notificationId: string): Promise<Notification> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
     return apiClient<Notification>(
-      `/api/${userId}/notifications/${notificationId}/read`,
+      `/api/notifications/${notificationId}/read`,
       { method: 'PATCH' },
       token
     );
   },
 
-  async markAllNotificationsAsRead(userId: string): Promise<{ count: number }> {
+  async markAllNotificationsAsRead(): Promise<{ count: number }> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
     return apiClient<{ count: number }>(
-      `/api/${userId}/notifications/read-all`,
+      `/api/notifications/read-all`,
       { method: 'PATCH' },
       token
     );
   },
 
-  async deleteNotification(userId: string, notificationId: string): Promise<{ success: boolean }> {
+  async deleteNotification(notificationId: string): Promise<{ success: boolean }> {
     const token = await getAuthToken();
     if (!token) throw new Error('Authentication required');
 
     return apiClient<{ success: boolean }>(
-      `/api/${userId}/notifications/${notificationId}`,
+      `/api/notifications/${notificationId}`,
       { method: 'DELETE' },
       token
     );
@@ -180,7 +181,6 @@ export const api = {
 
   // NEW: AUDIT LOG API
   async getAuditLogs(
-    userId: string,
     filters?: {
       eventType?: string;
       entityType?: string;
@@ -200,6 +200,6 @@ export const api = {
     if (filters?.offset) params.append('offset', String(filters.offset));
 
     const queryString = params.toString() ? `?${params.toString()}` : '';
-    return apiClient<AuditLogEntry[]>(`/api/${userId}/audit${queryString}`, {}, token);
+    return apiClient<AuditLogEntry[]>(`/api/audit${queryString}`, {}, token);
   }
 };

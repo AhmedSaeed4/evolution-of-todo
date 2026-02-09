@@ -32,7 +32,7 @@ podSecurityContext: {}
 securityContext: {}
 
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 8000
 
 # Environment variables for backend (non-sensitive)

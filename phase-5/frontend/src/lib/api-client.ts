@@ -6,8 +6,8 @@ export async function apiClient<T>(
   options: RequestInit = {},
   token?: string
 ): Promise<T> {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
-
+  // Use relative URL to go through Next.js API routes (Dapr proxy)
+  // No backendUrl needed - requests go to frontend origin
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...options.headers as Record<string, string>
@@ -18,7 +18,7 @@ export async function apiClient<T>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const url = `${backendUrl}${endpoint}`;
+  const url = endpoint;
 
   try {
     const response = await fetch(url, {

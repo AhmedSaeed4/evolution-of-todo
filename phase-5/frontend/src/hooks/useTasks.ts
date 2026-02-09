@@ -36,7 +36,7 @@ export function useTasks(): TaskState & {
 
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const tasks = await api.getAll(effectiveUserId, filters || state.filters);
+      const tasks = await api.getAll(filters || state.filters);
       setState(prev => ({ ...prev, tasks, loading: false }));
     } catch (error) {
       setState(prev => ({
@@ -60,7 +60,7 @@ export function useTasks(): TaskState & {
     }
 
     try {
-      const newTask = await api.create(effectiveUserId, data);
+      const newTask = await api.create(data);
       setState(prev => ({
         ...prev,
         tasks: [...prev.tasks, newTask]
@@ -81,7 +81,7 @@ export function useTasks(): TaskState & {
     }
 
     try {
-      const updatedTask = await api.update(effectiveUserId, taskId, data);
+      const updatedTask = await api.update(taskId, data);
       setState(prev => ({
         ...prev,
         tasks: prev.tasks.map(t => t.id === taskId ? updatedTask : t)
@@ -102,7 +102,7 @@ export function useTasks(): TaskState & {
     }
 
     try {
-      await api.delete(effectiveUserId, taskId);
+      await api.delete(taskId);
       setState(prev => ({
         ...prev,
         tasks: prev.tasks.filter(t => t.id !== taskId)
@@ -123,7 +123,7 @@ export function useTasks(): TaskState & {
     }
 
     try {
-      const updatedTask = await api.toggleComplete(effectiveUserId, taskId);
+      const updatedTask = await api.toggleComplete(taskId);
 
       // If this was a recurring task completion, refetch to get the new instance
       if (updatedTask.completed && updatedTask.recurringRule) {

@@ -29,7 +29,7 @@ export function useNotifications(pollInterval: number = 30000) {
 
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const notifications = await api.getNotifications(effectiveUserId, false, 50);
+      const notifications = await api.getNotifications(false, 50);
       const unreadCount = notifications.filter(n => !n.read).length;
       setState(prev => ({
         ...prev,
@@ -78,7 +78,7 @@ export function useNotifications(pollInterval: number = 30000) {
     if (!effectiveUserId) return { success: false, error: 'Not authenticated' };
 
     try {
-      const updated = await api.markNotificationAsRead(effectiveUserId, notificationId);
+      const updated = await api.markNotificationAsRead(notificationId);
       setState(prev => ({
         ...prev,
         notifications: prev.notifications.map(n =>
@@ -98,7 +98,7 @@ export function useNotifications(pollInterval: number = 30000) {
     if (!effectiveUserId) return { success: false, error: 'Not authenticated' };
 
     try {
-      await api.markAllNotificationsAsRead(effectiveUserId);
+      await api.markAllNotificationsAsRead();
       setState(prev => ({
         ...prev,
         notifications: prev.notifications.map(n => ({ ...n, read: true })),
@@ -116,7 +116,7 @@ export function useNotifications(pollInterval: number = 30000) {
     if (!effectiveUserId) return { success: false, error: 'Not authenticated' };
 
     try {
-      await api.deleteNotification(effectiveUserId, notificationId);
+      await api.deleteNotification(notificationId);
       setState(prev => ({
         ...prev,
         notifications: prev.notifications.filter(n => n.id !== notificationId),
